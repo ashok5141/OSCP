@@ -40,4 +40,4 @@ You should able to reach before executing next command
 >ping 172.16.201.11 
 ```
 
-Credits:  [Nicolas Chatelain]([https://github.com/nicocha30]
+Credits:  [Nicolas Chatelain][https://github.com/nicocha30](https://github.com/nicocha30)
