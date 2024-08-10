@@ -1967,7 +1967,7 @@ impacket-secretsdump -ntds ntds.dit.bak -system system.bak LOCAL
 ##Windows Powershell payload encrypt </br>
 <a href="https://gist.githubusercontent.com/tothi/ab288fb523a4b32b51a53e542d40fe58/raw/40ade3fb5e3665b82310c08d36597123c2e75ab4/mkpsrevshell.py
 ">Gihhub Link</a>
-<a href"https://discord.com/channels/780824470113615893/1087927556604432424/1271916461442728098"> Discord Chat</a>
+<a href="https://discord.com/channels/780824470113615893/1087927556604432424/1271916461442728098"> Discord Chat</a>
 ```powershell 
 #!/usr/bin/env python3
 #
@@ -1999,6 +1999,6 @@ print(cmdline)
 ```
 
 Special Thanks to 
-[Sai Sathvik Ruppa](#)
+<a href="#">Nikhil Mittal</>
 <a href="https://github.com/saisathvik1">Sai Sathvik Ruppa</>
 ---
