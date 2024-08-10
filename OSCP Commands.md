@@ -1999,6 +1999,6 @@ print(cmdline)
 ```
 
 Special Thanks to 
-<a href="#">Nikhil Mittal</>
-<a href="https://github.com/saisathvik1">Sai Sathvik Ruppa</>
+<a href="#">Nikhil Mittal</a>
+<a href="https://github.com/saisathvik1">Sai Sathvik Ruppa</a>
 ---
