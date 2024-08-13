@@ -2010,6 +2010,6 @@ print(cmdline)
 
 Special Thanks to Creator of tools and Community </br>
 <a href="#">Nikhil Mittal</a>
-[![](https://github.com/saisathvik1.png?size=50)](https://github.com/mpgn)
+[![](https://github.com/saisathvik1.png?size=50)](https://github.com/saisathvik1)
 
 ---
