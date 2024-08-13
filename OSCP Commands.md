@@ -503,6 +503,17 @@ ssh2john.py id_rsa > hash
 #Convert the obtained hash to John format(above link)
 john hashfile --wordlist=rockyou.txt
 ```
+### keepass2John
+During the Initial enumeration process of the target with smbclient -L //target or smbclient -L ////target found Database.kdbx file in User directory.
+```powershell
+keepass2john Database.kdbx > keepass.hash
+hashcat -m 13400 keepass.hash  /home/kali/HTB/OSCP/rockyou.txt -r /usr/share/hashcat/rules/rockyou-30000.rule
+john keepass.hash
+or
+hashcat --help | grep "KeePass" 
+hashcat -m 13400 keepass.hash  /home/kali/HTB/OSCP/rockyou.txt 
+```
+
 
 ### Hashcat
 
