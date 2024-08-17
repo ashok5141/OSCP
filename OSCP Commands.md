@@ -751,6 +751,7 @@ john --wordlist=/home/sathvik/Wordlists/rockyou.txt hash
 
 #bruteforce
 hydra -l uname -P passwords.txt <IP> ssh #'-L' for usernames list, '-l' for username and vice-versa
+hydra -L users.txt -P pass.txt <IP> ssh -s 2222
 hydra -l offsec -P /usr/share/seclists/Passwords/500-worst-passwords.txt <IP> ssh
 
 #check for vulnerabilities associated with the version identified.
