@@ -1600,7 +1600,7 @@ chmod +x <binary>
 ```
 ---
 ## CVE - Linux
-CVE-2021-3156 with sudo version, Sudo version 1.8.31 (OSCP - Relia)<a href="https://github.com/ashok5141/OSCP/blob/main/Linux/exploit_nss.py">MyGit</a></br> 
+CVE-2021-3156 with sudo version, Sudo version 1.8.31 (OSCP - Relia) <a href="https://github.com/ashok5141/OSCP/blob/main/Linux/exploit_nss.py">MyGit</a></br> 
 https://raw.githubusercontent.com/worawit/CVE-2021-3156/main/exploit_nss.py
 ```bash
 ##I tried this "CVE-2021-3156" one, generated some data, finally land on same user anita my sudo version - Sudo version 1.8.31
