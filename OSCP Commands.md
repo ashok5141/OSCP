@@ -1543,6 +1543,33 @@ watch -n 1 "ps -aux | grep pass" #Checking processes for credentials
 sudo tcpdump -i lo -A | grep "pass" #Password sniffing using tcpdump
 
 ```
+## Manual Enumeration
+```bash
+id
+cat /etc/passwd
+hostname
+cat /etc/issue
+cat /etc/os-release
+uname -a
+ps aux
+ip a or ifconfig
+routel or route
+ss -anp or netstat -anp
+cat /etc/iptables/rules.v4
+ls -lah /etc/cron*
+crontab -l
+sudo crontab -l
+dpkg -l or rpm
+find / -writable -type d 2>/dev/null
+cat /etc/fstab 
+mount
+lsblk
+lsmod
+>/sbin/modinfo liata (# libata found in the above command)
+find / -perm -u=s -type f 2>/dev/null
+strings file_read(Read file)
+```
+
 
 ## Automated Scripts
 
