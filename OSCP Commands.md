@@ -1572,6 +1572,7 @@ lsmod
 >/sbin/modinfo liata (# libata found in the above command)
 find / -perm -u=s -type f 2>/dev/null
 strings file_read(Read file)
+which bash sh awk perl python ruby gcc cc vi vim nmap find netcat nc wget tftp ftp git 2>/dev/null
 ```
 
 
