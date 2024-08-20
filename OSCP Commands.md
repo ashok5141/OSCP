@@ -1551,6 +1551,10 @@ hostname
 cat /etc/issue
 cat /etc/os-release
 uname -a
+cd /home
+groups <USER> 
+id -G <USER>
+
 ps aux
 ip a or ifconfig
 routel or route
