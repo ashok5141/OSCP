@@ -807,7 +807,7 @@ mget *
 
 ## HTTP/S enumeration
 
-- Check with whatweb '<URL>'
+- Check with whatweb 'URL'
 - View source-code and identify any hidden content. If some image looks suspicious download and try to find hidden data in it.
 - Identify the version or CMS and check for active exploits. This can be done using Nmap and Wappalyzer.
 - check /robots.txt folder
