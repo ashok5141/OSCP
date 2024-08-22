@@ -1766,6 +1766,16 @@ Get-DomainUser -PreauthNotRequired -verbose # identifying AS-REP roastable accou
 
 Get-NetUser -SPN | select serviceprincipalname #Kerberoastable accounts
 ```
+### Domain
+
+- Check weather the Windows OS joined in domain or not
+  
+```powershell
+systeminfo | findstr /B /C:"Domain"
+wmic computersystem get domain
+(Get-WmiObject Win32_ComputerSystem).Domain
+Test-Connection -ComputerName (Get-WmiObject Win32_NetworkAdapterConfiguration | Where-Object {$_.IPEnabled -eq $true} | Select-Object -First 1 -ExpandProperty DNSDomain)
+```
 
 ### Bloodhound
 
