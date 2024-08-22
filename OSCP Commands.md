@@ -1740,7 +1740,7 @@ john --wordlist=/home/sathvik/Wordlists/rockyou.txt keepasshash
 ```bash
 net localgroup Administrators #to check local admins 
 ```
-## Domain
+### Domain
 Check weather the Windows OS joined in domain or not
 ````powershell
 systeminfo | findstr /B /C:"Domain"
