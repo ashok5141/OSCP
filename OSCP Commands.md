@@ -1740,14 +1740,6 @@ john --wordlist=/home/sathvik/Wordlists/rockyou.txt keepasshash
 ```bash
 net localgroup Administrators #to check local admins 
 ```
-### Domain
-Check weather the Windows OS joined in domain or not
-````powershell
-systeminfo | findstr /B /C:"Domain"
-wmic computersystem get domain
-(Get-WmiObject Win32_ComputerSystem).Domain
-Test-Connection -ComputerName (Get-WmiObject Win32_NetworkAdapterConfiguration | Where-Object {$_.IPEnabled -eq $true} | Select-Object -First 1 -ExpandProperty DNSDomain)
-```
 
 ### Powerview
 
