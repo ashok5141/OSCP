@@ -485,7 +485,12 @@ useradd -u <UID> -g <group> <uname>  #UID can be something new than existing, th
 
 *Hash Analyzer*: [https://www.tunnelsup.com/hash-analyzer/](https://www.tunnelsup.com/hash-analyzer/)  </br>
 ## Password file saw in offsec discord 500-worst-passwords.txt 
-
+### Hash Identifier
+- Identify the hash types using these tools
+```powershell
+hashid <FILE>
+name-that-hash -f <FILE>
+```
 ### fcrackzip
 
 ```powershell
