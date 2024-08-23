@@ -1,6 +1,6 @@
 # OSCP Commands
 
-**Preparing as part of my OSCP Preparation.**
+**Preparing as part of my OSCP Certificate.**
 
 
 
