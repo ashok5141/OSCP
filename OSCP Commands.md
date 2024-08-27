@@ -440,7 +440,9 @@ nc -lvp 1234 > nmap
 ```
 - Powershell File transfer
 - Then if you have rdp you can add /drive:/tmp,tmp at the end of your command and it will map tmp on kali to tmp on client. Super easy to just drag and drop files.  Putting spoiler tags but don't really think file transfer techniques are spoilers.
-<a href="https://discord.com/channels/780824470113615893/1087927556604432424/1278089984737411092" target="_blank">Discord</a>
+<a href="https://discord.com/channels/780824470113615893/1087927556604432424/1278089984737411092" target="_blank">Discord1</a>
+<a href="https://discord.com/channels/780824470113615893/1087927556604432424/1278089984737411092" target="_blank" rel="noopener noreferrer">Discord</a>
+
 ```powershell
 
 From Windows:   First start kali NC command
