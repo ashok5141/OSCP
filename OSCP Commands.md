@@ -1807,7 +1807,28 @@ john --wordlist=/home/sathvik/Wordlists/rockyou.txt keepasshash
 </aside>
 
 ## Enumeration
+- Enumeration using the tools identifing users and groups using tools like smbclient, smbmap, rpcclient, enum4linux, seatbelt
+- If the user has privileges DnsAdmin similar machine in HacktheBox Resolute [Resolute](https://app.hackthebox.com/machines/220/information)
+```powershell
+smbclient -L 10.10.10.169 
+smbclient -L //10.10.10.169
+smbmap -H 10.10.10.169
+nbtscan 10.10.10.169
+nmblookup -A 10.10.10.169
+rpcclient -U "" -N 10.10.10.169
+rpcclient $> netshareenum
+rpcclient $> netshareenumall
+rpcclient $> guest
+command not found: guest
+rpcclient $> enumdomusers
+rpcclient $> enumdomgroups
+rpcclient $> querygroup <Group RID>
+rpcclient $> querygroupmem <Group RID>
+rpcclient $> enumdomusers
+rpcclient $> queryuser <User RID> # You will get in querygroupmem <Group RID>
+```
 
+- Check user in administrators group or not
 ```bash
 net localgroup Administrators #to check local admins 
 ```
