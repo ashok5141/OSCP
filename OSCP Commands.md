@@ -1000,6 +1000,8 @@ ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Adm
 ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Remote Desktop Users,CN=Builtin,DC=<1_SUBDOMAIN>,DC=<TLD>"
 
 #windapsearch.py
+#For Description and passwords
+./windapsearch.py --dc-ip 10.10.10.169 -d resolute.megabank.local -U --full | grep Password (#Make sure capital "P")
 #for computers
 python3 windapsearch.py --dc-ip <IP address> -u <username> -p <password> --computers
 
