@@ -999,8 +999,8 @@ ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Ent
 ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Administrators,CN=Builtin,DC=<1_SUBDOMAIN>,DC=<TLD>"
 ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "CN=Remote Desktop Users,CN=Builtin,DC=<1_SUBDOMAIN>,DC=<TLD>"
 
-#windapsearch.py
-#Windapsearch full information
+#windapsearch.py [windapsearch](https://github.com/ropnop/windapsearch)
+#Windapsearch full information (Save information in file, then search pwd keyword passwords might be their)
 ./windapsearch.py -U --full --dc-ip 10.10.10.182
 #For Description and passwords
 ./windapsearch.py --dc-ip 10.10.10.169 -d resolute.megabank.local -U --full | grep Password (#Make sure capital "P")
