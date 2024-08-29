@@ -534,7 +534,18 @@ or
 hashcat --help | grep "KeePass" 
 hashcat -m 13400 keepass.hash  /home/kali/HTB/OSCP/rockyou.txt 
 ```
-
+### Hex password Crack
+- Dealing with Hex format password like this "Password"=hex:6b,cf,2a,4b,6e,5a,ca,0f"
+- For more information [HacktheBox Cascade AD Machine](https://app.hackthebox.com/machines/235), [github](https://github.com/frizb/PasswordDecrypts)
+```powershell
+msfconsole -q
+msf5 > irb
+key="\x17\x52\x6b\x06\x23\x4e\x58\x07"
+require 'rex/proto/rfb'
+true
+Rex::Proto::RFB::Cipher.decrypt ["6BCF2A4B6E5ACA0F"].pack('H*'), key
+# password is sT333ve2
+```
 
 ### Hashcat
 
