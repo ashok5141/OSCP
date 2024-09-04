@@ -818,11 +818,13 @@ crackmapexec smb 192.168.1.100 -u username -p password -d mydomain --shares #spe
 crackmapexec smb --pass-pol <IP>
 #Inplace of username and password, we can include usernames.txt and passwords.txt for password-spraying or bruteforcing.
 
-# Smbclient
+# Smbclient with username and password
 smbclient -L //IP #or try with 4 /'s
 smbclient //server/share
 smbclient //server/share -U <username>
 smbclient //server/share -U domain/username
+smbclient //<IP Address or Hostname>/<Share Name> -U <username>%<password>
+
 
 #SMBmap
 smbmap -H <target_ip>
