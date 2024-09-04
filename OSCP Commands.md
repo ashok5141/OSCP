@@ -1921,8 +1921,8 @@ bloodhound
 #### Bloodhound Commands 
 - Bloodhound user commands 
 ```powershell
->MATCH (m:Computer) RETURN m 
->MATCH p = (c:Computer)-[:HasSession]->(m:User) RETURN p
+MATCH (m:Computer) RETURN m 
+MATCH p = (c:Computer)-[:HasSession]->(m:User) RETURN p
 ```
 ### LDAPDOMAINDUMP
 
