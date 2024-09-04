@@ -1911,15 +1911,19 @@ Invoke-BloodHound -CollectionMethod All -OutputDirectory <location> -OutputPrefi
 python3 bloodhound -u support -p '#00^BlackKnight' -ns 10.10.10.192 -d blackfield.local -c all 
 bloodhound-python -u 'uname' -p 'pass' -ns <rhost> -d <domain-name> -c all #output will be saved in you kali machine
 ```
-
-- Running Bloodhound
+#### Running Bloodhound
 
 ```powershell
 sudo neo4j console
 bloodhound
 # then upload the .json files obtained
 ```
-
+#### Bloodhound Commands 
+- Bloodhound user commands 
+```powershell
+>MATCH (m:Computer) RETURN m 
+>MATCH p = (c:Computer)-[:HasSession]->(m:User) RETURN p
+```
 ### LDAPDOMAINDUMP
 
 - These files contains information in a well structured webpage format.
