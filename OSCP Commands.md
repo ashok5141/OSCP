@@ -407,6 +407,7 @@ git show <commit-id>
 ```bash
 xfreerdp /u:uname /p:'pass' /v:IP
 xfreerdp /d:domain.com /u:uname /p:'pass' /v:IP
+xfreerdp /u:user /p:'password' /v:<IP> /smart-sizing:1920x1080 /cert-ignore #Fullscreen
 xfreerdp /u:uname /p:'pass' /v:IP +clipboard #try this option if normal login doesn't work
 ```
 
