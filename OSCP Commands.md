@@ -374,6 +374,7 @@ Windows
 </details>
 
 **Discovering KDBX files**
+- Getting passwords from the .kdbx files [Kpcli ](https://github.com/ashok5141/OSCP/blob/main/OSCP%20Commands.md#kpcli---keepass-password-manager)
 1. In Windows
 ```powershell
 Get-ChildItem -Path C:\ -Include *.kdbx -File -Recurse -ErrorAction SilentlyContinue
