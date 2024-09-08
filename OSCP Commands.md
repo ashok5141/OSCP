@@ -1402,6 +1402,13 @@ Get-CimInstance -ClassName win32_service | Select Name,State,PathName | Where-Ob
 #Service With shortcuts and filters to name service run in schedulers
 schtasks.exe /query /fo LIST /v^C
 schtasks.exe /query /fo LIST /v | findstr TaskName
+#Create windows service using sc in winprep machine
+sc.exe create "NAMEofSERVICE" binpath= "PATH"
+#Like Below
+sc.exe create "Scheduler" binpath= "C:\Users\offsec\Desktop\Scheduler.exe"
+#Check in procmon64.exe found in Sysinternal tools
+#Procmon > Filter Option > Filter > Process Name , is , Scheduler.exe >Add > Apply > Ok
+Restart-Service Scheduler
 ```
 
 ## Automated Scripts
