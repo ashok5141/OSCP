@@ -1399,6 +1399,9 @@ Get-ChildItem -Path C:\Users\dave\ -Include *.txt,*.pdf,*.xls,*.xlsx,*.doc,*.doc
 
 #Service Information
 Get-CimInstance -ClassName win32_service | Select Name,State,PathName | Where-Object {$_.State -like 'Running'}
+#Service With shortcuts and filters to name service run in schedulers
+schtasks.exe /query /fo LIST /v^C
+schtasks.exe /query /fo LIST /v | findstr TaskName
 ```
 
 ## Automated Scripts
