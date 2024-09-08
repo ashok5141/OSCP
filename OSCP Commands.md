@@ -1408,7 +1408,8 @@ sc.exe create "NAMEofSERVICE" binpath= "PATH"
 sc.exe create "Scheduler" binpath= "C:\Users\offsec\Desktop\Scheduler.exe"
 #Check in procmon64.exe found in Sysinternal tools
 #Procmon > Filter Option > Filter > Process Name , is , Scheduler.exe >Add > Apply > Ok
-Restart-Service Scheduler
+# In Procmon windows you will identify the (Operation : CreateFile, Path:same name.dll), based on  that create file) usint this code (https://github.com/ashok5141/OSCP/blob/main/OSCP%20Commands.md#dll-hijacking-adding-new-user-into-administrators-group)
+Restart-Service Scheduler  #(Name of the service or name file or file.exe)
 ```
 
 ## Automated Scripts
