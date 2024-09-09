@@ -536,7 +536,7 @@ keepass2john Database.kdbx > keepass.hash
 john keepass.hash
 or
 hashcat --help | grep "KeePass" 
-hashcat -m 13400 keepass.hash  /home/kali/HTB/OSCP/rockyou.txt 
+hashcat -m 13400 keepass.hash  /home/kali/HTB/OSCP/rockyou.txt
 ```
 ### Hex password Crack
 - Dealing with Hex format password like this "Password"=hex:6b,cf,2a,4b,6e,5a,ca,0f"
@@ -2293,6 +2293,7 @@ Found the Database.kdbx file in the smb enumeration
 smbclient -L \\<TARGET>
 smb shell> smb: \DB-back (1)\New Folder\Emma\Documents\> get Database.kdbx
 keepass2john Database.kdbx > keepass.hash
+#Remove Database keyword in the keepass file should start with "$keepass"
 hashcat -m 13400 keepass.hash  /home/kali/HTB/OSCP/rockyou.txt -r /usr/share/hashcat/rules/rockyou-30000.rule (#Password - welcome)
 john keepass.hash(#Password - welcome)
 ```
