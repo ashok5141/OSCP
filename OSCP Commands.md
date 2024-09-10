@@ -1809,6 +1809,8 @@ cat /etc/crontab
 crontab -l
 
 pspy #handy tool to livemonitor stuff happening in Linux
+./pspy64 #it will extract the live process with some credentials if it has
+Ctrl+z #Stop process
 
 grep "CRON" /var/log/syslog #inspecting cron logs
 ```
