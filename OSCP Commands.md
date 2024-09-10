@@ -1862,6 +1862,24 @@ https://raw.githubusercontent.com/worawit/CVE-2021-3156/main/exploit_nss.py
 >./exploit_nss.py (#Got roo shell)
 
 ```
+## borg backup exploit
+- BorgBackup  (short:  Borg)  is a deduplicating backup program.  Optionally, it supports compression and authenticated encryption.
+- The main goal of Borg is to provide an  efficient  and  secure  way  to backup data.  The data deduplication technique used makes Borg suitable for daily backups since only changes are stored.  The authenticated encryption  technique  makes it suitable for backups to not fully trusted targets.
+- Borg stores a set of files in an archive. A repository is a  collection of archives. The format of repositories is Borg-specific. Borg does not distinguish archives from each other in any way other than their  name, it  does not matter when or where archives were created (e.g. different hosts).
+```bash
+borg init --encryption=repokey /path/to/repo
+#Backup the ~/src and ~/Documents directories into an archive called Monday
+borg create /path/to/repo::Monday ~/src ~/Documents
+borg list /path/to/repo # List all archives
+borg list /path/to/repo::Monday   # List all contents in the Monday archives
+borg extract /path/to/repo::Monday #Restore the Monday archive by extracting the files relative  to  the current directory
+borg delete /path/to/repo::Monday # Recover disk space by manually deleting the Monday archive
+
+```
+
+
+
+
 ---
 # Post Exploitation
 
