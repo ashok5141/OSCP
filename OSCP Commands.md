@@ -1872,9 +1872,10 @@ borg init --encryption=repokey /path/to/repo
 borg create /path/to/repo::Monday ~/src ~/Documents
 borg list /path/to/repo # List all archives
 borg list /path/to/repo::Monday   # List all contents in the Monday archives
+ sudo /usr/bin/borg extract --stdout borgbackup::Monday # Read the data from the Monday 
 borg extract /path/to/repo::Monday #Restore the Monday archive by extracting the files relative  to  the current directory
 borg delete /path/to/repo::Monday # Recover disk space by manually deleting the Monday archive
-
+#Offsec Challenge Lab Relia 19 - https://www.ddosi.org/oscp-cheat-sheet-2/
 ```
 
 
