@@ -1727,7 +1727,8 @@ perl -e 'exec "/bin/sh";'
 ## Basic
 
 ```bash
-find / -writable -type d 2>/dev/null
+find / -writable -type d 2>/dev/null # Writable permission
+find / -type d -perm -o+w -print  # Another Writable permission but it checks other's with writable persmission
 dpkg -l #Installed applications on debian system
 cat /etc/fstab #Listing mounted drives
 lsblk #Listing all available drives
