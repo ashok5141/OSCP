@@ -1769,7 +1769,16 @@ find / -perm -u=s -type f 2>/dev/null
 strings file_read(Read file)
 which bash sh awk perl python ruby gcc cc vi vim nmap find netcat nc wget tftp ftp git 2>/dev/null
 ```
+## Wheel Linux FreeBSD
+- A group of users with similar permissions to the root user, but without using root user credentials.
+- Read the doas config file commands slightly different commapred to the regular Linux command
+- Wheel group is similar to the root privileges
 
+```bash
+locate doas
+#/usr/local/bin/doas search for where the doas file existed
+/usr/local/bin/doas pw usermod andrew -G wheel
+```
 
 ## Automated Scripts
 
