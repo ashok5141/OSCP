@@ -884,6 +884,8 @@ hydra -L users.txt -P password.txt <IP or domain> http-{post/get}-form "/path:na
 ```powershell
 #identifying endpoints using gobuster
 gobuster dir -u http://192.168.50.16:5002 -w /usr/share/wordlists/dirb/big.txt -p pattern #pattern can be like {GOBUSTER}/v1 here v1 is just for example, it can be anything
+gobuster dir -u http://192.168.162.143/ -w /usr/share/seclists/Discovery/Web-Content/directory-list-2.3-big.txt # It has big list
+
 
 #obtaining info using curl
 curl -i http://192.168.50.16:5002/users/v1
