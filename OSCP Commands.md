@@ -6,7 +6,10 @@
 
 # General
 # OSCP Commands
-
+- [GTFOBins](https://gtfobins.github.io/)
+- [Windows](https://lolbas-project.github.io/#)
+- [Windows AD](https://wadcoms.github.io/)
+  
 <aside>
 💡 For Finding all important files in Windows:(CTF Style)
 
@@ -2483,6 +2486,7 @@ ls -l ld.so.preload # Now the file is available
 [![](https://github.com/Pennyw0rth.png?size=50)](https://github.com/Pennyw0rth)
 [![](https://github.com/fortra.png?size=50)](https://github.com/fortra)
 [![](https://github.com/nicocha30.png?size=50)](https://github.com/nicocha30)
-[![](https://github.com/X0RW3LL/XenSpawn.png?size=50)](https://github.com/X0RW3LL/XenSpawn)
+[![](https://github.com/XenSpawn.png?size=50)](https://github.com/X0RW3LL/XenSpawn)
+
 
 ---
