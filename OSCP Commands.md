@@ -2464,5 +2464,7 @@ rlwrap nc -nlvp 3003 # This case used open port on the target
 [![](https://github.com/samratashok.png?size=50)](https://github.com/samratashok)
 [![](https://github.com/saisathvik1.png?size=50)](https://github.com/saisathvik1)
 [![](https://github.com/Pennyw0rth.png?size=50)](https://github.com/Pennyw0rth)
+[![](https://github.com/fortra.png?size=50)](https://github.com/fortra)
+[![](https://github.com/nicocha30.png?size=50)](https://github.com/nicocha30)
 
 ---
