@@ -4,11 +4,7 @@
 
 
 
-# General
-# OSCP Commands
-- [GTFOBins](https://gtfobins.github.io/)
-- [Windows](https://lolbas-project.github.io/#)
-- [Windows AD](https://wadcoms.github.io/)
+
   
 <aside>
 💡 For Finding all important files in Windows:(CTF Style)
@@ -2479,6 +2475,11 @@ ls -l ld.so.preload # Now the file is available
 /tmp/rootshell
 #Drops root shell
 ```
+
+# Resources
+- [Linux Exploits GTFOBins](https://gtfobins.github.io/)
+- [Windows Exploits LOLBAS](https://lolbas-project.github.io/#)
+- [Windows Active Directory Exploits WADComs](https://wadcoms.github.io/)
 
 # Special Thanks to the Creator of tools and Community
 [![](https://github.com/samratashok.png?size=50)](https://github.com/samratashok)
