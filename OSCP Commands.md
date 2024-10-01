@@ -398,9 +398,16 @@ git show <commit-id>
 
 # This shows the commit information and the newly added stuff.
 ```
-
+### GitHub Dump
 - If you identify `.git` active on the website. Use https://github.com/arthaud/git-dumper now it downloads all the files and saves it locally. Perform the same above commands and escalate.
+- Find the logs using git log command, then save the output in one file, automation script for git show [Github](https://github.com/ashok5141/OSCP/blob/main/RevShells/process_git_commits.py)
 - Some useful GitHub dorks: [https://book.hacktricks.xyz/generic-methodologies-and-resources/external-recon-methodology/github-leaked-secrets](https://book.hacktricks.xyz/generic-methodologies-and-resources/external-recon-methodology/github-leaked-secrets) → this might not be relevant to the exam environment.
+```powershell
+git log > git_output.txt
+python3 process_git_commits.py
+# It will provide the information in each commit and save the output in a text file.
+```
+
 
 ## Connecting to RDP
 
