@@ -535,6 +535,14 @@ ssh2john.py id_rsa > hash
 #Convert the obtained hash to John format(above link)
 john hashfile --wordlist=rockyou.txt
 ```
+
+### zip2john
+- Crack the password of the zip file using zip2john tool.
+```bash
+zip2john sitebackup3.zip > sitebackup3.hash
+john -w=/home/kali/HTB/OSCP/rockyou.txt sitebackup3.hash
+```
+
 ### keepass2John
 During the Initial enumeration process of the target with smbclient -L //target or smbclient -L ////target found Database.kdbx file in User directory.
 ```powershell
