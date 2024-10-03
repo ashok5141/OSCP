@@ -1058,10 +1058,16 @@ showmount -e <IP>
 ```
 
 ## SNMP Enumeration
+- ENumeration from [Hacktricks](https://book.hacktricks.xyz/network-services-pentesting/pentesting-snmp)
+- Similar machine faced OSCP Challenge labs, OSCPB Kiero(.149) use discord challnel
 
 ```powershell
 #Nmap UDP scan
 sudo nmap <IP> -A -T4 -p- -sU -v -oN nmap-udpscan.txt
+snmpwalk -c public -v1 192.168.171.149 NET-SNMP-EXTEND-MIB::nsExtendObjects
+#NET-SNMP-EXTEND-MIB::nsExtendCommand."RESET" = STRING: ./home/john/RESET_PASSWD
+#NET-SNMP-EXTEND-MIB::nsExtendOutLine."RESET".1 = STRING: Resetting password of kiero to the default value
+#It states that John is the user, the machine has 21, 22 and 80 open. I tried ssh, but I did not luck, I tried FTP and got the id_rsa keys.
 
 snmpcheck -t <IP> -c public #Better version than snmpwalk as it displays more user friendly
 
