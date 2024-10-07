@@ -525,6 +525,7 @@ fcrackzip -u -D -p /usr/share/wordlists/rockyou.txt <FILE>.zip #Cracking zip fil
 ```
 
 ### John
+- Sometimes hashcat not able to crack the krb5tgs, but johnhash cracked
 
 > [https://github.com/openwall/john/tree/bleeding-jumbo/run](https://github.com/openwall/john/tree/bleeding-jumbo/run)
 > 
@@ -534,6 +535,13 @@ fcrackzip -u -D -p /usr/share/wordlists/rockyou.txt <FILE>.zip #Cracking zip fil
 ssh2john.py id_rsa > hash
 #Convert the obtained hash to John format(above link)
 john hashfile --wordlist=rockyou.txt
+
+#Krb5tgs file changed from sql_svc147.hash to sql_svc.hash
+john -w=/home/kali/HTB/OSCP/rockyou.txt sql_svc.hash
+john -w=/home/kali/HTB/OSCP/rockyou.txt ./sql_svc.hash -format=krb5tgs
+#Loaded 1 password hash (krb5tgs, Kerberos 5 TGS etype 23 [MD4 HMAC-MD5 RC4]) , No password hashes left to crack (see FAQ)
+# Means that password hash is cracked
+john sql_svc.hash --show
 ```
 
 ### zip2john
