@@ -863,7 +863,7 @@ prompt OFF
 mget *
 ```
 
-## HTTP/S enumeration
+## HTTP/S enumeration & Directory Buster
 
 - Check with whatweb 'URL'
 - View source-code and identify any hidden content. If some image looks suspicious download and try to find hidden data in it.
@@ -900,6 +900,10 @@ hydra -L users.txt -P password.txt <IP or domain> http-{post/get}-form "/path:na
 gobuster dir -u http://192.168.50.16:5002 -w /usr/share/wordlists/dirb/big.txt -p pattern #pattern can be like {GOBUSTER}/v1 here v1 is just for example, it can be anything
 gobuster dir -u http://192.168.162.143/ -w /usr/share/seclists/Discovery/Web-Content/directory-list-2.3-big.txt # It has big list
 
+#feroxbuster
+feroxbuster --url HTTP://1.2.3.4/
+feroxbuster --url https://ms01.oscp.exam:8443 --insecure
+feroxbuster --url https://ms01.oscp.exam:8443 --insecure --filter-status 404
 
 #obtaining info using curl
 curl -i http://192.168.50.16:5002/users/v1
