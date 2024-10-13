@@ -753,6 +753,7 @@ sudo ip r add xxx.xxx.xxx.0/24 dev ligolo
 
 # Recon and Enumeration
 
+
 - OSINT OR Passive Recon
     
     <aside>
@@ -777,6 +778,12 @@ sudo ip r add xxx.xxx.xxx.0/24 dev ligolo
         - Then gather infor by going through the options
     - Scanning Security headers and SSL/TLS using [https://securityheaders.com/](https://securityheaders.com/)
     
+## Metadata Username
+- FTP has an anonymous login found some files like photos, pdfs etc
+```bash
+exiftool <FILE>
+exiftool FUNCTION-TEMPLATE.pdf | grep Author
+```
 
 ## Port Scanning
 
