@@ -780,6 +780,7 @@ sudo ip r add xxx.xxx.xxx.0/24 dev ligolo
     
 ## Metadata Username
 - FTP has an anonymous login found some files like photos, pdfs etc
+- Using ExifTool can find the metadata like usernames and sometimes password.
 ```bash
 exiftool <FILE>
 exiftool FUNCTION-TEMPLATE.pdf | grep Author
