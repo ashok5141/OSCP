@@ -1473,7 +1473,7 @@ Restart-Service <service>
 #Powershell History
 Get-History
 (Get-PSReadlineOption).HistorySavePath #displays the path of consoleHost_history.txt
-type C:\Users\sathvik\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline\ConsoleHost_history.txt
+type C:\Users\<USER>\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline\ConsoleHost_history.txt
 
 #Viewing installed execuatbles
 Get-ItemProperty "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*" | select displayname
@@ -2071,12 +2071,19 @@ whoami
 ## Sensitive Information
 
 ### Powershell History
+- I had a situation where in window AD, I got administrator access, but nothing to move forward to another machine, Then comes to the PowerShell history
 
 ```powershell
+#Path
+C:\Users\Administrator\appdata\roaming\microsoft\windows\PowerShell\PSReadLine
+#Then do ls or dir check any files, sometimes instead of the administrator user put the current user, If it's their history you'll get ConsoleHost_history.txt
+type ConsoleHost_history.txt
+
+#History path
 type %userprofile%\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline\ConsoleHost_history.txt
 
 #Example
-type C:\Users\sathvik\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline\ConsoleHost_history.txt 
+type C:\<USER>\sathvik\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline\ConsoleHost_history.txt 
 ```
 
 ### Searching for passwords
