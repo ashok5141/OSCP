@@ -788,6 +788,17 @@ exiftool FUNCTION-TEMPLATE.pdf | grep Author
 
 ## Port Scanning
 
+### Nmap for OSCP
+- Here is the Nmap commands in Kali split 4 terminals
+
+```bash
+mkdir Nmap
+nmap -sC -sV --open -p- -T4 -A -oN Nmap/<Name>xxx -Pn 192.168.xxx.xxx
+
+#UDP
+sudo nmap -sU -sC -sV --open -p- -T4 -A -oN Nmap/<Name>xxx -Pn 192.168.xxx.xxx
+```
+
 ```powershell
 #use -Pn option if you're getting nothing in scan
 nmap -sC -sV <IP> -v #Basic scan
