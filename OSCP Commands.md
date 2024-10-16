@@ -2206,6 +2206,7 @@ Get-NetUser #list of all users in the domain
 Get-NetGroup # enumerate domain groups
 Get-NetGroup "group name" # information from specific group
 Get-NetComputer # enumerate the computer objects in the domain
+Get-NetComputer | select operatingsystem,dnshostname # enumerate the all computer objects in the domain
 Find-LocalAdminAccess # scans the network in an attempt to determine if our current user has administrative permissions on any computers in the domain
 Get-NetSession -ComputerName files04 -Verbose #Checking logged on users with Get-NetSession, adding verbosity gives more info.
 Get-NetUser -SPN | select samaccountname,serviceprincipalname # Listing SPN accounts in domain
