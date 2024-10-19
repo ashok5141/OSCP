@@ -68,7 +68,7 @@
 ## Offsec Proving Ground Practice - Windows
 | Name | Level | Description|
 |:-|:-|:-|
-|Helpdesk | | |
+|Helpdesk | |Machine not available at this time 10/19/2024 |
 |Algernon | | |
 |Authby | | |
 |Craft2 | | |
