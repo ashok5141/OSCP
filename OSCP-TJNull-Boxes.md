@@ -89,6 +89,7 @@
 ## Offsec Proving Ground Practice - Linux
 | Name | Level | Description|
 |:-|:-|:-|
+|[Hetemit](https://medium.com/@c00540105/hetemit-proving-grounds-practice-a9d8dc95afd5) |Intermediate | Takeouts from this article give insights into Python code, vulnerable API design done by developers, enumeration of curl command, and Python OS module. Link|
 |Twiggy | | |
 |Exfiltrated | | |
 |Pelican | | |
