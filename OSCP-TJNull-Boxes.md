@@ -50,6 +50,7 @@
 |Pandora | | |
 |Builder | | |
 |Usage | | |
+|[Chaos](https://ashokreddyz.medium.com/chaos-hackthebox-firefox-password-decrypt-5906671dd8d3)|Medium|credential reuse, and WordPress directory identification, Firefox credentials decrypt|
 
 
 
