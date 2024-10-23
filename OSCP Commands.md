@@ -1496,6 +1496,10 @@ netsh advfilewall firewall dump
 netsh firewall show state
 netsh firewall show config
 
+
+#Stored Password
+reg query HKLM /f password /t REG_SZ /s
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\Currentversion\Winlogon"
 ```
 
 ## Manual Enumeration commands
