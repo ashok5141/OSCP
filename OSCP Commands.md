@@ -382,6 +382,16 @@ Get-ChildItem -Path C:\ -Include *.kdbx -File -Recurse -ErrorAction SilentlyCont
 ```bash
 find / -name *.kdbx 2>/dev/null
 ```
+### For loop
+- If you have multiple files to read using for loop you can read.
+- For
+```bash
+#Here .xml multiple files, so change based on the requirement.
+for file in *.xml; do echo "Reading $file:"; cat "$file"; echo "------------------------"; done
+# Grep for username and password
+for file in *.xml; do echo "Reading $file:"; cat "$file"; echo "------------------------"; done | grep pa  
+```
+
 
 ### GitHub recon
 
@@ -901,6 +911,9 @@ smbclient //server/share
 smbclient //server/share -U <username>
 smbclient //server/share -U domain/username
 smbclient //<IP Address or Hostname>/<Share Name> -U <username>%<password>
+
+#SMBCLIENT Shell, Download multiple file using, It will download only file not folders
+mget *     # Every time need to click yes, yes ..
 
 
 #SMBmap
