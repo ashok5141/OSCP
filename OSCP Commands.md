@@ -2046,6 +2046,15 @@ python3 mremoteng_decrypt.py -s yhgmiu5bbuamU3qMUKc/uYDdmbMrJZ/JvR1kYe4Bhiu8bXyb
 
 - [Privesc through TAR wildcard](https://medium.com/@polygonben/linux-privilege-escalation-wildcards-with-tar-f79ab9e407fa)
 
+## Linux Privilege Escalation -TCM Security
+- Resources [gotmilk](https://blog.g0tmi1k.com/2011/08/basic-linux-privilege-escalation/) , [PayloadAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Linux%20-%20Privilege%20Escalation.md) , [HackTricks-Linux](https://book.hacktricks.xyz/linux-unix/linux-privilege-escalation-checklist) , [Sushant747-Linux](https://sushant747.gitbooks.io/total-oscp-guide/content/privilege_escalation_-_linux.html)
+- Links
+```bash
+# Connecting ssh older version (Unable to negotiate with 10.10.98.115 port 22: no matching host key type found. Their offer: ssh-rsa,ssh-dss, Bad key types 'ssh-dss)
+ssh -o HostKeyAlgorithms=+ssh-rsa -o PubkeyAcceptedKeyTypes=+ssh-rsa TCM@10.10.231.100
+
+```
+
 ## TTY Shell
 
 ```powershell
