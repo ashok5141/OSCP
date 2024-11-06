@@ -846,6 +846,8 @@ get <file> #downloading file
 # Download bulk all, with anonymous login
 wget -m ftp://anonymous:anonymous@10.10.10.98 # If it fails do to passive mode below command
 wget -m --no-passive ftp://anonymous:anonymous@10.10.10.98
+#or
+wget -r ftp://Anonymous:pass@$IP
 
 #NSE
 locate .nse | grep ftp
