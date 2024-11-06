@@ -70,7 +70,7 @@
 | Name | Level | Description|
 |:-|:-|:-|
 |Helpdesk | |Machine not available at this time 10/19/2024 |
-|Algernon | | |
+|[Algernon](https://ashokreddyz.medium.com/algernon-proving-ground-practic-esmartermail-cve-2019-7214-windows-5c5cb6083fba) |Easy |FTP anonymous login is allowed to download all files from it, SmarterMail(CVE-2019–7214), Remote Code Execution. |
 |Authby | | |
 |Craft2 | | |
 |Hutch | | |
