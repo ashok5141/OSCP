@@ -14,6 +14,17 @@
 
 </aside>
 
+## Check List
+- Take 4-7-8 breathing then machine, Walk.
+- [ ] Nmap
+- [ ] FTP Anonymous
+- [ ] SSH
+- [ ] RPC 
+- [ ] SMB
+- [ ] HTTP, Directory buster
+- [ ] Random ports
+- [ ] 
+
 ## Important Locations
 
 <details>
@@ -816,6 +827,10 @@ nmap -sC -sV --open -p- -T4 -A -oN Nmap/<Name>xxx -Pn 192.168.xxx.xxx
 
 #UDP
 sudo nmap -sU -sC -sV --open -p- -T4 -A -oN Nmap/<Name>xxx -Pn 192.168.xxx.xxx
+
+autorecon 192.168.154.46 # It will generate results folder
+tree results
+# Check for results/IP/scans folder
 ```
 
 ```powershell
