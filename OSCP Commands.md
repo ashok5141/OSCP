@@ -23,7 +23,6 @@
 - [ ] SMB
 - [ ] HTTP, Directory buster
 - [ ] Random ports
-- [ ] 
 
 ## Important Locations
 
