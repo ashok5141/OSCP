@@ -71,7 +71,7 @@
 |:-|:-|:-|
 |Helpdesk | |Machine not available at this time 10/19/2024 |
 |[Algernon](https://ashokreddyz.medium.com/algernon-proving-ground-practic-esmartermail-cve-2019-7214-windows-5c5cb6083fba) |Easy |FTP anonymous login is allowed to download all files from it, SmarterMail(CVE-2019–7214), Remote Code Execution. |
-|Authby | | |
+|Authby |Medium |Intiall got access to ftp anonymous the find the usernames, then with admin:admin got FTP aceess able see the .htpasswd through web shell Simple-Backdoor.php, then escalate privileges using wes kernel exploits [40564](https://www.exploit-db.com/exploits/40564) [walkthrough](https://www.youtube.com/watch?v=U-VLgIDlySA&t), Learning ftp shell hash linux kind of permissions observe carefully for file names as well, think of web access through admin access to upload file and through web shell get shell back, through curl and while execute commands |
 |Craft2 | | |
 |Hutch | | |
 |Internal | | |
