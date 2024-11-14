@@ -944,6 +944,11 @@ smbmap -H <target_ip> -u <username> -p <password> -r <share_name>
 #Within SMB session
 put <file> #to upload file
 get <file> #to download file
+
+# Exploit finder faced old machine line (445/tcp, open, microsoft-ds syn-ack ttl 125 Windows Server (R) 2008 Standard 6001 Service Pack 1 microsoft-ds (workgroup: WORKGROUP))
+nmap --script smb-vuln* -p 139,445 -oN smb-vuln-scan 192.168.177.40  # Internal pg practice
+#https://www.trenchesofit.com/2020/11/24/offensive-security-proving-grounds-internal-write-up-no-metasploit/ #old exploit eternal blue
+#https://pentesting.zeyu2001.com/proving-grounds/warm-up/internal
 ```
 
 - Downloading shares made easy - if the folder consists of several files, they all be downloading by this.
