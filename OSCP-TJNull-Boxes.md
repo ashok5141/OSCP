@@ -75,7 +75,8 @@
 |Craft | Intermediate|This port 80 with web shell, can upload .odt file extension which is libreoffice macro file, created macro powershell TCP one liner script then got access to low levl user, then vertically escalate apache user in xmapp folder uploaded php cmd liner, this user has SeImpersanate privileges, using the PrintSpoofer64 and powershell got access to NT Authority user |
 |Craft2 |Hard |through Port 80 only accept the .odt(LibreOffice) file, using [badodt](https://github.com/rmdavy/badodf/tree/master) script and responder got thecybergeek user hash using that login into smbclient shell uploaded php revshell, with apache user, using runas as command got thecybergeek shell, in that privesc xampp has password.txt mysql running is root privileges, through write file permissions and [WerTrigger](https://swisskyrepo.github.io/InternalAllTheThings/redteam/escalation/windows-privilege-escalation/#exploit_1) got administrator access. [youtube](https://www.youtube.com/watch?v=-Y4yrwNx8ww&pp=ygUNY3JhZnQyIG9mZnNlYw%3D%3D) |
 |Hutch | Intermediate|Mutiple ports are open using ldapsearch found user credentials through that loggin to webdav is their through that cadaver tool login uploaded cmdaspx.aspx, then printSpoofer got administrator access, other way using initial crdes ran bloodhound-python got architecture of AD the user has laps <b>ReadLAPSPassword, ms-Mcs-AdmPwd</b> password got admin creds login as admin [walkthrough](https://juggernaut-sec.com/proving-grounds-hutch/)|
-|Internal | | |
+|Internal |Easy | System running on windows server 2008 using smb port exploit tried with metasploit and and no luck ms09-050, after reverting also no response moving next one [blue](https://www.trenchesofit.com/2020/11/24/offensive-security-proving-grounds-internal-write-up-no-metasploit)
+[ms09-050](https://pentesting.zeyu2001.com/proving-grounds/warm-up/internal)|
 |Jacko | | |
 |Kevin | | |
 |Resourced | | |
