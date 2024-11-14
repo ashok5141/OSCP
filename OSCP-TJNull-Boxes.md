@@ -77,7 +77,7 @@
 |Hutch | Intermediate|Mutiple ports are open using ldapsearch found user credentials through that loggin to webdav is their through that cadaver tool login uploaded cmdaspx.aspx, then printSpoofer got administrator access, other way using initial crdes ran bloodhound-python got architecture of AD the user has laps <b>ReadLAPSPassword, ms-Mcs-AdmPwd</b> password got admin creds login as admin [walkthrough](https://juggernaut-sec.com/proving-grounds-hutch/)|
 |Internal |Easy | System running on windows server 2008 using smb port exploit tried with metasploit and and no luck ms09-050, after reverting also no response moving next one [blue](https://www.trenchesofit.com/2020/11/24/offensive-security-proving-grounds-internal-write-up-no-metasploit)
 [ms09-050](https://pentesting.zeyu2001.com/proving-grounds/warm-up/internal)|
-|Jacko | | |
+|Jacko |Intermediate |In the ports 80 running the H2 database, it redirects to port 8082 initially no accessabl revert then accessible their is login without password, their is version using exploitDB script, loggedin using the nc or Metasploit non-staged payload, their running PaperSteam IP, identified the version then find the exploit in exploitDB got the shell using powershell bypass worked first first time time ````powershell.exe -ep bypass exploit.ps1```used S1ren video  |
 |Kevin | | |
 |Resourced | | |
 |Squid | | |
