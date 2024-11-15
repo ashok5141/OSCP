@@ -2130,6 +2130,8 @@ python3 mremoteng_decrypt.py -s yhgmiu5bbuamU3qMUKc/uYDdmbMrJZ/JvR1kYe4Bhiu8bXyb
 ```powershell
 # Both are target IP's squid from the PG Practice. It give the credentials or open ports, then turn on the froxy proxy the access the ports
 python3 spose/spose.py --proxy http://192.168.205.189:3128 --target 192.168.205.189
+```
+
 ---
 
 # Linux Privilege Escalation
