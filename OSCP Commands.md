@@ -827,9 +827,11 @@ nmap -sC -sV --open -p- -T4 -A -oN Nmap/<Name>xxx -Pn 192.168.xxx.xxx
 #UDP
 sudo nmap -sU -sC -sV --open -p- -T4 -A -oN Nmap/<Name>xxx -Pn 192.168.xxx.xxx
 
-autorecon 192.168.154.46 # It will generate results folder
+autorecon <IP ADDRESS>6 # It will generate results folder
 tree results
 # Check for results/IP/scans folder
+sudo sh -c 'echo "<IP> <HOSTNAME>" >> /etc/hosts' # Add into /etc/hosts
+
 ```
 
 ```powershell
@@ -2121,7 +2123,13 @@ C:\Users\L4mpje\AppData\Roaming\mRemoteNG>type confCons.xml
 #All the passwords will save here, to decrypt use the above GitHub link to decrypt.
 python3 mremoteng_decrypt.py -s yhgmiu5bbuamU3qMUKc/uYDdmbMrJZ/JvR1kYe4Bhiu8bXybLxVnO0U9fKRylI7NcB9QuRsZVvla8esB
 ```
+### Squid http proxy 4.14- Windows PrivEsc
+- Squid is a caching and forwarding HTTP web proxy.
+- Access [spose](https://github.com/aancw/spose) from Hacktricks.
 
+```powershell
+# Both are target IP's squid from the PG Practice. It give the credentials or open ports, then turn on the froxy proxy the access the ports
+python3 spose/spose.py --proxy http://192.168.205.189:3128 --target 192.168.205.189
 ---
 
 # Linux Privilege Escalation
