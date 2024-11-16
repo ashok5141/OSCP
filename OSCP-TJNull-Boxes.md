@@ -59,7 +59,7 @@
 ## Offsec Proving Ground Practice - Windows Active Directory
 | Name | Level | Description|
 |:-|:-|:-|
-|Access | | |
+|Access |Intermediate |In port 80 got website it has buytickets file upload .php is not accepted, uploaded the .htacees in that allowed extension as .evil in the the .evil file, write the php cmd, got initial user svc_apache in that active directory Added Rubeus.exe got the svc_mssql Kerberos hash cracked hash with john, switch the user using Invoke-RunasCs.ps1, with the svc_mssql user has SeChangeNotify(Privilege Bypass traverse checking) privilege then SeManageVolumeExploit.exe changed the entries created Printconfig.dll, changed the location trigger the the dll got the administrator in the netcat listner [Siren](https://www.youtube.com/watch?v=h1Br5umYxwc) |
 |Heist | | |
 |Vault | | |
 |Nagoya | | |
