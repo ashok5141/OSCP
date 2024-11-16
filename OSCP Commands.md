@@ -851,6 +851,7 @@ Test-NetConnection -Port <port> <IP>   #powershell utility
 ```
 
 ## FTP enumeration
+- FTP bulk download [here](https://apple.stackexchange.com/questions/18106/how-do-i-download-folders-through-ftp-in-terminal)
 
 ```powershell
 ftp <IP>
@@ -862,8 +863,8 @@ get <file> #downloading file
 # Download bulk all, with anonymous login
 wget -m ftp://anonymous:anonymous@10.10.10.98 # If it fails do to passive mode below command
 wget -m --no-passive ftp://anonymous:anonymous@10.10.10.98
-#or
 wget -r ftp://Anonymous:pass@$IP
+wget -r -l 10 --ftp-user='anonymous' --ftp-password='anonymous' ftp://192.168.104.140:20001/* # Hepet PG Practice
 
 #NSE
 locate .nse | grep ftp
@@ -1135,7 +1136,14 @@ nc -nlvp 4444>whoami
 >hostname
 >ipconfig # check IP Address
 ```
-
+## Finger 79 Enumeration
+In computer networking, the Name/Finger protocol and the Finger user information protocol are simple network protocols for the exchange of human-oriented data.
+- Identifying the users
+- Script from [PenetestMonkey](https://pentestmonkey.net/tools/user-enumeration/finger-user-enum) commands from hacktriks
+```powershell
+./finger-user-enum.pl -U /usr/share/seclists/Usernames/Names/names.txt -t 192.168.104.140 | grep -v 'is not known at this site' # Filter based on the output
+# Iamp commands from the Hepet PG Practice
+```
 ## LDAP Enumeration
 - If want login with ldap ports 389, 636, 3268, 3269 anonymously login get details like usernames and passwords
 
