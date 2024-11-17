@@ -109,7 +109,58 @@ UPLOAD IMAGE?
 GIF89a1
 ```
 
+# Directory FUZZ
+```powershell
+https://sirensecurity.io/blog/seclists/
+cd /opt/
+git clone https://github.com/danielmiessler/SecLists.git
 
+[Nikto]
+nikto --host $URL -C all
+
+[GOBUSTER]
++ We will begin with Gobuster.
+export URL="https://example.com/"
+
++ Here are my localized commands:
+BUST DIRECTORIES:
+gobuster dir -u $URL -w /opt/SecLists/Discovery/Web-Content/raft-medium-directories.txt -k -t 30
+
+BUST FILES:
+gobuster dir -u $URL -w /opt/SecLists/Discovery/Web-Content/raft-medium-files.txt -k -t 30
+
+BUST SUB-DOMAINS:
+gobuster dns -d someDomain.com -w /opt/SecLists/Discovery/DNS/subdomains-top1million-110000.txt -t 30
+--> Make sure any DNS name you find resolves to an in-scope address before you test it.
+
+===========================================================================
+
+[WFUZZ]
+export URL="https://example.com/FUZZ"
+
+FUZZ DIRECTORIES:
+export URL="https://example.com/FUZZ/"
+wfuzz -c -z file,/opt/SecLists/Discovery/Web-Content/raft-medium-directories.txt --hc 404 "$URL"
+
+FUZZ FILES:
+wfuzz -c -z file,/opt/SecLists/Discovery/Web-Content/raft-medium-files.txt --hc 404 "$URL"
+
+AUTHENTICATED FUZZING:
+e.g.
+wfuzz -c -b "<SESSIONVARIABLE>=<SESSIONVALUE>" -z file,/opt/SecLists/Discovery/Web-Content/raft-medium-files.txt --hc 404 "$URL"
+
+
+FUZZ DATA AND CHECK FOR PARAMETERS:
+export URL="https://example.com/?parameter=FUZZ
+--> and/or some combination of...
+export URL="https://example.com/?FUZZ=data
+wfuzz -c -z file,/opt/SecLists/Discovery/Web-Content/burp-parameter-names.txt "$URL"
+
++ Can I FUZZ Post Data?
+--> Yup.
+--> Example of Command Injection POST Checks:
+wfuzz -c -z file,/usr/share/wordlists/Fuzzing/command-injection.txt -d "postParameter=FUZZ" "$URL"
+```
 
 #  Venomref
 ```powershell
@@ -346,3 +397,8 @@ https://github.com/an4kein/awesome-red-teaming#-command-and-control
 + Phishing Attack Campaigns
 https://github.com/an4kein/awesome-red-teaming#-social-engineering
 ```
+
+
+
+# Special Thanks to the Creator of tools and Community
+([S1REN](https://sirensecurity.io/blog/about-me/))
