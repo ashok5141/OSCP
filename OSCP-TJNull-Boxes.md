@@ -60,7 +60,7 @@
 | Name | Level | Description|
 |:-|:-|:-|
 |Access |Intermediate |In port 80 got website it has buytickets file upload .php is not accepted, uploaded the .htacees in that allowed extension as .evil in the the .evil file, write the php cmd, got initial user svc_apache in that active directory Added Rubeus.exe got the svc_mssql Kerberos hash cracked hash with john, switch the user using Invoke-RunasCs.ps1, with the svc_mssql user has SeChangeNotify(Privilege Bypass traverse checking) privilege then SeManageVolumeExploit.exe changed the entries created Printconfig.dll, changed the location trigger the the dll got the administrator in the netcat listner [Siren](https://www.youtube.com/watch?v=h1Br5umYxwc) |
-|Heist | | |
+|Heist |Hard |Initially box has port 8080 running secure web browser, we can use the kaliIP in the search bar got the ntlm hash with responder running, ran the SharpHound.exe in that user has ReadGMPAPassword for that tried exe not compatable ran the powershell script Invoke-GMSAPasswordReader.ps1 got the svc_apache user has the ReStoreprivilege for that enable the  enable the with powershell script EnableSeRestorePrivilege.ps1 after that moved to C:\Windows\system32 here first moved the utilman.exe to utilman.exe.bak then move cmd.exe to utilman.exe, after that **rdesktop** TargetIP then press **Windows+U** it will open command prompt with administrator privileges check flag this shell open shorter time (not xfreerdp it's asking for password) |
 |Vault | | |
 |Nagoya | | |
 |Hokkaido | | |
