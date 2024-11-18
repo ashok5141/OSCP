@@ -3351,7 +3351,6 @@ python3 vestaROOT.py https://192.168.221.156:8083 Jack 3PUKsX98BMupBiCf
 [![](https://github.com/fortra.png?size=50)](https://github.com/fortra)
 [![](https://github.com/nicocha30.png?size=50)](https://github.com/nicocha30)
 [![](https://github.com/XenSpawn.png?size=50)](https://github.com/X0RW3LL/XenSpawn)
-[![](https://github.com/Daniel-Ay.png?size=50)](https://github.com/Daniel-Ayz)
 
 
 
