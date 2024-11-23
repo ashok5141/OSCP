@@ -4,7 +4,7 @@
 ## HackTheBox - Windows Active Directory
 | Name | Level | Description|
 |:-|:-|:-|
-|Active | | |
+|Active |Easy |Intially couple ports are opened with null credentials able see smb share in that their is a user SVC_TGS with credentials decrypted using gpp-decrypt, after that using those creds ran bloodhound-python using that found the kerberoatble account is administrator with impacket-GetUserSPNs got password hash decrypted using john tools then loggedin with impacket-psexec loggedin as administrator |
 |Forest | | |
 |Sauna | | |
 |Monteverde | | |
