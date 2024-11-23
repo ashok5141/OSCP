@@ -930,10 +930,12 @@ smbclient //<IP Address or Hostname>/<Share Name> -U <username>%<password>
 
 
 #SMBCLIENT Shell, Download multiple file using, It will download only file not folders
-mget *     # Every time need to click yes, yes ..
+recurse ON
+prompt OFF
+mget *     # It will don't prompt
 
 
-#SMBmap
+#SMBMAP 
 smbmap -H <target_ip>
 smbmap -H <target_ip>5 -u anonymous -d localhost
 smbmap -H <target_ip>   -u anonymous -d HTB.LOCAL
@@ -941,6 +943,10 @@ smbmap -u L4mpje -p aad3b435b51404eeaad3b435b51404ee:26112010952d963c8dc4217daec
 smbmap -H <target_ip> -u <username> -p <password>
 smbmap -H <target_ip> -u <username> -p <password> -d <domain>
 smbmap -H <target_ip> -u <username> -p <password> -r <share_name>
+#SMBMAP List contents
+smbmap -R <SHARE NAME> -H 10.10.10.100 # HTB Active, it will list all files
+smbmap -R <SHARE NAME> -H 10.10.10.100 -A Groups.xml -q # Mention the file you want to download 
+sudo updatedb # Update the locate command
 
 #Within SMB session
 put <file> #to upload file
