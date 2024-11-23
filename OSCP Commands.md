@@ -947,6 +947,7 @@ smbmap -H <target_ip> -u <username> -p <password> -r <share_name>
 smbmap -R <SHARE NAME> -H 10.10.10.100 # HTB Active, it will list all files
 smbmap -R <SHARE NAME> -H 10.10.10.100 -A Groups.xml -q # Mention the file you want to download 
 sudo updatedb # Update the locate command
+locate Groups.xml # find the file
 
 #Within SMB session
 put <file> #to upload file
