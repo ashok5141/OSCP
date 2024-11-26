@@ -5,7 +5,7 @@
 | Name | Level | Description|
 |:-|:-|:-|
 |Active |Easy |Intially couple ports are opened with null credentials able see smb share in that their is a user SVC_TGS with credentials decrypted using gpp-decrypt, after that using those creds ran bloodhound-python using that found the kerberoatble account is administrator with impacket-GetUserSPNs got password hash decrypted using john tools then loggedin with impacket-psexec loggedin as administrator |
-|Forest | | |
+|Forest |Easy | Intialy using ldapsearch find the users also find using the kerbrute, the service user svc-alfresco doesn't have Kerberos pre-authentication so AsRepRosting found the hash with impacket-GetNPUsers then check the password with crackmapexec to get shell or not, logged in with  evil-winrm got the user flag, ran bloodhound-python saw that user in Account Operator, and Exchange Windows Permissions(EWP) group this group has WriteDACL permission created a user added into group(EWP) the write ACL with PowerView command the got Hashes of administrator with impacket-secretsdump using logged as  administrator with impacket-psexec |
 |Sauna | | |
 |Monteverde | | |
 |Timelapse | | |
