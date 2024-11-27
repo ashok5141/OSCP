@@ -305,3 +305,123 @@ export AWS_SESSION_TOKEN=FwoGZXI---TRUNKATED--SfTktvIrSwwA==
 #Run this command identify the VPC configuration for user-amethyst-lab_admin
 aws ec2 describe-vpcs --region us-east-1
 ```
+
+
+## Initial IAM Reconnaissance
+1. Examining Compromised Credentials
+2. Scoping IAM permissions
+- At this stage, we won't begin enumerating resources. Instead, we'll focus on gathering initial information from the compromised credentials, including understanding the scope of access within the AWS environment. We'll explore various techniques for this, some stealthy and others less so.
+
+### Accessing the Lab
+> After deploying the lab we'll receive credentials to interact with AWS as three different users.
+1. The **target user** will simulate the compromised access to the cloud environment. This is the user we'll use most often while learning techniques to get information from this initial access.
+2. The **challenge user** is an auxiliary user with very limited access that we'll use to test concepts and execute additional tasks, validating our newly learned skills.
+3. The **monitor user** will simulate an operator with access to Cloudtrail, the AWS logging service.
+- For the moment let's start the lab deployment and take note of this information. We can organize the data as follows:
+- Credentials access as the target user.
+     - Target ACCESS KEY ID
+     - Target SECRET ACCESS KEY
+- Credentials access as the challenge user.
+     - Challenge ACCESS KEY ID
+     - Challenge SECRET ACCESS KEY
+- Credentials to access as the monitor user.
+     - Management Console login URL
+     - Username
+     - Password
+
+### Examining Compromised Credentials
+- configure the target user profile, details given in the lab
+```powershell
+aws configure --profile target
+aws --profile target aws sts get-caller-identity
+# Account ID - 619071316869
+```
+- configure the challenge user profile, details given in the lab
+```powershell
+aws configure --profile challenge
+aws --profile challenge sts get-caller-identity
+# Account ID - 619071316869 same as target
+```
+- Getting the account ID from access keys with the get-access-key-info command
+```
+aws --profile challenge sts get-access-key-info --access-key-id AKIAQOMAIGYUVEHJ7--M
+```
+- Penetration testers can also use the get-access-key-info subcommand to determine whether or not a compromised credential is inside the scope of the assessment.
+- Another stealthy approach is to abuse error messages that aren't logged by default in the Cloudtrail event history. For example, let's try invoking a nonexistent Lambda function using the compromised credentials.
+```bash
+aws --profile target lambda invoke --function-name arn:aws:lambda:us-east-1:619071316869:function:nonexistent-function outfile
+#An error occurred (AccessDeniedException) when calling the Invoke operation: User: arn:aws:iam::619071316869:user/support/clouddesk-plove is not authorized to perform: lambda:InvokeFunction on resource: arn:aws:lambda:us-east-1:619071316869:function:nonexistent-function because no identity-based policy allows the lambda:InvokeFunction action
+```
+#### CloudTrail
+- Check the logs in CloudTrail login to account credentials provided in lab for the region [us-east-1](https://us-east-1.console.aws.amazon.com/cloudtrail/home?region=us-east-1#/events?EventName=GetCallerIdentity&CustomTime=1800000)
+- In the search CloudTrail -> Left Menu -> Event History tab 
+
+- Executing an API request to another region
+- Check the cloud trail logs on [us-east-2](https://us-east-2.console.aws.amazon.com/cloudtrail/home?region=us-east-2#/events?EventName=GetCallerIdentity&CustomTime=1800000)
+```
+aws --profile target sts get-caller-identity --region us-east-2
+```
+
+
+### Scoping IAM permissions
+- All cloud providers implement some kind of authentication and authorization mechanisms to ensure that users can only interact with the provider's API within their designated permissions and cannot act on behalf of other users or accounts. All these mechanisms are commonly grouped under the umbrella term Identity and Access Management (IAM).
+
+- The Principle of Least Privilege (PoLP) is generally followed as a best practice for any cloud deployment. This principle suggests granting users only the permissions they need to perform their tasks, and nothing more. This will reduce actions that can be performed and limit potential attack vectors that an attacker can exploit from a compromised account. However, overly-permissive identities are still a common finding and the major cause of breaches in cloud environments.
+
+- Continuing in the lab, we'll again take on the role of an attacker to determine the extent of permissions associated with the compromised credentials in the target environment.
+```bash
+aws --profile target aws sts get-caller-identity
+# "Arn": "arn:aws:iam::619071316869:user/support/clouddesk-plove"
+```
+- This suggests the purpose of the user and what permissions they likely have. For example, "clouddesk" and "support" may tell us that the user has some IAM-related privileges to grant access or reset credentials. This type of hypothesis is helpful as it's extra information we've gained while maintaining a low profile.
+
+- We can list inline policies and managed policies associated with IAM user
+```bash
+aws --profile target iam list-user-policies --user-name clouddesk-plove # Nothing returned
+aws --profile target iam list-attached-user-policies --user-name clouddesk-plove
+# "PolicyName": "deny_challenges_access",
+#"PolicyArn": "arn:aws:iam::619071316869:policy/deny_challenges_access"
+```
+- Listing the groups to which the user belongs.
+```bash
+aws --profile target iam list-groups-for-user --user-name clouddesk-plove
+# Output
+{
+    "Groups": [
+        {
+            "Path": "/support/",
+            "GroupName": "support",
+            "GroupId": "AGPAZAI4GUOCZBYDLSXUW",
+            "Arn": "arn:aws:iam::619071316869:group/support/support",
+            "CreateDate": "2024-11-27T02:58:08+00:00"
+        }
+    ]
+}
+```
+- Now we have discovered that IAM user belong to the one group that is Support group
+- Now we will check for policies associated with the support group, we'll search for inline and managed policies in a search similar to one we ran previously.
+```bash
+aws --profile target iam list-group-policies --group-name support # Nothing returned
+aws --profile target iam list-attached-group-policies --group-name support
+# "PolicyName": "SupportUser",
+# "PolicyArn": "arn:aws:iam::aws:policy/job-function/SupportUser"
+```
+- Listing a policy version
+```bash
+aws --profile target iam list-policy-versions --policy-arn "arn:aws:iam::aws:policy/job-function/SupportUser"
+# Consider most recent version  "VersionId": "v8"
+```
+- Listing a policy definition by its version
+- Some of these elements define a specific action. For example, acm:DescribeCertificate defines the DescribeCertificate action for the AWS Certificate Manager service. Other elements use the "*" wildcard to describe any action that starts with read-only keywords such as Get, Describe and, List. These actions are allowed to run against any resource of the given services as stated in the "Resource": "*" line.
+```bash
+aws --profile target iam get-policy-version --policy-arn arn:aws:iam::aws:policy/job-function/SupportUser --version-id v8
+# "Effect": "Allow",
+# "Resource": "*"
+```
+#### Task
+- Use the challenge Profile in AWS CLI to scope the level of actions allowed to run in the EC2 service. Run the permitted actions to list or describe Resources. You will find a Tag Key named proof in one of the resources you can list. Enter the value of the Tag Key.
+- **Hint** We need to focus on actions that list/describe resources. We can also use tools like pacu to find allowed actions by brute force.
+```bash
+aws --profile challenge ec2 describe-vpcs
+aws --profile challenge ec2 describe-vpcs --query "Vpcs[].Tags[?Key=='proof']"
+```
