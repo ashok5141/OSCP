@@ -1324,8 +1324,7 @@ sc.exe start vss
 
 #### SeBackupPrivilege & SeRestorePrivilege bypass ACL
 - If you have the both permission are their then we can get full access to the file system
-- Using this [Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1) , we can change the permissions with powershell script.
-- 
+- Using this [Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1) , we can just change the permissions with powershell script. to exploit use [Server Operator](https://github.com/ashok5141/OSCP/blob/main/OSCP%20Commands.md#server-operator-to-get-admin-start-and-stop-service-svc-printer-ad-winprivesc)
 - We can try on the Return HTB
 ```powershell
 upload Acl-FullControl.ps1
