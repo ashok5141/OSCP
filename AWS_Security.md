@@ -425,3 +425,257 @@ aws --profile target iam get-policy-version --policy-arn arn:aws:iam::aws:policy
 aws --profile challenge ec2 describe-vpcs
 aws --profile challenge ec2 describe-vpcs --query "Vpcs[].Tags[?Key=='proof']"
 ```
+
+## IAM Resources Enumeration
+1. Choosing Between a Manual or Automated Enumeration Approach
+2. Enumerating IAM Resources
+3. Processing API Response data with JMESPath
+4. Running Automated Enumeration with Pacu
+5. Extracting Insights from Enumeration Data
+
+### Choosing Between a Manual or Automated Enumeration Approach
+- Several commercial and open-source tools have been developed to perform information gathering against cloud-based infrastructures. Some of these tools are tailored towards specific cloud providers, while others support multiple providers. Some are GUI-based and some run from the command line. Some are automated and some require manual intervention.
+> Most tools generate significant log events and may trigger monitoring systems. This may not be a significant consideration when performing a red team assessment or a penetration test in which stealth is not a requirement, but when stealth is a factor, we must test our tools to determine the potential impact prior to an engagement.
+
+### Enumerating IAM Resources
+- As we begin to enumerate IAM resources, we'll start our scenario in possession of an already-compromised account. Let's summarize what we have already learned from the compromised credentials.
+
+| Resource Type | Name | ARN |
+|:-|:-|:-|
+|IAM::User |clouddesk-plove |arn:aws:iam::123456789012:user/support/clouddesk-plove |
+|IAM::Group |Support |arn:aws:iam::123456789012:group/support/support |
+|IAM::Policy |SupportUser |arn:aws:iam::aws:policy/job-function/SupportUser |
+
+> AWS custom-managed policies allow users to define a set of permissions that can be reused and associated with multiple IAM users, groups, or roles. While these policies offer flexibility for IAM management, there is an inherent security risk if they are crafted to be overly permissive.
+- SupportUser is an AWS custom-managed policy that grants permissions to troubleshoot and resolve issues in an AWS account. This policy grants read-only access to explore several services.
+- Again started lab configuring above [steps](https://github.com/ashok5141/OSCP/blob/main/AWS_Security.md#examining-compromised-credentials)
+- Let's check what actions this policy grants to enumerate IAM resources. To do this we'll run iam get-policy-version to show the policy definition. We'll pipe the output to grep to filter and display only the lines that contain the string iam.
+```bash
+aws --profile target iam get-policy-version --policy-arn arn:aws:iam::aws:policy/job-function/SupportUser --version-id v8 | grep "iam"
+```
+- With this policy, we can run any iam subcommand that starts with get and list and two other specific actions. To list the available subcommands in AWS CLI we can use the help option.
+- Let's run aws iam help to display a description of the command usage including a list of all available subcommands. We'll also add | grep -E "list-|get-|generate-" to filter all the lines that include the words "list-", "get-" and "generate-".
+```
+aws --profile target iam help | grep -E "list-|get-|generate-"
+```
+- IAM is a critical component of AWS that manages all actions related to the authentication and authorization of identities. Having this level of access, even through it's read-only access, is a big deal.
+We won't cover the list of subcommands in this lab. However, we could learn about any of them running `aws iam command help`. This will show details about the subcommands and their basic usage, including the required and optional parameters.
+- Let's start by getting a summary of the IAM-related information in the account. We'll run `aws I am get-account-summaary` with no additional arguments and put it into the json format
+```bash
+aws --profile target iam get-account-summary | tee account-summary.json
+{
+  "SummaryMap": {
+    "GroupPolicySizeQuota": 5120,
+    "InstanceProfilesQuota": 1000,
+    "Policies": 8,
+    "GroupsPerUserQuota": 10,
+    "InstanceProfiles": 0,
+    "AttachedPoliciesPerUserQuota": 10,
+    "Users": 18,
+    "PoliciesQuota": 1500,
+    "Providers": 1,
+    "AccountMFAEnabled": 0,
+    "AccessKeysPerUserQuota": 2,
+    "AssumeRolePolicySizeQuota": 2048,
+    "PolicyVersionsInUseQuota": 10000,
+    "GlobalEndpointTokenVersion": 1,
+    "VersionsPerPolicyQuota": 5,
+    "AttachedPoliciesPerGroupQuota": 10,
+    "PolicySizeQuota": 6144,
+    "Groups": 8,
+    "AccountSigningCertificatesPresent": 0,
+    "UsersQuota": 5000,
+    "ServerCertificatesQuota": 20,
+    "MFADevices": 0,
+    "UserPolicySizeQuota": 2048,
+    "PolicyVersionsInUse": 28,
+    "ServerCertificates": 0,
+    "Roles": 21,
+    "RolesQuota": 1000,
+    "SigningCertificatesPerUserQuota": 2,
+    "MFADevicesInUse": 0,
+    "RolePolicySizeQuota": 10240,
+    "AttachedPoliciesPerRoleQuota": 10,
+    "AccountAccessKeysPresent": 0,
+    "AccountPasswordPresent": 1,
+    "GroupsQuota": 300
+  }
+}
+```
+- The output shows some information that is more relevant for administrators such as resource quotas, but it also shows insights about the number of IAM resources created in the account such as Users, Roles, Groups and Policies.
+- Let's continue enumerating all IAM identities list-users, list-groups and list-roles subcommand
+```bash
+aws --profile target iam list-users | tee users.json
+aws --profile target iam list-groups | tee groups.json
+aws --profile target iam list-roles | tee roles.json
+```
+- We can list all managed policies with list-policies. We'll use --scope Local to display only the Customer Managed Policies and omit the AWS Managed Policies, and we'll use --only-attached to list the policies that are attached to an IAM identity.
+```bash
+aws --profile target iam list-policies --scope Local --only-attached | tee Policies.json
+```
+- Next, to get the inline policies for every identity associated with the compromised credentials, we could run the following subcommand:
+     - list-user-policies
+     - get-user-policy
+     - list-group-policies
+     - get-group-policy
+     - list-role-policies
+     - get-role-policy
+- Similarly, we can check for all managed policies with the following subcommand:
+     - list-attached-user-policies
+     - list-attached-group-policies
+     - list-attached-role-policies
+> In order to execute get-account-authorization-details, the account running the command must have the GetAccountAuthorizationDetails permission attached to its policy. While it's not common to find this permission exclusively on a policy, it is included when a wildcard is used for all get permissions (iam:Get*) which is common.
+```bash
+aws --profile target iam get-account-authorization-details --filter User Group LocalManagedPolicy Role | tee account-authorization-details.json
+```
+- Let's check something curious about the user authorization details we discovered.
+- User clouddesk-plove IAM user is associated with a policy that denies access to certain resources.
+```bash
+aws --profile target iam list-attached-user-policies --user-name clouddesk-plove
+{
+    "AttachedPolicies": [
+        {
+            "PolicyName": "deny_challenges_access",
+            "PolicyArn": "arn:aws:iam::238741419615:policy/deny_challenges_access"
+        }
+    ]
+}
+```
+- We identified one managed policy (named deny_challenges_access) associated with the user. To understand the policy's function, we need to read its policy document. Let's take the ARN of policy and attempt to list version to gain further insights.
+```bash
+aws --profile target iam list-policy-versions --policy-arn arn:aws:iam::238741419615:policy/deny_challenges_access
+# An error occurred (AccessDenied) when calling the ListPolicyVersions operation: User: arn:aws:iam::238741419615:user/support/clouddesk-plove is not authorized to perform: iam:ListPolicyVersions on resource: policy arn:aws:iam::238741419615:policy/deny_challenges_access with an explicit deny in an identity-based policy
+```
+- This error message, indicating that the operation is "explicitly denied" suggests that the administrator restricted this user's access to certain resources.
+- Let's check interesting  **get-account-authorization-details -- filter LocalManagedPolicy** to retrive all the custom managed policies of the account and browse the list until we find the details of the **deny_challenges_access** policy.
+```bash
+aws --profile target iam get-account-authorization-details --filter LocalManagedPolicy
+```
+- FInd users from the group
+```bash
+aws --profile target iam get-group --group-name ruby_dev
+```
+
+### Processing API Response data with JMESPath
+- As previously mentioned, we have been using the aws client which produces JSON output by default. In this section, we will process the JSON output with [JMESPath](https://jmespath.org/) .
+- In this section, we'll learn some basic querying using JMESPath by running some examples against the output of the iam **get-account-authorization-details** subcommand.
+
+```bash
+aws --profile target iam get-account-authorization-details --filter User
+{
+    "UserDetailList": [
+        {
+            "Path": "/admin/",
+            "UserName": "admin-alice",
+            "UserId": "AIDATPFQY6ZP6V2CMANTY",
+            "Arn": "arn:aws:iam::238741419615:user/admin/admin-alice",
+            "CreateDate": "2024-12-04T18:12:11+00:00",
+            "GroupList": [
+                "amethyst_admin",
+                "admin"
+            ],
+            "AttachedManagedPolicies": [],
+            "Tags": [
+                {
+                    "Key": "Project",
+                    "Value": "amethyst"
+                },
+                {
+                    "Key": "ce1df3c0-33f8-4eac-bb8a-356a133b3ac0",
+                    "Value": "ce1df3c0-33f8-4eac-bb8a-356a133b3ac0"
+                }
+            ]
+        }
+  -------Truncated----
+}
+```
+- Now, Let's query only for the UserName keys for all the objects. This is a perfect opportunity to use a "UserDetailList[].UserName"
+```bash
+aws --profile target iam get-account-authorization-details --filter User --query "UserDetailList[].UserName"
+[
+    "admin-alice",
+    "admin-cbarton",
+    "admin-srogers",
+    "admin-tstark",
+    "challenge",
+    "clouddesk-bob",
+    "clouddesk-fruiz",
+    "clouddesk-plove",
+    "dev-ballen",
+    "dev-csandiego",
+    "dev-ddory",
+    "dev-jreyes",
+    "dev-mmurdock",
+    "dev-mwindu",
+    "dev-prince",
+    "dev-rboggs",
+    "dev-shedgehog",
+    "monitoring"
+]
+```
+- Filter some specific fields
+```bash
+aws --profile target iam get-account-authorization-details --filter User --query "UserDetailList[0].UserName,Path,GroupList]"
+[
+    "admin-alice",
+    "/admin/",
+    [
+        "amethyst_admin",
+        "admin"
+    ]
+]
+```
+- With parameter names
+```bash
+aws --profile target iam get-account-authorization-details --filter User --query "UserDetailList[0].{Name: UserName,Path: Path,Groups: GroupList}"
+{
+    "Name": "admin-alice",
+    "Path": "/admin/",
+    "Groups": [
+        "amethyst_admin",
+        "admin"
+    ]
+}
+```
+- For example, let's list all the IAM Users whose usernames contain the word admin. We would use the UserDetailList[?contains(UserName, 'admin')] expression. Let's run that now.
+```bash
+aws --profile target iam get-account-authorization-details --filter User --query "UserDetailList[?contains(UserName, 'admin')].{Name: UserName}" 
+[
+    {
+        "Name": "admin-alice"
+    },
+    {
+        "Name": "admin-cbarton"
+    },
+    {
+        "Name": "admin-srogers"
+    },
+    {
+        "Name": "admin-tstark"
+    }
+]
+```
+- If the two expressions are written separately the expressions would be UserDetailList[?Path=='/admin/'].UserName and GroupDetailList[?Path=='/admin/'].GroupName. Let's build a JSON object with the desired elements. The Listing below shows the JSON object. Notice that we must use the --filter User Group argument to also obtain the Group objects.
+```powershell
+aws --profile target iam get-account-authorization-details --filter User Group --query "{Users: UserDetailList[?Path=='/admin/'].UserName, Groups: GroupDetailList[?Path=='/admin/'].{Name: GroupName}}"
+{
+    "Users": [
+        "admin-alice"
+    ],
+    "Groups": [
+        {
+            "Name": "admin"
+        }
+    ]
+}
+```
+#### Task
+- What JMESPath expression will filter and display all users that contain the word "admin" in the Username and the Path fields? (Write only the JMESPath expression starting with "?". Use the contains function for both conditions. Example: ?contains(Path,'admin') ... )
+````powershell
+aws --profile target iam get-account-authorization-details --filter User --query "UserDetailList[?contains(UserName,'admin') && contains(Path,'admin')].{Name: UserName}"
+[
+    {
+        "Name": "admin-alice"
+    }
+]
+```
