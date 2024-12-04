@@ -669,13 +669,54 @@ aws --profile target iam get-account-authorization-details --filter User Group -
     ]
 }
 ```
+
 #### Task
 - What JMESPath expression will filter and display all users that contain the word "admin" in the Username and the Path fields? (Write only the JMESPath expression starting with "?". Use the contains function for both conditions. Example: ?contains(Path,'admin') ... )
-````powershell
+```powershell
 aws --profile target iam get-account-authorization-details --filter User --query "UserDetailList[?contains(UserName,'admin') && contains(Path,'admin')].{Name: UserName}"
 [
     {
         "Name": "admin-alice"
     }
 ]
+```
+
+### Running Automated Enumeration with Pacu
+- In this section, we'll explore some of pacu's enumeration modules as a case study for automated AWS enumeration. The goal of automation is to not only to streamline our work but more importantly to help us better understand the process and even build our own tools and workflows
+```powershell
+sudo apt update
+sudo apt install pacu
+```
+- Now let's run help iam__enum_users_roles_policies_groups to learn about this module.
+```powershell
+help iam__enum_users_roles_policies_groups
+```
+- This module works similarly to the get-account-authorization-details subcommand
+```powershell
+run iam__enum_users_roles_policies_groups
+[iam__enum_users_roles_policies_groups] MODULE SUMMARY:
+  18 Users Enumerated
+  21 Roles Enumerated
+  8 Policies Enumerated
+  8 Groups Enumerated
+  IAM resources saved in Pacu database.
+```
+- To display a list of services that have collected data in the current session we'll run the services command. Then we can run the data <service> command to display all data for the specified service in the session.
+```powershell
+services
+data IAM
+```
+### Extracting Insights from Enumeration Data
+- Let's start with an obvious path. We'll analyze the admin-alice IAM user's data from the output of the get-account-authorization-details IAM subcommand.
+```powershell
+aws --profile target iam get-account-authorization-details --filter User Group --query "UserDetailList[?UserName=='admin-alice']"
+```
+> Attribute-Based Access Control (ABAC) is an authorization strategy in which a subject's permission to perform a set of operations is determined by evaluating attributes associated with that subject. Tags are commonly used as attributes to implement ABAC in public cloud environments.
+```powershell
+aws --profile target iam get-account-authorization-details --filter User Group --query "GroupDetailList[?GroupName=='admin']"
+aws --profile target iam get-account-authorization-details --filter User Group --query "GroupDetailList[?GroupName=='amethyst_admin']"
+```
+- Let's **get-account-authorization-details** IAM subcommand to get this information.
+```powershell
+aws --profile target iam get-account-authorization-details --filter LocalManagedPolicy --query "Policies[?PolicyName=='amethyst_admin']"
 ```
