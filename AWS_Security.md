@@ -720,3 +720,23 @@ aws --profile target iam get-account-authorization-details --filter User Group -
 ```powershell
 aws --profile target iam get-account-authorization-details --filter LocalManagedPolicy --query "Policies[?PolicyName=='amethyst_admin']"
 ```
+
+
+# AWSPX graph view with neo4j like bloodhound
+- [awspx](https://github.com/WithSecureLabs/awspx) is an opensource tool developed by FSecure, which analyses access paths within AWS and help to visualize access control relationships and discover potential attack paths between AWS resources.
+- Similar tool [PMapper](https://github.com/nccgroup/PMapper) explore to list
+![alt text](https://raw.githubusercontent.com/wiki/FSecureLABS/awspx/uploads/Awspx.gif?raw=true)
+
+```bash
+git clone https://github.com/FSecureLABS/awspx.git
+cd awspx
+sudo ./INSTALL # It'll create the docker container
+awspx ingest # It prompt for AWS access key and secret key and region the format JSON, the it will generate the .zip file in /opt/awspx
+awspx db --load-zip sample.zip # It will generate the file don't rename the file
+awspx attacks
+```
+
+
+
+# Special Thanks to the Creator of tools and Community
+[![](https://github.com/WithSecureLabs.png?size=50)](https://github.com/WithSecureLabs)
