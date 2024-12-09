@@ -735,8 +735,108 @@ awspx ingest # It prompt for AWS access key and secret key and region the format
 awspx db --load-zip sample.zip # It will generate the file don't rename the file
 awspx attacks
 ```
+# Attacking AWS Cloud Infrastructure
+- Continuous Integration (CI) and Continuous Delivery (CD) systems are vital components of modern cloud-based environments, including those on AWS. These systems facilitate the automated, repeatable, and tested deployment of applications, ensuring greater stability and efficiency. To achieve this, CI/CD pipelines must have access to application source code, secrets, and various AWS services and environments for deployment.
+- However, the integration of these systems into AWS environments expands their attack surface, making CI/CD pipelines a prime target for malicious actors. Compromising a vulnerable CI/CD system within AWS can lead to privilege escalation, allowing attackers to move deeper into the cloud infrastructure.
+- Because CI/CD systems are massive targets for attackers, organizations like OWASP have created "Top 10" lists for the biggest security risks in CI/CD systems, shown below. These lists help organizations identify and mitigate vulnerabilities that could be exploited within their AWS infrastructure.
+     1. CICD-SEC-1: Insufficient Flow Control Mechanisms
+     2. CICD-SEC-2: Inadequate Identity and Access Management
+     3. CICD-SEC-3: Dependency Chain Abuse
+     4. CICD-SEC-4: Poisoned Pipeline Execution (PPE)
+     5. CICD-SEC-5: Insufficient PBAC (Pipeline-Based Access Controls)
+     6. CICD-SEC-6: Insufficient Credential Hygiene
+     7. CICD-SEC-7: Insecure System Configuration
+     8. CICD-SEC-8: Ungoverned Usage of 3rd Party Services
+     9. CICD-SEC-9: Improper Artifact Integrity Validation
+     10. CICD-SEC-10: Insufficient Logging and Visibility
+  
+![alt text](https://raw.githubusercontent.com/ashok5141/OSCP/refs/heads/main/Images/CICD%20security1.png?raw=true)
+- This Module is divided into two parts: the first half focused on the
+    - **Leaked Secrets to Poisoned Pipeline**, and the second half about
+    - **Dependency Chain Abuse**.
+- In order to maintain a consistent lab, we won't be covering CICD-SEC-8 as it requires a third-party service, such as GitHub. However, the concepts we'll examine can also be applied to that risk. Furthermore, won't be covering CICD-SEC-10 because visibility requires manual intervention, which is out of scope for this Module.
+- In the first part, we will focus on CICD-SEC-4: Poisoned Pipeline Execution (PPE), CICD-SEC-5: Insufficient PBAC (Pipeline-Based Access Controls), and CICD-SEC-6: Insufficient Credential Hygiene.
+- Poisoned Pipeline Execution (PPE) is when an attacker gains control of the build/deploy script, potentially leading to a reverse shell or secret theft.
+- Insufficient Pipeline-Based Access Controls (PBAC) means the pipeline lacks proper protection of secrets and sensitive assets, which can lead to compromise.
+- Insufficient Credential Hygiene refers to weak controls over secrets and tokens, making them vulnerable to leaks or escalation.
+- Lastly, we'll exploit an AWS S3 bucket misconfiguration to access Git credentials, modify the pipeline, and inject a payload to steal secrets and compromise the environment.
+- In the second half of this module, we'll cover CICD-SEC-3: Dependency Chain Abuse, CICD-SEC-5: Insufficient Pipeline-Based Access Controls, CICD-SEC-7: Insecure System Configuration, and CICD-SEC-9: Improper Artifact Integrity Validation.
+- Dependency Chain Abuse occurs when a malicious actor tricks the build system into downloading harmful code, either by hijacking an official dependency or creating similarly named packages.
+- Insufficient Pipeline-Based Access Controls means pipelines have excessive permissions, making systems vulnerable to compromise.
+- Insecure System Configuration involves misconfigurations or insecure code in pipeline applications.
+- Improper Artifact Integrity Validation allows attackers to inject malicious code into the pipeline without proper checks.
+- These risks, highlighted by OWASP, often overlap and serve as general guidelines for potential pipeline vulnerabilities.
+- In this module, we'll find public info referencing a dependency missing from the public repository. We'll exploit this by publishing a malicious package, which will be downloaded by the builder, allowing our code to run in production.
+- Once in production, we'll scan the network, discover more services, and tunnel into the automation server. There, we'll create an account, exploit a plugin vulnerability to get AWS keys, and continue until we find an S3 bucket with a Terraform state state file containing admin AWS keys.
+- As mentioned, we'll cover the material in two halves during this Learning Module. We will explore the following Learning Units:
+     - Leaked Secrets to Poisoned Pipeline:
+          - Lab Design
+          - Information Gathering
+          - Dependency Chain Attack
+          - Compromising the Environment
+     - Dependency Chain Abuse:
+          - Information Gathering
+          - Dependency Chain Attack
+          - Compromising the Environment
+## About the Public Cloud Labs
+- Directly accessible without using VPN
 
+## Leaked Secrets to Poisoned Pipeline - Lab Design
+- The components of this lab include:
+- **Gitea**: This is the Source Code Management (SCM) service. While this is a self-hosted option, the attack in this scenario would be conducted similarly if this were a public SCM like GitHub or GitLab.
+- **Jenkins**: This is the automation service. While we will have to use Jenkins-specific syntax for understanding and writing pipeline workflows, the general ideas apply to most other automation services.
+- **Application**: This is a generic application that we will be targeting.
+- The components will be accessible on the following subdomains when querying the custom DNS server:
 
+|Component|	Subdomain|
+|:-|:-|
+|Gitea | git.offseclab.io|
+|Jenkins |automation.offseclab.io |
+|Application |app.offseclab.io |
+
+#### Accessing the Labs
+- After completing this section, we'll be able to start the lab. This provides us with:
+     - A DNS server's IP address
+     - A Kali IP address
+     - A Kali Password
+     - An AWS account with no permissions (more on this later)
+- In order to access the services, we will need to configure our personal Kali machine (not the cloud instance) to use the provided DNS server. For this example, our DNS server will be hosted on 203.0.113.84.
+- Listing the connection, my main network connection is wired so selecting "Wired connection 1"
+```bash
+nmcli connection # Print list of connections
+sudo nmcli connection modify "Wired connection 1" ipv4.dns "x.x.x.x" # DNS IP Address is provided by lab specify in the field
+sudo systemctl restart NetworkManager
+sudo nano /etc/resolv.conf # Add the DNS ip address in resolv.conf
+cat /etc/resolv.conf 
+nslookup git.offseclab.io
+```
+## Enumeration
+- As with every security assessment, we should start with gathering as much information as we can about the target. Gathering this information is crucial for being able to properly exploit an application.
+- This Learning Unit covers the following Learning Objective:
+     - Understand How to Enumerate a CI/CD System.
+
+### Enumerating Jenkins
+- An application, Git server  and automation server. Let's enumerate the automation server.
+
+#### Enumerating Jenkins
+- Access the Jenkins [automation.offseclab.io](http://automation.offseclab.io/login?from=%2F)
+```bash
+sudo msfdb init
+msfconsole --quiet
+search jenkins_enum
+use auxiliary/scanner/http/jenkins_enum
+show options
+set RHOSTS automation.offseclab.io
+set TARGETURI /
+run
+# [+] 54.165.165.130:80 - Jenkins Version 2.385
+# Unfortunately, the authentication blocked the rest of the scan, so we've only gathered the version.
+```
+
+#### Enumerating the Git Server
+- How we approach enumerating a Git server depends on the context. If an organization uses a hosted SCM solution like GitHub or GitLab, our enumeration will consist of more open-source intelligence relying on public repos, users, etc. While it's possible for these hosted solutions to have vulnerabilities, in an ethical security assessment, we would focus on the assets owned by our target and not a third party.
+- If the organization hosts their own SCM and it's in scope, exploiting the SCM software would be part of the assessment. We would also search for any exposed information on a self-hosted SCM.
+- For example, gathering information about exposed repositories would typically be scoped for both hosted and non-hosted SCMs. However, brute forcing commonly-used passwords would be ineffective on hosted SCMs, since they typically have hundreds of thousands of users who are not related to an organization. In a self-hosted SCM, brute forcing users and usernames might be part of our assessment.
 
 # Special Thanks to the Creator of tools and Community
 [![](https://github.com/WithSecureLabs.png?size=50)](https://github.com/WithSecureLabs)
