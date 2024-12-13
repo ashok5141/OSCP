@@ -1050,6 +1050,8 @@ wfuzz -c -z file,/usr/share/seclists/Discovery/Web-Content/raft-large-files.txt 
 gobuster dir -u http://192.168.50.16:5002 -w /usr/share/wordlists/dirb/big.txt -p pattern #pattern can be like {GOBUSTER}/v1 here v1 is just for example, it can be anything
 gobuster dir -u http://192.168.162.143/ -w /usr/share/seclists/Discovery/Web-Content/directory-list-2.3-big.txt # It has big list
 sudo gobuster dir -w '/usr/share/dirbuster/wordlists/directory-list-2.3-medium.txt' -u https://$IP:9090 -t 42 -b 404,403,400 -k --exclude-length 43264 # Cockpit PGPractice offsec
+sudo gobuster dir -w '/usr/share/dirbuster/wordlists/directory-list-2.3-medium.txt' -u http://$IP:80 -t 42 -b 400,403,404 -x txt,php # Cockpit PGPractice offsec
+
 
 #feroxbuster
 feroxbuster --url HTTP://1.2.3.4/
