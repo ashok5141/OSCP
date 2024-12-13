@@ -837,6 +837,359 @@ run
 - How we approach enumerating a Git server depends on the context. If an organization uses a hosted SCM solution like GitHub or GitLab, our enumeration will consist of more open-source intelligence relying on public repos, users, etc. While it's possible for these hosted solutions to have vulnerabilities, in an ethical security assessment, we would focus on the assets owned by our target and not a third party.
 - If the organization hosts their own SCM and it's in scope, exploiting the SCM software would be part of the assessment. We would also search for any exposed information on a self-hosted SCM.
 - For example, gathering information about exposed repositories would typically be scoped for both hosted and non-hosted SCMs. However, brute forcing commonly-used passwords would be ineffective on hosted SCMs, since they typically have hundreds of thousands of users who are not related to an organization. In a self-hosted SCM, brute forcing users and usernames might be part of our assessment.
+- **Task** Brute force the users discovered in the SCM server and find the user with a weak password. What is that user's password?
+- Brute force with 5 username and the password file is 500-worst-passwords.txt/
+
+#### Enumerating the Application
+- Access the Application [HTTP://app.offseclab.io](http://app.offseclab.io), then try to view the source code for any AWS information like images from the S3 buckets and other links.
+```python
+dirb http://app.offseclab.io # found only /index.html
+curl  https://staticcontent-mit9cfx8fn4lnr01.s3.us-east-1.amazonaws.com # Access Denied
+head -n 51 /usr/share/wordlists/dirb/common.txt > first50.txt
+dirb  https://staticcontent-mit9cfx8fn4lnr01.s3.us-east-1.amazonaws.com ./first50.txt # found https://staticcontent-mit9cfx8fn4lnr01.s3.us-east-1.amazonaws.com/.git/HEAD
+# Configue the aws configure with aws lab details given in the lab
+aws s3 ls staticcontent-mit9cfx8fn4lnr01
+```
+
+### Discovering Secrets
+- We can list the bucket and access at least some of the files within, let's search for secrets. We'll do this by checking files we can and cannot download, then leverage tools to search the bucket for sensitive data.
+     - Discover which files are accessible
+     - Analyze Git history to discover secrets
+
+#### Downloading the Bucket
+- First review the contents
+```bash
+aws s3 ls staticcontent-mit9cfx8fn4lnr01
+```
+- First, we can determine this is most likely an entire git repository based off the .git directory. Next, we'll discover a Jenkinsfile that points to this potentially being part of a pipeline. We'll inspect this file more closely later. We also find a scripts directory that might be interesting.
+- Let's first download all the content we can from the bucket. We know we have access to the images/ folder, but do we have access to the README.md file? Let's use the aws s3 command, this time with the cp operation to copy README.md from the staticcontent-mit9cfx8fn4lnr01 bucket to the current directory. We also need to add the s3:// directive to the bucket name to instruct the AWS CLI that we're copying from an S3 bucket and not a folder.
+- If there is a large amount of sensitive information that could be valuable, we may attempt to exfiltrate data by copying it to another AWS S3 bucket rather than directly downloading it.
+- Using the AWS S3 cp command allows faster transfers between buckets and gives us more time to access the data later without drawing immediate attention. Always monitor unusual S3 bucket activities and apply strict access control policies.
+```bash
+aws s3 cp s3://staticcontent-mit9cfx8fn4lnr01/README.md ./
+```
+-The README makes note of the scripts directory and how to upload to S3. Now that we know we can load the README.md file, let's try to download the rest of the bucket and inspect those scripts. We'll start by making a new directory called static_content. We'll then use the aws s3 command, but with the sync operator to sync all the contents from a source to a destination. We'll specify s3://staticcontent-mit9cfx8fn4lnr01 as the source and the newly created directory as the destination.
+```bash
+mkdir static_content
+aws s3 sync s3://staticcontent-mit9cfx8fn4lnr01 ./static_content/
+cd static_content/
+```
+- Let's start by reviewing the script in scripts/upload-to-s3.sh. Based on the contents of the README, we can assume this is the script used to upload the contents to S3. In this file, we're searching for any potential hard-coded AWS access keys that the developer may have forgotten about.
+```bash
+cat scripts/upload-to-s3.sh  # Below information in the script
+# Upload images to s3
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+AWS_PROFILE=prod aws s3 sync $SCRIPT_DIR/../ s3://staticcontent-mit9cfx8fn4lnr01/ 
+```
+- Unfortunately for us, the script contains no secrets. It seems to be fairly straightforward and only uploads the content of the repo to S3. Let's list the scripts directory and check if other scripts contain useful information.
+```bash
+cat -n update-readme.sh  # Below content in the file
+     1  # Update Readme to include collaborators images to s3
+     2
+     3  SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+     4
+     5  SECTION="# Collaborators"
+     6  FILE=$SCRIPT_DIR/../README.md
+     7
+     8  if [ "$1" == "-h" ]; then
+     9    echo "Update the collaborators in the README.md file"
+    10    exit 0
+    11  fi
+    12
+    13  # Check if both arguments are provided
+    14  if [ "$#" -ne 2 ]; then
+    15    # If not, display a help message
+    16    echo "Usage: $0 USERNAME PASSWORD"
+    17    exit 1
+    18  fi
+    19
+    20  # Store the arguments in variables
+    21  username=$1
+    22  password=$2
+    23
+    24  auth_header=$(printf "Authorization: Basic %s\n" "$(echo -n "$username:$password" | base64)")
+    25
+    26  USERNAMES=$(curl -X 'GET' 'http://git.offseclab.io/api/v1/repos/Jack/static_content/collaborators' -H 'accept: application/json' -H $auth_header | jq .\[\].username |  tr -d '"')
+    27
+    28  sed -i "/^$SECTION/,/^#/{/$SECTION/d;//!d}" $FILE
+    29  echo "$SECTION" >> $FILE
+    30  echo "$USERNAMES" >> $FILE
+    31  echo "" >> $FILE   
+```
+- It seems that the update-readme.sh script finds the collaborators from the SCM server and updates the README.md file. Based on the link used on line 26, Jack appears to be the repo owner. As we suspected earlier, the SCM does contain private repos
+- We might determine that the script accepts a username and password as arguments. This is important to note because if we can find bash history of a user who has executed this script, we might be able to find the credentials for a git user.
+- That's about everything useful we can obtain from this file currently. However, since this is a git repo, we have the entire history of all changes made to this repo. Let's use a more git-specific methodology to search for sensitive data.
+
+#### Searching for Secrets in Git
+- Since git not only stores the files in the repo, but all of its history, it's important when searching for secrets that we also examine the history. While certain tools may help us with this, it's important that we also conduct a cursory manual review if the automated scripts don't find anything.
+- One tool we can use for this is gitleaks. We'll need to install it first. Let's use apt to update the list of packages, then install the gitleaks package.
+```bash
+sudo apt update
+sudo apt install -y gitleaks
+```
+- To run gitleaks, we need to ensure we're in the root of the static_content folder. We'll then run the gitleaks binary with the detect subcommand.
+```bash
+gitleaks detect  # Below information from this command
+
+    ○
+    │╲
+    │ ○
+    ○ ░
+    ░    gitleaks
+
+5:05PM INF 7 commits scanned.
+5:05PM INF scan completed in 73.7ms
+5:05PM INF no leaks found
+```
+- Unfortunately, gitleaks did not find anything. However, it's always important to do a manual review. While we can't discover everything, we can focus on specific items that draw our attention. Let's start by running git log, which will list all the commits in the current branch.
+```bash
+git log   # Below information from this command                                              
+-------------------TRUNCATED--------------------------
+commit 534f1f6871ca3881adad0e1179c07fd220ee79cd
+Author: Jack <jack@offseclab.io>
+Date:   Tue Dec 10 20:31:50 2024 +0000
+
+    Fix issue
+
+commit ad0c4b46c15a28d9cf7d97661581ad0371ce5393
+Author: Jack <jack@offseclab.io>
+Date:   Mon Dec 9 20:31:49 2024 +0000
+
+    Add Managment Scripts
+-------------------TRUNCATED--------------------------
+```
+- The command outputs the git commit log in descending order of when the commit was made. In the git history, we find that after adding the management scripts, an issue had to be fixed. Let's inspect what was changed. To do this, we'll use git show and pass in the commit hash.
+```bash
+git show 534f1f6871ca3881adad0e1179c07fd220ee79cd  # Below information from this command  
+commit 534f1f6871ca3881adad0e1179c07fd220ee79cd
+Author: Jack <jack@offseclab.io>
+Date:   Tue Dec 10 20:31:50 2024 +0000
+
+    Fix issue
+
+diff --git a/scripts/update-readme.sh b/scripts/update-readme.sh
+index 02cff69..3fac4be 100644
+--- a/scripts/update-readme.sh
++++ b/scripts/update-readme.sh
+@@ -1,4 +1,5 @@
+ # Update Readme to include collaborators images to s3
++
+ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+ 
+ SECTION="# Collaborators"
+@@ -9,9 +10,22 @@ if [ "$1" == "-h" ]; then
+   exit 0
+ fi
+ 
+-USERNAMES=$(curl -X 'GET' 'http://git.offseclab.io/api/v1/repos/Jack/static_content/collaborators' -H 'accept: application/json' -H 'authorization: Basic YWRtaW5pc3RyYXRvcjo2djFxMmlua3ZkbXpnaGdv' | jq .\[\].username |  tr -d '"')
++# Check if both arguments are provided
++if [ "$#" -ne 2 ]; then
++  # If not, display a help message
++  echo "Usage: $0 USERNAME PASSWORD"
++  exit 1
++fi
++
++# Store the arguments in variables
++username=$1
++password=$2
++
++auth_header=$(printf "Authorization: Basic %s\n" "$(echo -n "$username:$password" | base64)")
++
++USERNAMES=$(curl -X 'GET' 'http://git.offseclab.io/api/v1/repos/Jack/static_content/collaborators' -H 'accept: application/json' -H $auth_header | jq .\[\].username |  tr -d '"')
+ 
+ sed -i "/^$SECTION/,/^#/{/$SECTION/d;//!d}" $FILE
+ echo "$SECTION" >> $FILE
+ echo "$USERNAMES" >> $FILE
+-echo "" >> $FILE
++echo "" >> $FILE
+\ No newline at end of file
+```
+- From the output, we find that the developer removed a pre-filled authorization header and replaced it with the ability to pass the credentials via command line. Mistakes like these are common when a developer is testing a script. The pre-filled credentials might still be valid and provide us with more access into the SCM server. Let's decode the header and try out the credentials.
+- HTTP basic authentication headers are base64-encoded in the following format: <username>:<password>. To decode it, we need to use the base64 command with the --decode argument. We'll use echo with the header value to pipe it into the base64 utility.
+```bash
+echo "YWRtaW5pc3RyYXRvcjo2djFxMmlua3ZkbXpnaGdv" | base64 -d
+# administrator:6v1q2inkvdmzghgo 
+```
+- Let's attempt to use these credentials in the SCM server. We'll navigate to the login page and click Sign In.
+
+## Poisoning the Pipeline
+- Now that we have access to view the git repositories, we can to enumerate further and attempt to poison the pipeline. A pipeline in CI/CD refers to the actions that must be taken to distribute a new version of an application. By automating many of these steps, the actions become repeatable. The pipeline might include compiling a program, seeding a database, updating a configuration, and much more.
+- In many situations, the pipeline definition file can be found in the same repo that contains the application source. For GitLab, it's a **.gitlab-ci.yml** file. For GitHub, such files are defined in the **.github/workflows** folder. For Jenkins, a **Jenkinsfile** is used. Each of these has its own syntax for configuration.
+- Commonly, specific actions trigger the pipeline to run. For example, a commit to the main branch might trigger a pipeline, or a pull request sent to the repo might trigger a pipeline to test the changes.
+     - Enumerating the Repositories
+     - Modifying the Pipeline
+     - Enumerating the Builder
+### Enumerating the Repositories
+- Now that we're authenticated, let's attempt to visit the list of repositories in the [web](http://git.offseclab.io) again. We'll click Explore in the top menu.
+- Once you looged into the git website then Explore -> Repositories 1. Image-transform, 2. Static_content
+- In the Image-transform repository has Jenkins file
+```bash
+pipeline {
+  agent any
+
+  stages {
+
+    
+    stage('Validate Cloudfront File') {
+      steps {
+        withAWS(region:'us-east-1', credentials:'aws_key') {
+            cfnValidate(file:'image-processor-template.yml')
+        }
+      }
+    }
+
+    stage('Create Stack') {
+      steps {
+        withAWS(region:'us-east-1', credentials:'aws_key') {
+            cfnUpdate(
+                stack:'image-processor-stack', 
+                file:'image-processor-template.yml', 
+                params:[
+                    'OriginalImagesBucketName=original-images-mit9cfx8fn4lnr01',
+                    'ThumbnailImageBucketName=thumbnail-images--mit9cfx8fn4lnr01'
+                ], 
+                timeoutInMinutes:10, 
+                pollInterval:1000)
+        }
+      }
+    }
+  }
+}
+```
+- Once again, we find the pipeline definition on line 1 and the use of any builder agent on line 2. This time, however, we actually have some steps. The first thing that sticks out to us is the use of [withAWS](https://www.jenkins.io/doc/pipeline/steps/pipeline-aws/#withaws-set-aws-settings-for-nested-block) on lines 9 and 17. This instructs Jenkins to load the AWS plugin. More importantly, it instructs the plugin to load with a set of credentials. On both lines 9 and 17, we find that credentials named "aws_key" are loaded here. This will set the environment variables AWS_ACCESS_KEY_ID for the access key ID, AWS_SECRET_ACCESS_KEY for the secret key, and AWS_DEFAULT_REGION for the region.
+- As long as the administrator set up everything correctly, the account configured to these credentials should at the very least have permissions to create, modify, and delete everything in the CloudFormation template. If we can obtain these credentials, we might be able to escalate further.
+- We should also review the CloudFormation template. We'll break up the template into multiple listings and explain each section.
+```bash
+01  AWSTemplateFormatVersion: '2010-09-09'
+02
+03  Parameters:
+04    OriginalImagesBucketName:
+05      Type: String
+06      Description: Enter the name for the Original Images Bucket
+07    ThumbnailImageBucketName:
+08      Type: String
+09      Description: Enter the name for the Thumbnail Images Bucket
+10
+11  Resources:
+12    # S3 buckets for storing original and thumbnail images
+13    OriginalImagesBucket:
+14      Type: AWS::S3::Bucket
+15      Properties:
+16        BucketName: !Ref OriginalImagesBucketName
+17        AccessControl: Private
+18    ThumbnailImagesBucket:
+19      Type: AWS::S3::Bucket
+20      Properties:
+21        BucketName: !Ref ThumbnailImageBucketName
+22        AccessControl: Private
+```
+- The first part of the CloudFormation template accepts parameters for the names of two buckets. One holds the original images, while the other holds the thumbnails. Based on the repository and bucket names, we can assume this application processes images and creates thumbnails.
+- Next, we find the definition of a lambda function.
+```bash
+24    ImageProcessorFunction:
+25      Type: 'AWS::Lambda::Function'
+26      Properties:
+27        FunctionName: ImageTransform
+28        Handler: index.lambda_handler
+29        Runtime: python3.9
+30        Role: !GetAtt ImageProcessorRole.Arn
+31        MemorySize: 1024
+32        Environment:
+33          Variables:
+34            # S3 bucket names
+35            ORIGINAL_IMAGES_BUCKET: !Ref OriginalImagesBucket
+36            THUMBNAIL_IMAGES_BUCKET: !Ref ThumbnailImagesBucket
+37        Code:
+38          ZipFile: |
+39            import boto3
+40            import os
+41            import json
+42
+43            SOURCE_BUCKET = os.environ['ORIGINAL_IMAGES_BUCKET']
+44            DESTINATION_BUCKET = os.environ['THUMBNAIL_IMAGES_BUCKET']
+45
+46
+47            def lambda_handler(event, context):
+48                s3 = boto3.resource('s3')
+49
+50                # Loop through all objects in the source bucket
+51                for obj in s3.Bucket(SOURCE_BUCKET).objects.all():
+52                    # Get the file key and create a new Key object
+53                    key = obj.key
+54                    copy_source = {'Bucket': SOURCE_BUCKET, 'Key': key}
+55                    new_key = key
+56                    
+57                    # Copy the file from the source bucket to the destination bucket
+58                    # TODO: this should process the image and shrink it to a more desirable size
+59                    s3.meta.client.copy(copy_source, DESTINATION_BUCKET, new_key)
+60                return {
+61                    'statusCode': 200,
+62                    'body': json.dumps('Success')
+63                }
+65    ImageProcessorScheduleRule:
+66      Type: AWS::Events::Rule
+67      Properties:
+68        Description: "Runs the ImageProcessorFunction daily"
+69        ScheduleExpression: rate(1 day)
+70        State: ENABLED
+71        Targets:
+72          - Arn: !GetAtt ImageProcessorFunction.Arn
+73            Id: ImageProcessorFunctionTarget
+``` 
+- The lambda function creates environment variables based on the names of the S3 bucket on lines 35 and 36. Lines 38 to 63 define the contents of the lambda function. We also have a rule to run the lambda function daily on lines 65-73. On line 30, we find that the lambda function has a role assigned to it. If we can modify this lambda function, we might be able to extract the credentials for that user. Let's continue reviewing this file and determine what this role can access.
+```bash
+74    ImageProcessorRole:
+ 75      Type: AWS::IAM::Role
+ 76      Properties:
+ 77        AssumeRolePolicyDocument:
+ 78          Version: '2012-10-17'
+ 79          Statement:
+ 80          - Effect: Allow
+ 81            Principal:
+ 82              Service:
+ 83              - lambda.amazonaws.com
+ 84            Action:
+ 85            - sts:AssumeRole
+ 86        Path: "/"
+ 87        Policies:
+ 88        - PolicyName: ImageProcessorLogPolicy
+ 89          PolicyDocument:
+ 90            Version: '2012-10-17'
+ 91            Statement:
+ 92            - Effect: Allow
+ 93              Action:
+ 94              - logs:CreateLogGroup
+ 95              - logs:CreateLogStream
+ 96              - logs:PutLogEvents
+ 97              Resource: "*"
+ 98        - PolicyName: ImageProcessorS3Policy
+ 99          PolicyDocument:
+100            Version: '2012-10-17'
+101            Statement:
+102            - Effect: Allow
+103              Action:
+104                - "s3:PutObject"
+105                - "s3:GetObject"
+106                - "s3:AbortMultipartUpload"
+107                - "s3:ListBucket"
+108                - "s3:DeleteObject"
+109                - "s3:GetObjectVersion"
+110                - "s3:ListMultipartUploadParts"
+111              Resource:
+112                - !Sub arn:aws:s3:::${OriginalImagesBucket}
+113                - !Sub arn:aws:s3:::${OriginalImagesBucket}/*
+114                - !Sub arn:aws:s3:::${ThumbnailImagesBucket}
+115                - !Sub arn:aws:s3:::${ThumbnailImagesBucket}/*
+```
+- The policy definition allows for updating the logs (lines 88-97), as well as access to get and update objects in the bucket (lines 98-115). While this is access that we currently do not have, it's not the most lucrative path we can go down.
+- The credentials we found in the Jenkinsfile need to have access to apply this CloudFormation template. Thus, its permissions will always be higher than what we have access to in the lambda function.
+- However, while we can most likely edit the Jenkinsfile (since we have access to the repo now), we need to check how to trigger the build. Jenkins might be configured to only run on manual intervention; if this is the case, we need to keep exploring. It might also be configured to routinely execute the pipeline. In such a scenario, we won't know how to trigger it until it executes. However, Jenkins might also be configured to run the build on each change to the repo. This is typically done by having the SCM server call a webhook for specific triggers. Let's check if the repo contains any configurations that will execute a pipeline on certain actions.
+- In Gitea, the webhooks can be found in the **Webhooks tab under Settings** [LINK of webhooks](http://git.offseclab.io/Jack/image-transform/settings/hooks/2).
+- Based on the settings, a Git Push will send a webhook to the automation server. Next, let's try to modify the Jenkinsfile to obtain a reverse shell from the builder.
+
+
+
+
 
 # Special Thanks to the Creator of tools and Community
 [![](https://github.com/WithSecureLabs.png?size=50)](https://github.com/WithSecureLabs)
