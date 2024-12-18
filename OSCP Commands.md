@@ -379,6 +379,8 @@ Windows
 1. In Windows
 ```powershell
 Get-ChildItem -Path C:\ -Include *.kdbx -File -Recurse -ErrorAction SilentlyContinue
+Get-ChildItem -Path C:\Users -Include *.txt -File -Recurse -ErrorAction SilentlyContinue # flag, are you in powershell
+powershell -c "Get-ChildItem -Path C:\Users -Include *.txt -File -Recurse -ErrorAction SilentlyContinue" # if you are in cmd
 ```
 2. In Linux
 ```bash
