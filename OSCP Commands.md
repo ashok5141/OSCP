@@ -395,6 +395,19 @@ for file in *.xml; do echo "Reading $file:"; cat "$file"; echo "----------------
 # Grep for username and password
 for file in *.xml; do echo "Reading $file:"; cat "$file"; echo "------------------------"; done | grep pa  
 ```
+### Checklist
+- [Methodlogy](https://guide.offsecnewbie.com/general-methodology), [Certcube](https://blog.certcube.com/oscp-enumeration-cheatsheet/), [Gabb4r](https://gabb4r.gitbook.io/oscp-notes/web-http/directory-fuzzing)
+- [ ] Windows
+	- [ ] C drive for new apps
+	- [ ] User downloads, documents
+	- [ ] Kdbx, passwords, powershell history, user privileges, Sevices
+	- [ ] AD- smb, rpc, ldap, Kerberos pre-auth, web, bloodhound, Powerview,
+- [ ] Linux
+	- [ ] User bash history 
+	- [ ] Scheduled tasks, sudo -l
+ 	- [ ] Suid permissions
+	- [ ] Pspy64, /opt, /var/www/, then html
+ 
 
 
 ### GitHub recon
