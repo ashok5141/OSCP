@@ -1495,6 +1495,85 @@ aws --profile backdoor iam list-attached-user-policies --user-name backdoor  # B
 aws --profile backdoor ec2 describe-tags 
 ```
 ## Dependency Chain Abuse
+- Dependency Chain Abuse happens when a malicious actor tricks the build system into downloading harmful code by hijacking or mimicking dependencies. Insufficient Pipeline-Based Access Controls occur when pipelines have excessive permissions, risking system compromise. Permissions should be tightly scoped to prevent this. Insecure System Configuration refers to vulnerabilities due to misconfigurations or insecure code, while Improper Artifact Integrity Validation allows attackers to push malicious code into a pipeline without proper checks. These OWASP risks often overlap and act as general guidelines.
+- In the second half of the module, we'll exploit public information about a missing dependency, publish a malicious package, and have it executed in production. Once inside, we'll scan the network, tunnel into the automation server, exploit a plugin vulnerability to obtain AWS keys, and eventually find a Terraform state file containing admin AWS keys.
+- Once we have access to production, we'll scan the internal network and discover some additional services. From there, we'll tunnel into the automation server, where we'll be able to create an account and exploit a vulnerability in an installed plugin to obtain AWS access keys. Using those access keys, we'll be able to continue enumeration until we find an S3 bucket, which contains a [Terraform state](https://developer.hashicorp.com/terraform/language/state) file with administrator AWS keys.
+- We will cover the following Learning Units:
+     - Lab Design
+     - Information Gathering
+     - Dependency Chain Attack
+     - Compromising the Environment
+     - Wrapping Up
+#### Accessing the Labs
+- At the end of this section, we'll be able to start the lab. This provides us with:
+     - A DNS server's IP address
+     - A Kali IP address
+     - A Kali password
+- In order to access the services, we will need to configure our personal Kali machine (not the cloud instance) to use the provided DNS server and the pip client. Let's start with the DNS server. For this example, our DNS server will be hosted on 203.0.113.84.
+- We'll start by listing the active connections on our Kali machine using nmcli with the connection subcommand. Depending on how our kali is connected (via Wi-Fi, VM, etc.), the output may differ.
+- Our main network connection is named "Wired connection 1". We'll use this in the next command to set the DNS configuration. Then, we'll add the modify subcommand to nmcli and specify the name of the connection we want to modify. Let's set ipv4.dns to the IP of our DNS server. Once set, we'll use systemctl to restart the NetworkManager service.
+```bash
+nmcli connection
+nmcli connection modify "Wired connection 1" ipv4.dns "54.85.142.134" # IP from new lab only has DNS and cloud kali
+sudo systemctl restart NetworkManager
+```
+- Once configured, we can confirm that the change propagated by verifying the DNS IP in our /etc/resolv.conf file. We'll also use nslookup to check if the DNS server is responding to the appropriate requests.
+```bash
+cat /etc/resolv.conf # Gives 54.85.142.134
+nslookup git.offseclab.io  # Gives 54.85.142.134                                        
+```
+- We wrote our changes to the resolv.conf file and successfully queried one of the DNS entries.
+- Each lab restart will provide us with a new DNS IP, and we'll need to run the above commands to set it. Because the DNS server will be destroyed at the end of the lab, we'll need to delete this entry from our settings by running the nmcli command in Listing 2 with an empty string instead of the IP. We'll demonstrate this in the Wrapping Up section.
+- Next, let's configure the pip client on our Kali instance. To use the cloud Kali instance for the pip commands, we'll need to make these updates there as well.
+- We can configure pip with the ~/.config/pip/pip.conf file. We'll start by creating the ~/.config/pip/ directory using mkdir and the -p option, which will create the intermediate directories (.config and pip). Next, we'll use nano to create and edit pip.conf.
+```bash
+mkdir -p ~/.config/pip/
+nano ~/.config/pip/pip.conf # Below lines are added
+cat -n  ~/.config/pip/pip.conf
+     1  [global]
+     2  index-url = http://pypi.offseclab.io
+     3  trusted-host = pypi.offseclab.io  
+```
+- On line 1, we'll specify the top level global configuration to ensure this populates every time our user uses pip. Next, we'll specify the http://pypi.offseclab.io server, which is our replacement to the official PyPI server. Finally, we'll need to specify that this is a trusted-host because it uses HTTP instead of HTTPS.
+### Information Gathering
+- As with every security assessment, we should start by gathering as much information as we can about the target environment. Collecting this information is crucial for being able to properly exploit an application.
+- This Learning Unit covers the following Learning Objectives:
+     - Enumerate the target applications
+     - Conduct open-source intelligence on the organization
+#### Enumerating the Services
+- Let's start by visiting the target application [app.offseclab.io](http://app.offseclab.io) and learning how it functions.
+- The name of the target application is HackShort and, based on the description, it can shorten long URLs into shorter ones. We also find a link (HackShort's API) to the application's API documentation.
+- The first step lists that we need to generate an access token to use the API. Let's follow that link [http://app.offseclab.io/get_token](http://app.offseclab.io/get_token), We'll enter a random email address and click Get API Key.
+- This takes us to a page that contains our API token.
+- In a traditional assessment, discovering the API documentation and obtaining an API token would have significantly increased our attack landscape. However, since we're targeting the pipeline and not the application, we'll continue with our enumeration. It's important to note that we would usually spend much more time attacking the application using a tool like Burp.
+- Instead, let's continue enumerating the application to discover more information. We'll open up the Developer Tools in Firefox by right clicking anywhere on the page and clicking on Inspect (Q). We can then navigate to the Network tab, refresh the page, and inspect the first request and response.
+
+![Alt text](https://raw.githubusercontent.com/ashok5141/OSCP/refs/heads/main/Images/offsecdev.png "Network Tab Developer tools, server")
+
+- One thing that stands out to us is the Server headers. We'll notice that there are two headers with the value of Caddy. This indicates that the application is most likely behind two [Caddy](https://caddyserver.com/) reverse proxies. However, we also find one Server header with the value of Werkzeug/1.0.1 Python/3.11.2. This informs us that the target application is most likely written in Python.
+#### Conducting Open Source Intelligence
+- While enumerating the application and the pipeline is important, so is searching the open internet for anything that might relate to the target. This might include searching for the target's name on websites like Stack Overflow, Reddit, and other forums. In some instances, this might not be feasible due to the number of potential matches. However, when the target is not a popular public tool, it might be fruitful.
+- Let's assume that we conducted a search for "hackshort" on a [forum](http://forum.offseclab.io/) and discovered the following post.
+- The user is complaining that they're unable to build the container image and are asking for help. However, they've left some crucial information in this post that might enable us to gain code execution into their developer workstations or into their various environments. Specifically, we find that there is a Python module named hackshort-util.
+- Let's check the public repository and try to find if this utility is publicly accessible. If so, we'll have a glimpse into the internal source code. If it's not available, we might be able to conduct a dependency chain attack.
+- To download the package, we'll use pip with the download option. We'll specify the hackshort-util package we found in the forum post.
+- As shown, ```pip download hackshort-util``` we did not find the package. This means that we should attempt to exploit a dependency chain attack.
+### Dependency Chain Attack
+- Dependency chain attacks (sometimes referred to as dependency confusion, dependency hijacking, or substitution attacks) are an attack in which a user or a package manager downloads a malicious package instead of the intended one. This might be done with a package sharing the same name but listed in a different repository, by typosquatting an organization's name, or by [typosquatting](https://en.wikipedia.org/wiki/Typosquatting) a common misspelling.
+- While typosquatting is a valid attack vector, we will be focusing on the confusion that a package manager might encounter when multiple packages have the same name.
+- This class of attack can lead to potential security breaches, data leaks, and arbitrary code execution in the application.
+- This Learning Unit covers the following Learning Objectives:
+     - Understanding the attack
+     - Publishing a malicious package
+#### Understanding the Attack
+- The primary idea behind a dependency chain attack is that package managers, like Python Package Index (PyPI) for Python and Node Package Manager (NPM) for JavaScript, will prioritize certain repositories or versions of a package when installing it. For example, an official public repository or a newer version of a package may be prioritized over custom repositories. However, public repositories often allow any user to publish custom repositories with any version number as long as the package name is not already in use.
+- This means that if an application requires a specific package from a custom internal repository, an attacker could upload a malicious package to a public repository with a newer version number. The package manager might then prioritize the malicious package over the official internal one.
+- The following graphic demonstrates what happens when a package manager checks multiple repositories, does not find a package in the public repository, and will then download the package found in the private repository:
+1. ==: This is the version matching clause. For example, if the requested package is some-package==1.0.0, only the 1.0.0 version would be downloaded. It's important to mention that wildcards can be used, so some-package==1.0.* would also match 1.0.0, 1.0.1, and so on.
+2. <=: This the version matching clause that would match any version equal or less than the specified version. For example, if some-package<=1.0.0 was requested, version 1.0.0, 0.0.9, and 0.8.9 would match, but 1.0.1 and 7.0.2 would not.
+3. >=: This the version matching clause that would match any version equal or greater than the specified version. This is the opposite of the <= clause.
+4. # no hash ~=: This is the compatible release clause, which will download any version that should be compatible with the requested version. This assumes that the developer versions the package according to the specification. For example, if some-package~=1.0.0 is requested, 1.0.1, 1.0.5, and 1.0.9 would all match, but 1.2.0 and 2.0.0 would not.
+
 
 
 
