@@ -18,7 +18,7 @@ sudo systemctl restart networking
 ### Parrot OS Internet not working tried these commands
 - ens33 port is down, in **ip a** command
 
-````bash
+```bash
 ifconfig (Only see localhost 127.0.0.1)
 ip a (if you see ens33 is down)
 sudo ip link set ens33 up
@@ -41,6 +41,4 @@ ping -c 4 8.8.8.8  (It worked)
 sudo apt update && sudo apt install firmware-realtek network-manager -y
 sudo modprobe e1000
 sudo reboot
-
-
 ```
