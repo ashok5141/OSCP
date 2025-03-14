@@ -1,4 +1,22 @@
+### Parrot OS permanent fix
+- ens33 port is down, in **ip a** command
+- in this path edit the file **/etc/network/interfaces** add the below commands
+```bash
+source /etc/network/interfaces.d/*  # This might exits
+
+# Paste these 2 commands
+auto ens33
+iface ens33 inet dhcp
+```
+- Restart network adaper
+```bash
+sudo systemctl restart networking
+```
+
+
+
 ### Parrot OS Internet not working tried these commands
+- ens33 port is down, in **ip a** command
 
 ````bash
 ifconfig (Only see localhost 127.0.0.1)
