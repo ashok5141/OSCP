@@ -975,8 +975,8 @@ smbmap -H <target_ip> -u <username> -p <password>
 smbmap -H <target_ip> -u <username> -p <password> -d <domain>
 smbmap -H <target_ip> -u <username> -p <password> -r <share_name>
 #SMBMAP List contents
-smbmap -R <SHARE NAME> -H 10.10.10.100 # HTB Active, it will list all files
-smbmap -R <SHARE NAME> -H 10.10.10.100 -A Groups.xml -q # Mention the file you want to download
+smbmap -r --depth 10  -s Replication -H 10.129.11.249 # HTB Active, it will list all files
+smbmap -R <SHARE NAME> -H 10.10.10.100 -A Groups.xml -q # Mention the file you want to download, -R option not working as 3/29/2026
 smbmap -H 10.10.10.172 -u 'SABatchJobs' -p 'SABatchJobs' -r --exclude SYSVOL,IPC$ # Monteverde HTB
 sudo updatedb # Update the locate command
 locate Groups.xml # find the file
