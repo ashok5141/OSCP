@@ -3063,6 +3063,7 @@ MATCH p = (c:Computer)-[:HasSession]->(m:User) RETURN p
 
 ```bash
 sudo ldapdomaindump ldaps://<IP> -u 'username' -p 'password' #Do this in a new folder
+ldapdomaindump -u 'cicada.htb\david.orelious' -p 'aRt$Lp#7t*VQ!3' 10.129.18.241 # It give the full details in the html grep and json format
 ```
 
 ### PlumHound
