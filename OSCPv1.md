@@ -136,7 +136,7 @@ hydra -l offsec -P /usr/share/seclists/Passwords/500-worst-passwords.txt <IP> ss
 ##### SMB Enumeration 
 - SMB
 ```bash
-sudo nbtscan -r 192.168.50.0/24 #IP or range can be provided
+sudo nbtscan -r <IP>/24 #IP or range can be provided
 
 #NSE scripts can be used
 locate .nse | grep smb
@@ -196,7 +196,7 @@ get <file> #to download file
 impacket-smbclient <USER>:'<PASS>'@<IP>
 
 # Exploit finder faced old machine line (445/tcp, open, microsoft-ds syn-ack ttl 125 Windows Server (R) 2008 Standard 6001 Service Pack 1 microsoft-ds (workgroup: WORKGROUP))
-nmap --script smb-vuln* -p 139,445 -oN smb-vuln-scan 192.168.177.40  # Internal pg practice
+nmap --script smb-vuln* -p 139,445 -oN smb-vuln-scan <IP>  # Internal pg practice
 #https://www.trenchesofit.com/2020/11/24/offensive-security-proving-grounds-internal-write-up-no-metasploit/ #old exploit eternal blue
 #https://pentesting.zeyu2001.com/proving-grounds/warm-up/internal
 ```
