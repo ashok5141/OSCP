@@ -1,6 +1,6 @@
 # OSCP Commands
 - Some revised commands
-- 
+
 # Stuck?
 - Take 4-7-8 breathing then machine, Walk.
 - Think simple!
