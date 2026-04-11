@@ -75,7 +75,7 @@ sudo nmap -sU -sC -sV --open -p- -T4 -A -oN Nmap/<Name>xxx -Pn 192.168.xxx.xxx
 #NSE
 updatedb
 locate .nse | grep <name>
-sudo nmap -sV -p 443 --script "vuln" 192.168.50.124 #running vuln category scripts
+sudo nmap -sV -p 443 --script "vuln" <IP> #running vuln category scripts
 sudo nmap --script="name" <IP> #here we can specify other options like specific ports...etc
 
 autorecon <IP ADDRESS>6 # It will generate results folder
@@ -96,10 +96,10 @@ put <file> #uploading file
 get <file> #downloading file
 
 # Download bulk all, with anonymous login
-wget -m ftp://anonymous:anonymous@10.10.10.98 # If it fails do to passive mode below command
-wget -m --no-passive ftp://anonymous:anonymous@10.10.10.98
+wget -m ftp://anonymous:anonymous@<IP> # If it fails do to passive mode below command
+wget -m --no-passive ftp://anonymous:anonymous@<IP>10.10.10.98
 wget -r ftp://Anonymous:pass@$IP
-wget -r -l 10 --ftp-user='anonymous' --ftp-password='anonymous' ftp://192.168.104.140:20001/* # Hepet PG Practice
+wget -r -l 10 --ftp-user='anonymous' --ftp-password='anonymous' ftp://<IP>:20001/* # Hepet PG Practice
 
 #NSE
 locate .nse | grep ftp
@@ -163,7 +163,7 @@ smbclient //server/share -U domain/username
 smbclient //<IP>/<Share Name> -U <username>%<password>
 
 #Domain
-smbclient //192.168.197.159/SQL -U zeus/guest  # Without password got the sqlconnection.sql their is a creds
+smbclient //<IP>/SQL -U zeus/guest  # Without password got the sqlconnection.sql their is a creds
 
 #SMBCLIENT Shell, Download multiple file using, It will download only file not folders
 recurse ON
@@ -181,12 +181,12 @@ smbmap -H <target_ip> -u <username> -p <password> -r <share_name>
 #SMBMAP List contents
 smbmap -r --depth 10  -s Replication -H <IP> 
 smbmap -R <SHARE NAME> -H <IP> -A Groups.xml -q # locate Groups.xml, Mention the file you want to download, -R option not working
-smbmap -H 10.10.10.172 -u <USER> -p <PASS> -r --exclude SYSVOL, IPC$ 
+smbmap -H <IP> -u <USER> -p <PASS> -r --exclude SYSVOL, IPC$ 
 sudo updatedb # Update the locate command
 
 
 # recursively check the smb shares using the nxc
-nxc smb <IP> -u <USER> -p <PASS> -M spider_plus # View jq . /tmp/cme_spider_plus/10.10.10.182.json
+nxc smb <IP> -u <USER> -p <PASS> -M spider_plus # View jq . /tmp/cme_spider_plus/<IP>.json
 
 #Within SMB session
 put <file> #to upload file
