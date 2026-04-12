@@ -224,11 +224,17 @@ impacket-secretsdump -system SYSTEM -sam SAM local # mention local in the comman
 impacket-lookupsid 'domain/guest'@domain -no-pass
 nxc smb IP -u 'anonymous' -p '' --rid-brute
 ```
-##### Ldap Active Directory
+#### Ldap Active Directory
 - If you know the user credentials, to get the user's description
 ```bash
 ldapdomaindump -u 'domain\username' -p 'password' IP
 nxc ldap IP -u 'username' -p 'password' -M get-desc-users # It works for the anonymous login allowed
+```
+- If you have the valid LDAP credentials, you can run Bloodhound to collect data from the NetExec `nxc`
+```bash
+nxc ldap <IP> -u <USER> -p <PASS> --bloodhound --collection All --dns-server <IP> # Change the dns server to domain to ip address of the error occur
+mv /home/ashok/.nxc/logs/<FILE>.zip . # Move the zip file to the preferred location
+bloodhound
 ```
 ##### Login Active Directory
 - Check the login with Active Directory with usernames/passwords
