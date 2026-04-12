@@ -145,10 +145,12 @@ nmap -p445 --script="name" $IP
 net view \\<computername/IP> /all #In Windows, we can view like this
 
 
-#nxc Inplace of username and password, we can include usernames.txt and passwords.txt for password-spraying or bruteforcing.
+# nxc In place of a username and password, we can use usernames.txt and passwords.txt for password spraying or brute forcing.
 nxc smb <IP/range>  
 nxc smb <IP> -u username -p password --shares #lists available shares
 nxc smb <IP> -u username -p password -d mydomain --shares #specific domain
+nxc smb <IP> -u username -p password -d mydomain -M spider_plus # give the list of share with folder and files, Saved inside the .nxc home folder
+nxc smb <IP> -u username -p password -d mydomain -M spider_plus -o EXCLUDE_FOLDER='print$,NETLOGON,SYSVOL,IPC$' # Excluding default shares
 nxc smb <IP> -u username -p password --users #lists users
 nxc smb <IP> -u 'anonymous' -p '' --rid-brute # Bruteforce to get the usernames
 nxc smb <IP> -u username -p password --all #all information
